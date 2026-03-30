@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Canvas from "@/components/graph/canvas";
 import { NodeContextMenu } from "@/components/graph/node-context-menu";
+import { SearchOverlay } from "@/components/graph/search-overlay";
 import { Sidebar } from "@/components/panels/sidebar";
 import { DetailPanel } from "@/components/panels/detail-panel";
 import { NodeForm } from "@/components/forms/node-form";
@@ -11,6 +12,7 @@ import { RuleForm } from "@/components/forms/rule-form";
 import { useGraph } from "@/hooks/use-graph";
 import { useSelection } from "@/hooks/use-selection";
 import { useRules } from "@/hooks/use-rules";
+import { findMatchingNodeIds } from "@/lib/search-match";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -49,6 +51,18 @@ export default function Home() {
             return next;
         });
     }, []);
+
+    // Search state
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const matchedNodeIds = useMemo(
+        () => (graph ? findMatchingNodeIds(graph.nodes, searchQuery) : null),
+        [graph, searchQuery],
+    );
+
+    // searchOpen이 false면 검색 결과를 Canvas에 전달하지 않음
+    const highlightedNodeIds = searchOpen ? matchedNodeIds : null;
 
     // Dialog state
     const [nodeFormOpen, setNodeFormOpen] = useState(false);
@@ -184,6 +198,24 @@ export default function Home() {
         setContextMenu(null);
     }, [clearSelection]);
 
+    const handleSearchClose = useCallback(() => {
+        setSearchOpen(false);
+        setSearchQuery("");
+    }, []);
+
+    // Global keyboard shortcut: Cmd+K / Ctrl+K to open search
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+                e.preventDefault();
+                setSearchOpen(true);
+                setFocusedNodeId(null);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
     const handleAddRelationFromContext = useCallback((_subjectId: string) => {
         setEditingTripleId(null);
         setTripleFormOpen(true);
@@ -257,6 +289,15 @@ export default function Home() {
 
                 {/* Canvas + violation banner */}
                 <div className="relative flex-1">
+                    {/* Search overlay */}
+                    <SearchOverlay
+                        open={searchOpen}
+                        query={searchQuery}
+                        matchedCount={highlightedNodeIds?.size ?? 0}
+                        onQueryChange={setSearchQuery}
+                        onClose={handleSearchClose}
+                    />
+
                     {/* Violation banner at bottom-left */}
                     {failCount > 0 && (
                         <div className="absolute bottom-4 left-4 z-10">
@@ -276,6 +317,7 @@ export default function Home() {
                         selectedNodeId={selectedNodeId}
                         selectedEdgeId={selectedEdgeId}
                         focusedNodeId={focusedNodeId}
+                        highlightedNodeIds={highlightedNodeIds}
                         onSelectNode={selectNode}
                         onSelectEdge={selectEdge}
                         onClearSelection={handleClearSelection}
