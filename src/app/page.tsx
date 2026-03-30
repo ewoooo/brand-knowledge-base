@@ -181,7 +181,7 @@ export default function Home() {
             + 노드
           </Button>
           <Button size="sm" variant="outline" onClick={() => { setEditingTripleId(null); setTripleFormOpen(true); }}>
-            + 트리플
+            + 관계
           </Button>
           <div className="flex-1" />
           <Button size="sm" onClick={save} disabled={!isDirty}>

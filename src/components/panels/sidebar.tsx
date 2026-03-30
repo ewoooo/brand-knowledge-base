@@ -80,7 +80,7 @@ export function Sidebar({
             </div>
             <div className="rounded-md bg-muted/30 px-2 py-1.5">
               <div className="text-lg font-semibold">{graph.triples.length}</div>
-              <div className="text-[10px] text-muted-foreground">트리플</div>
+              <div className="text-[10px] text-muted-foreground">관계</div>
             </div>
             <div className="rounded-md bg-muted/30 px-2 py-1.5">
               <div className="text-lg font-semibold">{graph.rules.length}</div>

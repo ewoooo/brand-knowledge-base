@@ -71,7 +71,7 @@ export function TripleForm({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "트리플 편집" : "새 트리플 추가"}
+            {isEditing ? "관계 편집" : "새 관계 추가"}
           </DialogTitle>
         </DialogHeader>
 

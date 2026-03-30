@@ -95,7 +95,7 @@ export function DetailPanel({
               </div>
               <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
                 <span className="text-muted-foreground">엣지 클릭</span>
-                <span className="ml-2 text-foreground/70">트리플 편집 · 삭제</span>
+                <span className="ml-2 text-foreground/70">관계 편집 · 삭제</span>
               </div>
               <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
                 <span className="text-muted-foreground">노드 드래그</span>
@@ -137,7 +137,7 @@ export function DetailPanel({
             {/* Connected triples */}
             <div>
               <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">
-                연결된 트리플 ({connectedTriples.length})
+                연결된 관계 ({connectedTriples.length})
               </p>
               {connectedTriples.length === 0 ? (
                 <p className="text-xs text-muted-foreground">연결 없음</p>
@@ -220,7 +220,7 @@ export function DetailPanel({
           <div className="space-y-4 p-4">
             <div className="space-y-1">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                트리플
+                관계
               </p>
               <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
                 <span className="font-medium">
