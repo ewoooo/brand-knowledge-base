@@ -2,7 +2,7 @@ import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 import { serializeGraphForPrompt } from "@knowledgeview/kg-core";
 import { runPipeline } from "@knowledgeview/graph-rag";
 
-interface ChatContextResult {
+export interface ChatContextResult {
     context: string;
     mode: "rag" | "fallback";
 }

@@ -1,12 +1,8 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { runPipeline } from "@knowledgeview/graph-rag";
+import { buildSystemMessage } from "@knowledgeview/chat-core";
 import { loadGraph } from "@/lib/graph-loader";
-
-const SYSTEM_PROMPT = `당신은 브랜드 온톨로지 전문가입니다.
-아래 지식 그래프 컨텍스트를 기반으로 질문에 답하세요.
-컨텍스트에 없는 정보는 추측하지 마세요.
-한국어로 답변합니다.`;
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -44,7 +40,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: anthropic(modelId),
-    system: `${SYSTEM_PROMPT}\n\n${context}`,
+    system: buildSystemMessage(context),
     messages: chatMessages,
   });
 

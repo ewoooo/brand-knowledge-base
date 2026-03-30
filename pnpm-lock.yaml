@@ -23,6 +23,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^3.0.143
         version: 3.0.143(react@19.2.4)(zod@3.25.76)
+      '@knowledgeview/chat-core':
+        specifier: workspace:*
+        version: link:../../packages/chat-core
       '@knowledgeview/graph-rag':
         specifier: workspace:*
         version: link:../../packages/graph-rag
@@ -199,6 +202,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^3.0.64
         version: 3.0.64(zod@4.3.6)
+      '@knowledgeview/chat-core':
+        specifier: workspace:*
+        version: link:../../packages/chat-core
       '@knowledgeview/graph-rag':
         specifier: workspace:*
         version: link:../../packages/graph-rag
@@ -236,6 +242,19 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.0)(@types/node@20.19.37)(msw@2.12.14(@types/node@20.19.37)(typescript@5.9.3))(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@20.19.37)(jiti@2.6.1))
+
+  packages/chat-core:
+    dependencies:
+      '@knowledgeview/graph-rag':
+        specifier: workspace:*
+        version: link:../graph-rag
+      '@knowledgeview/kg-core':
+        specifier: workspace:*
+        version: link:../kg-core
+    devDependencies:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.0)(@types/node@20.19.37)(msw@2.12.14(@types/node@20.19.37)(typescript@5.9.3))(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@20.19.37)(jiti@2.6.1))

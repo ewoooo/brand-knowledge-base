@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@knowledgeview/chat-core": "workspace:*",
     "@knowledgeview/kg-core": "workspace:*",
     "@knowledgeview/graph-rag": "workspace:*",
     "@ai-sdk/anthropic": "^3.0.64",

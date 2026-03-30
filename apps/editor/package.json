@@ -13,6 +13,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
     "@ai-sdk/react": "^3.0.143",
+    "@knowledgeview/chat-core": "workspace:*",
     "@knowledgeview/graph-rag": "workspace:*",
     "@knowledgeview/kg-core": "workspace:*",
     "ai": "^6.0.141",

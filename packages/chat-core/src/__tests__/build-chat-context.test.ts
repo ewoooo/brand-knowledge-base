@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildChatContext } from "@/lib/build-chat-context";
+import { buildChatContext } from "../build-chat-context";
 import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 
 const testGraph: KnowledgeGraph = {
@@ -22,7 +22,6 @@ describe("buildChatContext", () => {
     it("질문에 매칭되는 노드가 있으면 서브그래프 컨텍스트를 반환한다", () => {
         const result = buildChatContext(testGraph, "Primary Blue의 관계를 알려줘");
 
-        // graph-rag 파이프라인의 컨텍스트 형식: "## 지식 그래프 컨텍스트"
         expect(result.context).toContain("지식 그래프 컨텍스트");
         expect(result.context).toContain("Primary Blue");
         expect(result.mode).toBe("rag");
@@ -31,7 +30,6 @@ describe("buildChatContext", () => {
     it("매칭 노드가 없으면 전체 그래프 직렬화로 폴백한다", () => {
         const result = buildChatContext(testGraph, "안녕하세요");
 
-        // serializeGraphForPrompt의 형식: "## 현재 그래프:"
         expect(result.context).toContain("현재 그래프:");
         expect(result.mode).toBe("fallback");
     });
@@ -60,7 +58,6 @@ describe("buildChatContext", () => {
             rules: [],
         };
 
-        // runPipeline이 예외를 던지든 빈 결과를 반환하든 폴백으로 동작해야 함
         const result = buildChatContext(brokenGraph, "Test");
         expect(result.context).toBeTruthy();
         expect(["rag", "fallback"]).toContain(result.mode);
