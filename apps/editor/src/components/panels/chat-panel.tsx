@@ -8,6 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 import { Send, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatPanelProps {
     graph: KnowledgeGraph;
@@ -95,6 +97,22 @@ export function ChatPanel({ graph, chatId }: ChatPanelProps) {
                             >
                                 {message.parts.map((part, index) => {
                                     if (part.type === "text") {
+                                        if (message.role === "assistant") {
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="chat-markdown break-words"
+                                                >
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[
+                                                            remarkGfm,
+                                                        ]}
+                                                    >
+                                                        {part.text}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            );
+                                        }
                                         return (
                                             <div
                                                 key={index}
