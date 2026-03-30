@@ -55,7 +55,7 @@ describe("generateImage", () => {
     expect(result.image).toBe("data:image/png;base64,iVBORw0KGgo=");
     expect(mockGenerateContent).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: "gemini-2.5-flash-preview-image-generation",
+        model: "gemini-2.5-flash-image",
         contents: expect.stringContaining("a fox in a forest"),
       }),
     );

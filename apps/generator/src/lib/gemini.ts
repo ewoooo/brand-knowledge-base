@@ -40,7 +40,7 @@ export async function generateImage(
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-image-generation",
+      model: "gemini-2.5-flash-image",
       contents: fullPrompt,
       config: {
         responseModalities: ["image", "text"],
@@ -63,7 +63,21 @@ export async function generateImage(
     }
 
     return { success: false, error: "이미지를 생성할 수 없습니다" };
-  } catch {
+  } catch (e) {
+    console.error("[gemini] generateImage error:", e);
+    const message = e instanceof Error ? e.message : String(e);
+    if (message.includes("429") || message.includes("RESOURCE_EXHAUSTED")) {
+      return {
+        success: false,
+        error: "API 할당량을 초과했습니다. 잠시 후 다시 시도하거나 Google AI Studio에서 billing을 활성화해주세요",
+      };
+    }
+    if (message.includes("404") || message.includes("NOT_FOUND")) {
+      return {
+        success: false,
+        error: "이미지 생성 모델을 찾을 수 없습니다. API 키의 접근 권한을 확인해주세요",
+      };
+    }
     return {
       success: false,
       error: "이미지 생성에 실패했습니다. 다시 시도해주세요",
