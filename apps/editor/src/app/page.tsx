@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Canvas from "@/components/graph/canvas";
 import { NodeContextMenu } from "@/components/graph/node-context-menu";
 import { SearchOverlay } from "@/components/graph/search-overlay";
@@ -12,7 +12,9 @@ import { RuleForm } from "@/components/forms/rule-form";
 import { useGraph } from "@/hooks/use-graph";
 import { useSelection } from "@/hooks/use-selection";
 import { useRules } from "@/hooks/use-rules";
-import { findMatchingNodeIds } from "@/lib/search-match";
+import { useDialogs } from "@/hooks/use-dialogs";
+import { useContextMenu } from "@/hooks/use-context-menu";
+import { useSearch } from "@/hooks/use-search";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -38,6 +40,21 @@ export default function Home() {
     const { results, violatedNodeIds, violatedTripleIds, failCount } =
         useRules(graph);
 
+    const dialogs = useDialogs({
+        graph,
+        addNode,
+        updateNode,
+        addTriple,
+        updateTriple,
+        addRule,
+    });
+
+    const { contextMenu, openContextMenu, closeContextMenu } =
+        useContextMenu();
+
+    const clearFocus = useCallback(() => setFocusedNodeId(null), []);
+    const search = useSearch(graph?.nodes ?? null, { onOpen: clearFocus });
+
     // Filter state
     const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
 
@@ -53,48 +70,16 @@ export default function Home() {
         });
     }, []);
 
-    // Search state
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-
-    const matchedNodeIds = useMemo(
-        () => (graph ? findMatchingNodeIds(graph.nodes, searchQuery) : null),
-        [graph, searchQuery],
-    );
-
-    // searchOpen이 false면 검색 결과를 Canvas에 전달하지 않음
-    const highlightedNodeIds = searchOpen ? matchedNodeIds : null;
-
-    // Dialog state
-    const [nodeFormOpen, setNodeFormOpen] = useState(false);
-    const [tripleFormOpen, setTripleFormOpen] = useState(false);
-    const [ruleFormOpen, setRuleFormOpen] = useState(false);
-
-    // Editing state
-    const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-    const [editingTripleId, setEditingTripleId] = useState<string | null>(null);
-
-    // Context menu state
-    const [contextMenu, setContextMenu] = useState<{
-        nodeId: string;
-        position: { x: number; y: number };
-    } | null>(null);
-
     // Focus state
     const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
+
+    const handleFocusNode = useCallback((nodeId: string | null) => {
+        setFocusedNodeId((prev) => (prev === nodeId ? null : nodeId));
+    }, []);
 
     // Derive selected IDs from selection
     const selectedNodeId = selection?.type === "node" ? selection.id : null;
     const selectedEdgeId = selection?.type === "edge" ? selection.id : null;
-
-    // Find editing items from graph
-    const editingNode = editingNodeId
-        ? (graph?.nodes.find((n) => n.id === editingNodeId) ?? null)
-        : null;
-
-    const editingTriple = editingTripleId
-        ? (graph?.triples.find((t) => t.id === editingTripleId) ?? null)
-        : null;
 
     // --- Handlers ---
 
@@ -110,117 +95,18 @@ export default function Home() {
 
         if (!res.ok) return;
         const data = await res.json();
-        // data should contain the filename
         await load(data.filename);
     }, [load]);
-
-    const handleEditNode = useCallback((nodeId: string) => {
-        setEditingNodeId(nodeId);
-        setNodeFormOpen(true);
-    }, []);
-
-    const handleEditTriple = useCallback((tripleId: string) => {
-        setEditingTripleId(tripleId);
-        setTripleFormOpen(true);
-    }, []);
-
-    const handleNodeFormClose = useCallback(() => {
-        setNodeFormOpen(false);
-        setEditingNodeId(null);
-    }, []);
-
-    const handleTripleFormClose = useCallback(() => {
-        setTripleFormOpen(false);
-        setEditingTripleId(null);
-    }, []);
-
-    const handleRuleFormClose = useCallback(() => {
-        setRuleFormOpen(false);
-    }, []);
-
-    const handleNodeSubmit = useCallback(
-        (data: { label: string; type?: string }) => {
-            if (editingNodeId) {
-                updateNode(editingNodeId, data);
-            } else {
-                addNode(data);
-            }
-        },
-        [editingNodeId, updateNode, addNode],
-    );
-
-    const handleTripleSubmit = useCallback(
-        (data: { subject: string; predicate: string; object: string }) => {
-            if (editingTripleId) {
-                updateTriple(editingTripleId, data);
-            } else {
-                addTriple(data);
-            }
-        },
-        [editingTripleId, updateTriple, addTriple],
-    );
-
-    const handleRuleSubmit = useCallback(
-        (data: {
-            name: string;
-            expression: string;
-            type: "constraint" | "inference" | "validation";
-            condition: {
-                nodeType: string;
-                predicate: string;
-                operator: "must_have" | "must_not_have" | "conflicts_with";
-                conflictPredicate?: string;
-            };
-        }) => {
-            addRule(data);
-        },
-        [addRule],
-    );
-
-    const handleDoubleClickCanvas = useCallback(() => {
-        setEditingNodeId(null);
-        setNodeFormOpen(true);
-    }, []);
-
-    const handleContextMenu = useCallback(
-        (nodeId: string, position: { x: number; y: number }) => {
-            setContextMenu({ nodeId, position });
-        },
-        [],
-    );
-
-    const handleFocusNode = useCallback((nodeId: string | null) => {
-        setFocusedNodeId((prev) => (prev === nodeId ? null : nodeId));
-    }, []);
 
     const handleClearSelection = useCallback(() => {
         clearSelection();
         setFocusedNodeId(null);
-        setContextMenu(null);
-    }, [clearSelection]);
+        closeContextMenu();
+    }, [clearSelection, closeContextMenu]);
 
     const handleSearchClose = useCallback(() => {
-        setSearchOpen(false);
-        setSearchQuery("");
-    }, []);
-
-    // Global keyboard shortcut: Cmd+K / Ctrl+K to open search
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-                e.preventDefault();
-                setSearchOpen(true);
-                setFocusedNodeId(null);
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
-
-    const handleAddRelationFromContext = useCallback((_subjectId: string) => {
-        setEditingTripleId(null);
-        setTripleFormOpen(true);
-    }, []);
+        search.closeSearch();
+    }, [search.closeSearch]);
 
     // --- No graph loaded state ---
     if (!graph) {
@@ -231,7 +117,7 @@ export default function Home() {
                     onSelectFile={load}
                     onCreateGraph={handleCreateGraph}
                     validationResults={results}
-                    onAddRule={() => setRuleFormOpen(true)}
+                    onAddRule={dialogs.openRuleCreate}
                     graph={null}
                     hiddenTypes={hiddenTypes}
                     onToggleType={toggleTypeFilter}
@@ -253,7 +139,7 @@ export default function Home() {
                 onSelectFile={load}
                 onCreateGraph={handleCreateGraph}
                 validationResults={results}
-                onAddRule={() => setRuleFormOpen(true)}
+                onAddRule={dialogs.openRuleCreate}
                 graph={graph}
                 hiddenTypes={hiddenTypes}
                 onToggleType={toggleTypeFilter}
@@ -265,20 +151,14 @@ export default function Home() {
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                            setEditingNodeId(null);
-                            setNodeFormOpen(true);
-                        }}
+                        onClick={dialogs.openNodeCreate}
                     >
                         + 노드
                     </Button>
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                            setEditingTripleId(null);
-                            setTripleFormOpen(true);
-                        }}
+                        onClick={dialogs.openTripleCreate}
                     >
                         + 관계
                     </Button>
@@ -290,16 +170,14 @@ export default function Home() {
 
                 {/* Canvas + violation banner */}
                 <div className="relative flex-1">
-                    {/* Search overlay */}
                     <SearchOverlay
-                        open={searchOpen}
-                        query={searchQuery}
-                        matchedCount={highlightedNodeIds?.size ?? 0}
-                        onQueryChange={setSearchQuery}
+                        open={search.searchOpen}
+                        query={search.searchQuery}
+                        matchedCount={search.matchedCount}
+                        onQueryChange={search.setSearchQuery}
                         onClose={handleSearchClose}
                     />
 
-                    {/* Violation banner at bottom-left */}
                     {failCount > 0 && (
                         <div className="absolute bottom-4 left-4 z-10">
                             <Alert variant="destructive" className="w-auto">
@@ -318,13 +196,13 @@ export default function Home() {
                         selectedNodeId={selectedNodeId}
                         selectedEdgeId={selectedEdgeId}
                         focusedNodeId={focusedNodeId}
-                        highlightedNodeIds={highlightedNodeIds}
+                        highlightedNodeIds={search.highlightedNodeIds}
                         onSelectNode={selectNode}
                         onSelectEdge={selectEdge}
                         onClearSelection={handleClearSelection}
-                        onDoubleClickCanvas={handleDoubleClickCanvas}
+                        onDoubleClickCanvas={dialogs.openNodeCreate}
                         onFocusNode={handleFocusNode}
-                        onContextMenu={handleContextMenu}
+                        onContextMenu={openContextMenu}
                     />
                 </div>
             </div>
@@ -334,9 +212,9 @@ export default function Home() {
                 selectedNodeId={selectedNodeId}
                 selectedEdgeId={selectedEdgeId}
                 validationResults={results}
-                onEditNode={handleEditNode}
+                onEditNode={dialogs.openNodeEdit}
                 onDeleteNode={removeNode}
-                onEditTriple={handleEditTriple}
+                onEditTriple={dialogs.openTripleEdit}
                 onDeleteTriple={removeTriple}
                 onFocusNode={(nodeId: string) => {
                     selectNode(nodeId);
@@ -346,7 +224,7 @@ export default function Home() {
             />
 
             {/* Context menu */}
-            {contextMenu && graph && (
+            {contextMenu && (
                 <NodeContextMenu
                     nodeId={contextMenu.nodeId}
                     nodeLabel={
@@ -354,12 +232,11 @@ export default function Home() {
                             ?.label ?? ""
                     }
                     position={contextMenu.position}
-                    onClose={() => setContextMenu(null)}
-                    onAddRelation={handleAddRelationFromContext}
-                    onEditNode={(id) => {
-                        setEditingNodeId(id);
-                        setNodeFormOpen(true);
+                    onClose={closeContextMenu}
+                    onAddRelation={() => {
+                        dialogs.openTripleCreate();
                     }}
+                    onEditNode={dialogs.openNodeEdit}
                     onDeleteNode={(id) => {
                         removeNode(id);
                         clearSelection();
@@ -369,12 +246,15 @@ export default function Home() {
 
             {/* Dialogs */}
             <NodeForm
-                open={nodeFormOpen}
-                onClose={handleNodeFormClose}
-                onSubmit={handleNodeSubmit}
+                open={dialogs.nodeFormOpen}
+                onClose={dialogs.closeNodeForm}
+                onSubmit={dialogs.handleNodeSubmit}
                 initial={
-                    editingNode
-                        ? { label: editingNode.label, type: editingNode.type }
+                    dialogs.editingNode
+                        ? {
+                              label: dialogs.editingNode.label,
+                              type: dialogs.editingNode.type,
+                          }
                         : undefined
                 }
                 existingTypes={graph.nodes
@@ -383,25 +263,25 @@ export default function Home() {
             />
 
             <TripleForm
-                open={tripleFormOpen}
-                onClose={handleTripleFormClose}
-                onSubmit={handleTripleSubmit}
+                open={dialogs.tripleFormOpen}
+                onClose={dialogs.closeTripleForm}
+                onSubmit={dialogs.handleTripleSubmit}
                 nodes={graph.nodes}
                 initial={
-                    editingTriple
+                    dialogs.editingTriple
                         ? {
-                              subject: editingTriple.subject,
-                              predicate: editingTriple.predicate,
-                              object: editingTriple.object,
+                              subject: dialogs.editingTriple.subject,
+                              predicate: dialogs.editingTriple.predicate,
+                              object: dialogs.editingTriple.object,
                           }
                         : undefined
                 }
             />
 
             <RuleForm
-                open={ruleFormOpen}
-                onClose={handleRuleFormClose}
-                onSubmit={handleRuleSubmit}
+                open={dialogs.ruleFormOpen}
+                onClose={dialogs.closeRuleForm}
+                onSubmit={dialogs.handleRuleSubmit}
                 graph={graph}
             />
         </div>
