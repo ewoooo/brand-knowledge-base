@@ -1,0 +1,102 @@
+/* Chat markdown — compact styles for 350px panel */
+.chat-markdown {
+    line-height: 1.5;
+}
+.chat-markdown p {
+    margin: 0.25em 0;
+}
+.chat-markdown p:first-child {
+    margin-top: 0;
+}
+.chat-markdown p:last-child {
+    margin-bottom: 0;
+}
+.chat-markdown strong {
+    font-weight: 600;
+}
+.chat-markdown ul,
+.chat-markdown ol {
+    margin: 0.25em 0;
+    padding-left: 1.25em;
+}
+.chat-markdown li {
+    margin: 0.1em 0;
+}
+.chat-markdown code {
+    font-size: 0.85em;
+    padding: 0.1em 0.3em;
+    border-radius: 0.25em;
+    background: oklch(0 0 0 / 6%);
+}
+.dark .chat-markdown code {
+    background: oklch(1 0 0 / 10%);
+}
+.chat-markdown pre {
+    margin: 0.4em 0;
+    padding: 0.5em;
+    border-radius: 0.375em;
+    overflow-x: auto;
+    background: oklch(0 0 0 / 4%);
+}
+.dark .chat-markdown pre {
+    background: oklch(1 0 0 / 8%);
+}
+.chat-markdown pre code {
+    padding: 0;
+    background: none;
+}
+.chat-markdown h1,
+.chat-markdown h2,
+.chat-markdown h3,
+.chat-markdown h4 {
+    font-weight: 600;
+    margin: 0.5em 0 0.25em;
+}
+.chat-markdown h1,
+.chat-markdown h2 {
+    font-size: 1em;
+}
+.chat-markdown h3,
+.chat-markdown h4 {
+    font-size: 0.95em;
+}
+.chat-markdown blockquote {
+    margin: 0.25em 0;
+    padding-left: 0.75em;
+    border-left: 2px solid oklch(0 0 0 / 15%);
+    color: oklch(0.5 0 0);
+}
+.dark .chat-markdown blockquote {
+    border-left-color: oklch(1 0 0 / 20%);
+    color: oklch(0.65 0 0);
+}
+.chat-markdown hr {
+    margin: 0.5em 0;
+    border-color: oklch(0 0 0 / 10%);
+}
+.dark .chat-markdown hr {
+    border-color: oklch(1 0 0 / 10%);
+}
+.chat-markdown table {
+    width: 100%;
+    margin: 0.4em 0;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+.chat-markdown th,
+.chat-markdown td {
+    padding: 0.25em 0.5em;
+    border: 1px solid oklch(0 0 0 / 12%);
+    text-align: left;
+}
+.chat-markdown th {
+    font-weight: 600;
+    background: oklch(0 0 0 / 4%);
+}
+.dark .chat-markdown th,
+.dark .chat-markdown td {
+    border-color: oklch(1 0 0 / 12%);
+}
+.dark .chat-markdown th {
+    background: oklch(1 0 0 / 6%);
+}

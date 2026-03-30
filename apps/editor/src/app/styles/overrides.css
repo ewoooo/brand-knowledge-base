@@ -1,0 +1,4 @@
+/* Detail panel scroll area — prevent horizontal overflow caused by Radix's display:table */
+.border-l [data-radix-scroll-area-viewport] > div {
+    display: block !important;
+}
