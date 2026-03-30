@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
   const { context } = runPipeline(graph, question, options);
 
-  const modelId = options?.model ?? "claude-sonnet-4.6";
+  const modelId = options?.model ?? "claude-sonnet-4-6";
 
   const chatMessages = messages
     ? await convertToModelMessages(messages)
