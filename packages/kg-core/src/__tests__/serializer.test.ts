@@ -98,6 +98,29 @@ describe("fromJSON", () => {
         expect(restored.metadata.systemPrompt).toBe("당신은 색상 전문가입니다.");
     });
 
+    it("should normalize PascalCase node types on load", () => {
+        const json = JSON.stringify({
+            metadata: { name: "테스트", created: "2026-01-01", updated: "2026-01-01" },
+            nodes: [
+                { id: "n1", label: "브랜드", type: "BrandName" },
+                { id: "n2", label: "값", type: "CoreValue" },
+                { id: "n3", label: "타입없음" },
+            ],
+            triples: [],
+            rules: [
+                {
+                    id: "r1", name: "규칙", expression: "", type: "constraint",
+                    condition: { nodeType: "BrandName", predicate: "설명", operator: "must_have" },
+                },
+            ],
+        });
+        const restored = fromJSON(json);
+        expect(restored.nodes[0].type).toBe("brand-name");
+        expect(restored.nodes[1].type).toBe("core-value");
+        expect(restored.nodes[2].type).toBeUndefined();
+        expect(restored.rules[0].condition.nodeType).toBe("brand-name");
+    });
+
     it("should handle missing systemPrompt gracefully", () => {
         const json = JSON.stringify({
             metadata: { name: "테스트", created: "2026-01-01", updated: "2026-01-01" },

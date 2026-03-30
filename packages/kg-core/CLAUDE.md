@@ -19,7 +19,7 @@ KnowledgeGraph
 └── rules: Rule[]          ← { id, name, expression, type, condition }
 ```
 
-- **Node**: 개체. `type`은 자유 문자열 (brand, color, typography, concept 등)
+- **Node**: 개체. `type`은 kebab-case 문자열 (brand, color, typography, core-value 등). `normalizeType()`이 자동 정규화
 - **Triple**: 관계. subject/object는 nodeId 참조
 - **Rule**: 검증 규칙. condition.operator: `must_have | must_not_have | conflicts_with`
 
@@ -29,3 +29,4 @@ KnowledgeGraph
 - **side-effect 없음** — React 의존성 없는 순수 함수
 - `removeNode`는 연관된 Triple도 함께 제거
 - `metadata.updated`는 모든 변경 시 자동 갱신
+- `addNode`/`updateNode`/`addRule`은 type을 자동 정규화 (`normalizeType()`: PascalCase → kebab-case)

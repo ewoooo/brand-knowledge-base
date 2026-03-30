@@ -1,4 +1,5 @@
 import type { KnowledgeGraph, Node, Triple, Rule } from "./types";
+import { normalizeType } from "./normalize-type";
 
 export function createEmptyGraph(name: string): KnowledgeGraph {
     const now = new Date().toISOString().split("T")[0];
@@ -14,9 +15,10 @@ export function addNode(graph: KnowledgeGraph, node: Node): KnowledgeGraph {
     if (graph.nodes.some((n) => n.id === node.id)) {
         throw new Error(`Node with id ${node.id} already exists`);
     }
+    const normalized = node.type ? { ...node, type: normalizeType(node.type) } : node;
     return {
         ...graph,
-        nodes: [...graph.nodes, node],
+        nodes: [...graph.nodes, normalized],
         metadata: {
             ...graph.metadata,
             updated: new Date().toISOString().split("T")[0],
@@ -46,10 +48,13 @@ export function updateNode(
     nodeId: string,
     updates: Partial<Omit<Node, "id">>,
 ): KnowledgeGraph {
+    const normalized = updates.type !== undefined
+        ? { ...updates, type: normalizeType(updates.type) }
+        : updates;
     return {
         ...graph,
         nodes: graph.nodes.map((n) =>
-            n.id === nodeId ? { ...n, ...updates } : n,
+            n.id === nodeId ? { ...n, ...normalized } : n,
         ),
         metadata: {
             ...graph.metadata,
@@ -110,9 +115,16 @@ export function updateTriple(
 }
 
 export function addRule(graph: KnowledgeGraph, rule: Rule): KnowledgeGraph {
+    const normalized = {
+        ...rule,
+        condition: {
+            ...rule.condition,
+            nodeType: normalizeType(rule.condition.nodeType) ?? rule.condition.nodeType,
+        },
+    };
     return {
         ...graph,
-        rules: [...graph.rules, rule],
+        rules: [...graph.rules, normalized],
         metadata: {
             ...graph.metadata,
             updated: new Date().toISOString().split("T")[0],
