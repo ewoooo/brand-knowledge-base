@@ -23,28 +23,45 @@ interface NodeFormProps {
   onClose: () => void;
   onSubmit: (node: { label: string; type?: string }) => void;
   initial?: { label: string; type?: string };
+  existingTypes?: string[];
 }
 
-const NODE_TYPES = ["brand", "color", "typography", "concept"] as const;
+const DEFAULT_TYPES = ["brand", "color", "typography", "concept"];
 
-export function NodeForm({ open, onClose, onSubmit, initial }: NodeFormProps) {
+export function NodeForm({ open, onClose, onSubmit, initial, existingTypes = [] }: NodeFormProps) {
   const [label, setLabel] = useState(initial?.label ?? "");
   const [type, setType] = useState<string>(initial?.type ?? "");
+  const [customType, setCustomType] = useState("");
+  const [isCustom, setIsCustom] = useState(false);
+
+  const allTypes = Array.from(new Set([...DEFAULT_TYPES, ...existingTypes])).sort();
 
   useEffect(() => {
     if (open) {
       setLabel(initial?.label ?? "");
-      setType(initial?.type ?? "");
+      const initialType = initial?.type ?? "";
+      if (initialType && !DEFAULT_TYPES.includes(initialType) && !existingTypes.includes(initialType)) {
+        setIsCustom(true);
+        setCustomType(initialType);
+        setType("");
+      } else {
+        setIsCustom(false);
+        setCustomType("");
+        setType(initialType);
+      }
     }
-  }, [open, initial]);
+  }, [open, initial, existingTypes]);
 
   const isEditing = !!initial;
 
   function handleSubmit() {
     if (!label.trim()) return;
-    onSubmit({ label: label.trim(), type: type || undefined });
+    const finalType = isCustom ? customType.trim() : type;
+    onSubmit({ label: label.trim(), type: finalType || undefined });
     setLabel("");
     setType("");
+    setCustomType("");
+    setIsCustom(false);
     onClose();
   }
 
@@ -76,18 +93,52 @@ export function NodeForm({ open, onClose, onSubmit, initial }: NodeFormProps) {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium">타입</label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue placeholder="타입 선택 (선택사항)" />
-              </SelectTrigger>
-              <SelectContent>
-                {NODE_TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isCustom ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="새 타입 이름 입력"
+                  value={customType}
+                  onChange={(e) => setCustomType(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  autoFocus
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsCustom(false);
+                    setCustomType("");
+                  }}
+                >
+                  취소
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Select value={type} onValueChange={setType}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="타입 선택 (선택사항)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allTypes.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsCustom(true);
+                    setType("");
+                  }}
+                >
+                  + 새 타입
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
