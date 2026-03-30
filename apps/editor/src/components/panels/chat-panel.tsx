@@ -117,16 +117,17 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
         }
     }, [messages]);
 
-    // Auto-focus: 스트리밍 완료 후 마지막 assistant 메시지에서 첫 번째 언급 노드를 포커스
-    const prevStatusRef = useRef(status);
+    // Auto-focus: 스트리밍 중 첫 번째 노드가 감지되면 즉시 포커스 (1회만)
+    const focusedForMessageRef = useRef<string | null>(null);
     useEffect(() => {
-        const wasStreaming = prevStatusRef.current === "streaming";
-        prevStatusRef.current = status;
-
-        if (!wasStreaming || status !== "ready") return;
+        if (status !== "streaming") {
+            // 스트리밍이 끝나면 플래그 초기화 (다음 대화를 위해)
+            if (status === "ready") focusedForMessageRef.current = null;
+            return;
+        }
 
         const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-        if (!lastAssistant) return;
+        if (!lastAssistant || focusedForMessageRef.current === lastAssistant.id) return;
 
         const text = lastAssistant.parts
             .filter((p): p is { type: "text"; text: string } => p.type === "text")
@@ -135,6 +136,7 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
 
         const mentionedIds = extractMentionedNodeIds(text, graph.nodes);
         if (mentionedIds.length > 0) {
+            focusedForMessageRef.current = lastAssistant.id;
             onFocusNode(mentionedIds[0]);
         }
     }, [status, messages, graph.nodes, onFocusNode]);
