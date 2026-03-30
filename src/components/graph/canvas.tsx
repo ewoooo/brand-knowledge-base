@@ -242,8 +242,6 @@ export default function Canvas({
         onSelectNodeRef.current(d.id);
       });
 
-    nodeGs.append("title").text((d) => d.label);
-
     nodeGs
       .append("circle")
       .attr("r", (d) => nodeSize(d.type))
@@ -251,25 +249,30 @@ export default function Canvas({
       .attr("stroke", (d) => hexToRgba(nodeColor(d.type), 0.6))
       .attr("stroke-width", 2);
 
+    // Short label inside circle (type abbreviation or first 2 chars)
+    nodeGs
+      .append("text")
+      .text((d) => {
+        if (d.type === "brand") return "B";
+        if (d.type === "color") return "●";
+        if (d.type === "typography") return "Aa";
+        return "◇";
+      })
+      .attr("fill", "rgba(255,255,255,0.7)")
+      .attr("font-size", (d) => d.type === "brand" ? 14 : 12)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .attr("pointer-events", "none");
+
+    // Full label below circle
     nodeGs
       .append("text")
       .text((d) => d.label)
-      .attr("fill", "#ffffff")
+      .attr("fill", "rgba(255,255,255,0.9)")
       .attr("font-size", 11)
       .attr("text-anchor", "middle")
-      .attr("dominant-baseline", "central")
-      .attr("pointer-events", "none")
-      .each(function (d) {
-        const maxWidth = nodeSize(d.type) * 1.6;
-        const textEl = d3.select(this);
-        if (this.getComputedTextLength() > maxWidth) {
-          let text = d.label;
-          while (text.length > 1 && this.getComputedTextLength() > maxWidth) {
-            text = text.slice(0, -1);
-            textEl.text(text + "…");
-          }
-        }
-      });
+      .attr("dy", (d) => nodeSize(d.type) + 14)
+      .attr("pointer-events", "none");
 
     /* -- drag ------------------------------------------------------- */
     const drag = d3
@@ -303,7 +306,7 @@ export default function Canvas({
       )
       .force("charge", d3.forceManyBody().strength(-500))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collide", d3.forceCollide<SimNode>().radius((d) => nodeSize(d.type) + 12))
+      .force("collide", d3.forceCollide<SimNode>().radius((d) => nodeSize(d.type) + 20))
       .on("tick", () => {
         linkGroup
           .selectAll<SVGLineElement, SimLink>("line")
