@@ -10,7 +10,7 @@ import { ChatPanel } from "@/components/panels/chat-panel";
 import type {
   KnowledgeGraph,
   ValidationResult,
-} from "@/lib/kg-core/types";
+} from "@knowledgeview/kg-core";
 
 interface DetailPanelProps {
   graph: KnowledgeGraph;

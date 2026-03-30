@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import type { KnowledgeGraph, ValidationResult } from "@/lib/kg-core/types";
-import { validate } from "@/lib/kg-core/validator";
+import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
+import { validate } from "@knowledgeview/kg-core";
 
 export function useRules(graph: KnowledgeGraph | null) {
   const results = useMemo<ValidationResult[]>(() => {

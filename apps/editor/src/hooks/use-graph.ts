@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { KnowledgeGraph, Node, Triple, Rule } from "@/lib/kg-core/types";
+import type { KnowledgeGraph, Node, Triple, Rule } from "@knowledgeview/kg-core";
 import {
   addNode,
   removeNode,
@@ -11,8 +11,8 @@ import {
   updateTriple,
   addRule,
   removeRule,
-} from "@/lib/kg-core/operations";
-import { generateId } from "@/lib/kg-core/serializer";
+  generateId,
+} from "@knowledgeview/kg-core";
 
 export function useGraph(initial: KnowledgeGraph | null) {
   const [graph, setGraph] = useState<KnowledgeGraph | null>(initial);

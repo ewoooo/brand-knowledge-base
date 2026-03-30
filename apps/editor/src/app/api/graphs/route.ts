@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR = path.join(process.cwd(), "../../data");
 
 export async function GET() {
   const files = await fs.readdir(DATA_DIR);

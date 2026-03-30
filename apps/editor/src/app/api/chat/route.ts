@@ -4,8 +4,8 @@ import {
   convertToModelMessages,
   type UIMessage,
 } from "ai";
-import { serializeGraphForPrompt } from "@/lib/kg-core/serializer";
-import type { KnowledgeGraph } from "@/lib/kg-core/types";
+import { serializeGraphForPrompt } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 
 const SYSTEM_PROMPT = `당신은 브랜드 디자인 시스템 지식 그래프 분석 전문가입니다.
 사용자가 현재 보고 있는 그래프 데이터를 기반으로 질문에 답변합니다.

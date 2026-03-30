@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import type { KnowledgeGraph } from "@/lib/kg-core/types";
+import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 import { Send, Loader2 } from "lucide-react";
 
 interface ChatPanelProps {

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import * as d3 from "d3";
-import type { KnowledgeGraph } from "@/lib/kg-core/types";
+import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */

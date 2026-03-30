@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import type { KnowledgeGraph, RuleCondition } from "@/lib/kg-core/types";
+import type { KnowledgeGraph, RuleCondition } from "@knowledgeview/kg-core";
 
 interface RuleFormProps {
   open: boolean;

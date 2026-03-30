@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ["@knowledgeview/kg-core"],
 };
 
 export default nextConfig;
