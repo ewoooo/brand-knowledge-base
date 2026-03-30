@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         const { context: graphContext } = buildChatContext(graph, question);
 
         const result = streamText({
-            model: anthropic("claude-sonnet-4.6"),
+            model: anthropic("claude-sonnet-4-6"),
             system: `${SYSTEM_PROMPT}\n\n${graphContext}`,
             messages: await convertToModelMessages(messages),
         });
