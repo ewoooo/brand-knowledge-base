@@ -7,7 +7,90 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatPanel } from "@/components/panels/chat-panel";
-import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, Triple, ValidationResult } from "@knowledgeview/kg-core";
+
+function TripleCard({
+    triple,
+    direction,
+    isViolating,
+    nodeLabelById,
+    onFocusNode,
+    onEditTriple,
+    onDeleteTriple,
+}: {
+    triple: Triple;
+    direction: "outgoing" | "incoming";
+    isViolating: boolean;
+    nodeLabelById: (id: string) => string;
+    onFocusNode: (nodeId: string) => void;
+    onEditTriple: (tripleId: string) => void;
+    onDeleteTriple: (tripleId: string) => void;
+}) {
+    const targetId = direction === "outgoing" ? triple.object : triple.subject;
+    const title =
+        direction === "outgoing"
+            ? `${triple.predicate} → ${nodeLabelById(triple.object)}`
+            : `${nodeLabelById(triple.subject)} → ${triple.predicate}`;
+
+    return (
+        <div
+            className={`group overflow-hidden rounded-md border px-3 py-2 text-xs ${
+                isViolating
+                    ? "border-red-500 bg-red-500/5"
+                    : "border-border bg-muted/30"
+            }`}
+        >
+            <div className="truncate" title={title}>
+                {isViolating && (
+                    <span className="mr-1 text-red-500">⚠</span>
+                )}
+                {direction === "outgoing" ? (
+                    <>
+                        <span className="text-muted-foreground">→</span>
+                        <span className="text-primary mx-1">
+                            {triple.predicate}
+                        </span>
+                        <span className="text-muted-foreground">→</span>
+                        <button
+                            type="button"
+                            onClick={() => onFocusNode(targetId)}
+                            className="ml-1 font-medium underline-offset-2 hover:underline"
+                        >
+                            {nodeLabelById(targetId)}
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => onFocusNode(targetId)}
+                            className="font-medium underline-offset-2 hover:underline"
+                        >
+                            {nodeLabelById(targetId)}
+                        </button>
+                        <span className="text-muted-foreground mx-1">→</span>
+                        <span className="text-primary">{triple.predicate}</span>
+                        <span className="text-muted-foreground ml-1">→</span>
+                    </>
+                )}
+            </div>
+            <div className="mt-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                    onClick={() => onEditTriple(triple.id)}
+                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded px-1.5 py-0.5 text-[10px]"
+                >
+                    편집
+                </button>
+                <button
+                    onClick={() => onDeleteTriple(triple.id)}
+                    className="rounded px-1.5 py-0.5 text-[10px] text-red-400 hover:bg-red-500/10"
+                >
+                    삭제
+                </button>
+            </div>
+        </div>
+    );
+}
 
 interface DetailPanelProps {
     graph: KnowledgeGraph;
@@ -60,12 +143,14 @@ export function DetailPanel({
         nodeViolations.map((v) => v.relatedTripleId).filter(Boolean),
     );
 
-    // Triples connected to the selected node
-    const connectedTriples = selectedNode
-        ? graph.triples.filter(
-              (t) =>
-                  t.subject === selectedNode.id || t.object === selectedNode.id,
-          )
+    // Outgoing triples: selected node is subject (→ points to other nodes)
+    const outgoingTriples = selectedNode
+        ? graph.triples.filter((t) => t.subject === selectedNode.id)
+        : [];
+
+    // Incoming triples: selected node is object (← pointed by other nodes)
+    const incomingTriples = selectedNode
+        ? graph.triples.filter((t) => t.object === selectedNode.id)
         : [];
 
     // Helper to resolve node label by id
@@ -189,80 +274,58 @@ export function DetailPanel({
 
                                 <Separator />
 
-                                {/* Connected triples */}
+                                {/* Outgoing triples */}
                                 <div>
                                     <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-                                        연결된 관계 ({connectedTriples.length})
+                                        나가는 관계 ({outgoingTriples.length})
                                     </p>
-                                    {connectedTriples.length === 0 ? (
+                                    {outgoingTriples.length === 0 ? (
                                         <p className="text-muted-foreground text-xs">
-                                            연결 없음
+                                            없음
                                         </p>
                                     ) : (
                                         <div className="space-y-1.5">
-                                            {connectedTriples.map((t) => {
-                                                const isViolating =
-                                                    violatingTripleIds.has(
-                                                        t.id,
-                                                    );
-                                                return (
-                                                    <div
-                                                        key={t.id}
-                                                        className={`group overflow-hidden rounded-md border px-3 py-2 text-xs ${
-                                                            isViolating
-                                                                ? "border-red-500 bg-red-500/5"
-                                                                : "border-border bg-muted/30"
-                                                        }`}
-                                                    >
-                                                        <div className="truncate" title={`${nodeLabelById(t.subject)} → ${t.predicate} → ${nodeLabelById(t.object)}`}>
-                                                            {isViolating && (
-                                                                <span className="mr-1 text-red-500">
-                                                                    ⚠
-                                                                </span>
-                                                            )}
-                                                            <span className="font-medium">
-                                                                {nodeLabelById(
-                                                                    t.subject,
-                                                                )}
-                                                            </span>
-                                                            <span className="text-muted-foreground mx-1">
-                                                                →
-                                                                {
-                                                                    t.predicate
-                                                                }
-                                                                →
-                                                            </span>
-                                                            <span className="font-medium">
-                                                                {nodeLabelById(
-                                                                    t.object,
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                        <div className="mt-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                                            <button
-                                                                onClick={() =>
-                                                                    onEditTriple(
-                                                                        t.id,
-                                                                    )
-                                                                }
-                                                                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded px-1.5 py-0.5 text-[10px]"
-                                                            >
-                                                                편집
-                                                            </button>
-                                                            <button
-                                                                onClick={() =>
-                                                                    onDeleteTriple(
-                                                                        t.id,
-                                                                    )
-                                                                }
-                                                                className="rounded px-1.5 py-0.5 text-[10px] text-red-400 hover:bg-red-500/10"
-                                                            >
-                                                                삭제
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                            {outgoingTriples.map((t) => (
+                                                <TripleCard
+                                                    key={t.id}
+                                                    triple={t}
+                                                    direction="outgoing"
+                                                    isViolating={violatingTripleIds.has(t.id)}
+                                                    nodeLabelById={nodeLabelById}
+                                                    onFocusNode={onFocusNode}
+                                                    onEditTriple={onEditTriple}
+                                                    onDeleteTriple={onDeleteTriple}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Separator />
+
+                                {/* Incoming triples */}
+                                <div>
+                                    <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
+                                        들어오는 관계 ({incomingTriples.length})
+                                    </p>
+                                    {incomingTriples.length === 0 ? (
+                                        <p className="text-muted-foreground text-xs">
+                                            없음
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-1.5">
+                                            {incomingTriples.map((t) => (
+                                                <TripleCard
+                                                    key={t.id}
+                                                    triple={t}
+                                                    direction="incoming"
+                                                    isViolating={violatingTripleIds.has(t.id)}
+                                                    nodeLabelById={nodeLabelById}
+                                                    onFocusNode={onFocusNode}
+                                                    onEditTriple={onEditTriple}
+                                                    onDeleteTriple={onDeleteTriple}
+                                                />
+                                            ))}
                                         </div>
                                     )}
                                 </div>
