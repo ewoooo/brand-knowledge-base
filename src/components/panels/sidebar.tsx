@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import type { ValidationResult } from "@/lib/kg-core/types";
+import type { KnowledgeGraph, ValidationResult } from "@/lib/kg-core/types";
 
 interface GraphListItem {
   filename: string;
@@ -21,6 +21,7 @@ interface SidebarProps {
   onCreateGraph: () => void;
   validationResults: ValidationResult[];
   onAddRule: () => void;
+  graph: KnowledgeGraph | null;
 }
 
 export function Sidebar({
@@ -29,6 +30,7 @@ export function Sidebar({
   onCreateGraph,
   validationResults,
   onAddRule,
+  graph,
 }: SidebarProps) {
   const [graphs, setGraphs] = useState<GraphListItem[]>([]);
 
@@ -65,6 +67,44 @@ export function Sidebar({
           ))}
         </ScrollArea>
       </div>
+
+      <Separator />
+
+      {graph && (
+        <div className="px-4 py-3">
+          <span className="text-xs font-medium uppercase text-muted-foreground">통계</span>
+          <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-md bg-muted/30 px-2 py-1.5">
+              <div className="text-lg font-semibold">{graph.nodes.length}</div>
+              <div className="text-[10px] text-muted-foreground">노드</div>
+            </div>
+            <div className="rounded-md bg-muted/30 px-2 py-1.5">
+              <div className="text-lg font-semibold">{graph.triples.length}</div>
+              <div className="text-[10px] text-muted-foreground">트리플</div>
+            </div>
+            <div className="rounded-md bg-muted/30 px-2 py-1.5">
+              <div className="text-lg font-semibold">{graph.rules.length}</div>
+              <div className="text-[10px] text-muted-foreground">규칙</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {graph && graph.nodes.length > 0 && (
+        <div className="px-4 py-3">
+          <span className="text-xs font-medium uppercase text-muted-foreground">노드 타입</span>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {Array.from(new Set(graph.nodes.map((n) => n.type).filter(Boolean))).map((type) => {
+              const count = graph.nodes.filter((n) => n.type === type).length;
+              return (
+                <Badge key={type} variant="secondary" className="text-xs">
+                  {type} <span className="ml-1 opacity-60">{count}</span>
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <Separator />
 

@@ -151,6 +151,7 @@ export default function Home() {
           onCreateGraph={handleCreateGraph}
           validationResults={results}
           onAddRule={() => setRuleFormOpen(true)}
+          graph={null}
         />
         <div className="flex flex-1 items-center justify-center">
           <p className="text-muted-foreground">
@@ -170,6 +171,7 @@ export default function Home() {
         onCreateGraph={handleCreateGraph}
         validationResults={results}
         onAddRule={() => setRuleFormOpen(true)}
+        graph={graph}
       />
 
       <div className="relative flex-1">
@@ -227,6 +229,7 @@ export default function Home() {
         onClose={handleNodeFormClose}
         onSubmit={handleNodeSubmit}
         initial={editingNode ? { label: editingNode.label, type: editingNode.type } : undefined}
+        existingTypes={graph.nodes.map((n) => n.type).filter((t): t is string => !!t)}
       />
 
       <TripleForm
