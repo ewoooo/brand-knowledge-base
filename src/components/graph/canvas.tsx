@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import * as d3 from "d3";
 import type { KnowledgeGraph } from "@/lib/kg-core/types";
 
@@ -43,10 +43,10 @@ const NODE_COLORS: Record<string, string> = {
 };
 
 const NODE_SIZES: Record<string, number> = {
-  brand: 28,
-  color: 20,
-  typography: 20,
-  concept: 18,
+  brand: 36,
+  color: 26,
+  typography: 26,
+  concept: 22,
 };
 
 function nodeColor(type?: string): string {
@@ -81,9 +81,19 @@ export default function Canvas({
 }: CanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null);
+  // Store latest callbacks in refs so D3 event handlers always call the current version
+  const onSelectNodeRef = useRef(onSelectNode);
+  const onSelectEdgeRef = useRef(onSelectEdge);
+  const onClearSelectionRef = useRef(onClearSelection);
+  const onDoubleClickCanvasRef = useRef(onDoubleClickCanvas);
 
-  /* ---- main render ------------------------------------------------ */
-  const render = useCallback(() => {
+  onSelectNodeRef.current = onSelectNode;
+  onSelectEdgeRef.current = onSelectEdge;
+  onClearSelectionRef.current = onClearSelection;
+  onDoubleClickCanvasRef.current = onDoubleClickCanvas;
+
+  /* ---- build simulation (only when graph data changes) ------------ */
+  useEffect(() => {
     const svgEl = svgRef.current;
     if (!svgEl) return;
 
@@ -155,52 +165,43 @@ export default function Canvas({
     /* -- click background ------------------------------------------- */
     svg.on("click", (event) => {
       if (event.target === svgEl) {
-        onClearSelection();
+        onClearSelectionRef.current();
       }
     });
 
-    svg.on("dblclick.zoom", null); // disable zoom on dblclick
+    svg.on("dblclick.zoom", null);
     svg.on("dblclick", (event) => {
       if (event.target === svgEl) {
-        onDoubleClickCanvas();
+        onDoubleClickCanvasRef.current();
       }
     });
 
     /* -- edges ------------------------------------------------------ */
     const linkGroup = g.append("g").attr("class", "links");
 
-    const linkLines = linkGroup
+    linkGroup
       .selectAll<SVGLineElement, SimLink>("line")
       .data(links, (d) => d.id)
       .join("line")
-      .attr("stroke", (d) =>
-        violatedTripleIds.has(d.id)
-          ? "rgba(255,100,100,0.5)"
-          : "rgba(255,255,255,0.2)"
-      )
-      .attr("stroke-width", (d) => (selectedEdgeId === d.id ? 3 : 1))
-      .attr("stroke-dasharray", (d) =>
-        violatedTripleIds.has(d.id) ? "6 3" : "none"
-      )
-      .attr("marker-end", (d) =>
-        violatedTripleIds.has(d.id)
-          ? "url(#arrow-violated)"
-          : "url(#arrow-normal)"
-      )
+      .attr("data-id", (d) => d.id)
+      .attr("stroke", "rgba(255,255,255,0.2)")
+      .attr("stroke-width", 1)
+      .attr("marker-end", "url(#arrow-normal)")
       .attr("cursor", "pointer")
       .on("click", (event, d) => {
         event.stopPropagation();
-        onSelectEdge(d.id);
+        onSelectEdgeRef.current(d.id);
       });
 
     /* -- edge labels ------------------------------------------------ */
-    const linkLabels = linkGroup
+    linkGroup
       .selectAll<SVGTextElement, SimLink>("text")
       .data(links, (d) => d.id)
       .join("text")
+      .attr("data-link-id", (d) => d.id)
       .text((d) => d.predicate)
-      .attr("fill", "rgba(255,255,255,0.5)")
-      .attr("font-size", 10)
+      .attr("fill", "rgba(255,255,255,0.7)")
+      .attr("font-size", 12)
       .attr("text-anchor", "middle")
       .attr("dy", -4)
       .attr("pointer-events", "none");
@@ -212,33 +213,25 @@ export default function Canvas({
       .selectAll<SVGGElement, SimNode>("g")
       .data(nodes, (d) => d.id)
       .join("g")
+      .attr("data-id", (d) => d.id)
       .attr("cursor", "grab")
       .on("click", (event, d) => {
         event.stopPropagation();
-        onSelectNode(d.id);
+        onSelectNodeRef.current(d.id);
       });
 
-    // Circle
     nodeGs
       .append("circle")
       .attr("r", (d) => nodeSize(d.type))
       .attr("fill", (d) => hexToRgba(nodeColor(d.type), 0.2))
-      .attr("stroke", (d) => {
-        if (selectedNodeId === d.id) return "#ffffff";
-        if (violatedNodeIds.has(d.id)) return "#ff6464";
-        return hexToRgba(nodeColor(d.type), 0.6);
-      })
-      .attr("stroke-width", (d) => (selectedNodeId === d.id ? 3 : 2))
-      .attr("stroke-dasharray", (d) =>
-        violatedNodeIds.has(d.id) ? "6 3" : "none"
-      );
+      .attr("stroke", (d) => hexToRgba(nodeColor(d.type), 0.6))
+      .attr("stroke-width", 2);
 
-    // Label
     nodeGs
       .append("text")
       .text((d) => d.label)
       .attr("fill", "#ffffff")
-      .attr("font-size", 11)
+      .attr("font-size", 12)
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "central")
       .attr("pointer-events", "none");
@@ -271,19 +264,21 @@ export default function Canvas({
         d3
           .forceLink<SimNode, SimLink>(links)
           .id((d) => d.id)
-          .distance(120)
+          .distance(160)
       )
-      .force("charge", d3.forceManyBody().strength(-300))
+      .force("charge", d3.forceManyBody().strength(-500))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collide", d3.forceCollide<SimNode>().radius((d) => nodeSize(d.type) + 4))
+      .force("collide", d3.forceCollide<SimNode>().radius((d) => nodeSize(d.type) + 12))
       .on("tick", () => {
-        linkLines
+        linkGroup
+          .selectAll<SVGLineElement, SimLink>("line")
           .attr("x1", (d) => (d.source as SimNode).x ?? 0)
           .attr("y1", (d) => (d.source as SimNode).y ?? 0)
           .attr("x2", (d) => (d.target as SimNode).x ?? 0)
           .attr("y2", (d) => (d.target as SimNode).y ?? 0);
 
-        linkLabels
+        linkGroup
+          .selectAll<SVGTextElement, SimLink>("text")
           .attr("x", (d) => {
             const sx = (d.source as SimNode).x ?? 0;
             const tx = (d.target as SimNode).x ?? 0;
@@ -299,25 +294,75 @@ export default function Canvas({
       });
 
     simulationRef.current = simulation;
-  }, [
-    graph,
-    violatedNodeIds,
-    violatedTripleIds,
-    selectedNodeId,
-    selectedEdgeId,
-    onSelectNode,
-    onSelectEdge,
-    onClearSelection,
-    onDoubleClickCanvas,
-  ]);
 
-  /* ---- effects ---------------------------------------------------- */
-  useEffect(() => {
-    render();
+    // Fit to view when simulation settles
+    simulation.on("end", () => {
+      const padding = 60;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      nodes.forEach((n) => {
+        const r = nodeSize(n.type);
+        if ((n.x ?? 0) - r < minX) minX = (n.x ?? 0) - r;
+        if ((n.y ?? 0) - r < minY) minY = (n.y ?? 0) - r;
+        if ((n.x ?? 0) + r > maxX) maxX = (n.x ?? 0) + r;
+        if ((n.y ?? 0) + r > maxY) maxY = (n.y ?? 0) + r;
+      });
+
+      if (!isFinite(minX)) return;
+
+      const graphWidth = maxX - minX + padding * 2;
+      const graphHeight = maxY - minY + padding * 2;
+      const scale = Math.min(width / graphWidth, height / graphHeight, 1.5);
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+
+      svg.transition().duration(500).call(
+        zoom.transform,
+        d3.zoomIdentity
+          .translate(width / 2, height / 2)
+          .scale(scale)
+          .translate(-cx, -cy)
+      );
+    });
+
     return () => {
-      simulationRef.current?.stop();
+      simulation.stop();
     };
-  }, [render]);
+  // Only rebuild simulation when graph structure changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph]);
+
+  /* ---- update styles (selection/violation) without rebuilding ------ */
+  useEffect(() => {
+    const svgEl = svgRef.current;
+    if (!svgEl) return;
+
+    const svg = d3.select(svgEl);
+
+    // Update node styles
+    svg.selectAll<SVGGElement, SimNode>("g.nodes g").each(function (d) {
+      const circle = d3.select(this).select("circle");
+      if (selectedNodeId === d.id) {
+        circle.attr("stroke", "#ffffff").attr("stroke-width", 3).attr("stroke-dasharray", "none");
+      } else if (violatedNodeIds.has(d.id)) {
+        circle.attr("stroke", "#ff6464").attr("stroke-width", 2).attr("stroke-dasharray", "6 3");
+      } else {
+        circle.attr("stroke", hexToRgba(nodeColor(d.type), 0.6)).attr("stroke-width", 2).attr("stroke-dasharray", "none");
+      }
+    });
+
+    // Update edge styles
+    svg.selectAll<SVGLineElement, SimLink>("g.links line").each(function (d) {
+      const line = d3.select(this);
+      const isViolated = violatedTripleIds.has(d.id);
+      const isSelected = selectedEdgeId === d.id;
+
+      line
+        .attr("stroke", isViolated ? "rgba(255,100,100,0.5)" : "rgba(255,255,255,0.2)")
+        .attr("stroke-width", isSelected ? 3 : 1)
+        .attr("stroke-dasharray", isViolated ? "6 3" : "none")
+        .attr("marker-end", isViolated ? "url(#arrow-violated)" : "url(#arrow-normal)");
+    });
+  }, [selectedNodeId, selectedEdgeId, violatedNodeIds, violatedTripleIds]);
 
   /* ---- JSX -------------------------------------------------------- */
   return (
