@@ -152,7 +152,7 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
     };
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full min-h-0 flex-col">
             {/* System Prompt Editor */}
             {onUpdateSystemPrompt && (
                 <div className="border-b">
@@ -210,7 +210,7 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
             )}
 
             {/* Messages */}
-            <ScrollArea ref={scrollAreaRef} className="flex-1">
+            <ScrollArea ref={scrollAreaRef} className="min-h-0 flex-1">
                 <div className="space-y-3 p-3">
                     {messages.length === 0 && (
                         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">

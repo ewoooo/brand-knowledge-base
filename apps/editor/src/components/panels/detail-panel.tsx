@@ -75,7 +75,7 @@ export function DetailPanel({
     };
 
     return (
-        <div className="flex h-full w-[280px] min-w-[280px] flex-col overflow-hidden border-l">
+        <div className="flex h-full w-[350px] min-w-[350px] flex-col overflow-hidden border-l">
             <Tabs defaultValue="properties" className="flex h-full flex-col">
                 <div className="border-b px-2 pt-2">
                     <TabsList className="w-full">
