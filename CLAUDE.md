@@ -44,6 +44,31 @@ npx tsx scripts/convert-worxphere.ts
 
 **의존 관계:** `editor → kg-core`, `rag-api → graph-rag → kg-core`
 
+## Data Methodology (SPO + FOL)
+
+이 프로젝트의 지식 그래프는 **SPO 트리플**과 **FOL 규칙** 기반으로 설계되어 있다. 데이터 모델 변경이나 규칙 관련 작업 전에 반드시 아래 문서를 확인할 것:
+
+- 설계 스펙: `docs/superpowers/specs/2026-03-30-knowledgeview-design.md` (데이터 모델 섹션)
+- 로드맵: `docs/superpowers/specs/2026-03-30-knowledgeview-roadmap.md`
+
+### SPO (Subject-Predicate-Object)
+
+```
+(Subject) ──[Predicate]──→ (Object)
+   노드         엣지          노드
+```
+
+- 모든 관계는 방향 있는 SPO 트리플로 표현
+- Predicate는 자유 텍스트 (미리 정의된 관계 타입 없음)
+- 비표준 구조 (SPO + Node 메타데이터 하이브리드). RDF/OWL보다 단순, 브랜드 데이터에 충분
+
+### FOL (First-Order Logic) 규칙
+
+- Rule의 `expression`에 FOL 표현식 저장 (예: `∀x (brand(x) → ∃y 프라이머리컬러(x, y))`)
+- GUI 조건 빌더(`condition`)로 생성, FOL은 사람이 읽는 미리보기 용도
+- 검증은 `condition`의 3가지 operator로 수행: `must_have`, `must_not_have`, `conflicts_with`
+- 검증 엔진: `packages/kg-core/src/validator.ts`
+
 ## Key Architectural Decisions
 
 - **`data/` 디렉토리는 프로젝트 루트에 위치** — API route에서 `process.cwd() + "data"`로 런타임 읽기/쓰기를 수행하므로 `src/`로 옮기면 안 됨
