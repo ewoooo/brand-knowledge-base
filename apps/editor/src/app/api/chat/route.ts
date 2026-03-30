@@ -10,28 +10,36 @@ const SYSTEM_PROMPT = `당신은 브랜드 디자인 시스템 지식 그래프 
 컨텍스트에 없는 정보는 추측하지 마세요.`;
 
 export async function POST(req: Request) {
-    const {
-        messages,
-        graph,
-    }: { messages: UIMessage[]; graph: KnowledgeGraph } = await req.json();
+    try {
+        const {
+            messages,
+            graph,
+        }: { messages: UIMessage[]; graph: KnowledgeGraph } = await req.json();
 
-    const lastUserMessage =
-        [...messages].reverse().find((m) => m.role === "user");
-    const question =
-        lastUserMessage?.parts
-            ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-            .map((p) => p.text)
-            .join(" ")
-        || (typeof lastUserMessage?.content === "string" ? lastUserMessage.content : "")
-        || "";
+        const lastUserMessage =
+            [...messages].reverse().find((m) => m.role === "user");
+        const question =
+            lastUserMessage?.parts
+                ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+                .map((p) => p.text)
+                .join(" ")
+            || (typeof lastUserMessage?.content === "string" ? lastUserMessage.content : "")
+            || "";
 
-    const { context: graphContext } = buildChatContext(graph, question);
+        const { context: graphContext } = buildChatContext(graph, question);
 
-    const result = streamText({
-        model: anthropic("claude-sonnet-4.6"),
-        system: `${SYSTEM_PROMPT}\n\n${graphContext}`,
-        messages: await convertToModelMessages(messages),
-    });
+        const result = streamText({
+            model: anthropic("claude-sonnet-4-6"),
+            system: `${SYSTEM_PROMPT}\n\n${graphContext}`,
+            messages: await convertToModelMessages(messages),
+        });
 
-    return result.toUIMessageStreamResponse();
+        return result.toUIMessageStreamResponse();
+    } catch (error) {
+        console.error("[chat route error]", error);
+        return new Response(JSON.stringify({ error: String(error) }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
 }
