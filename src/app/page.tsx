@@ -174,42 +174,46 @@ export default function Home() {
         graph={graph}
       />
 
-      <div className="relative flex-1">
-        {/* Top action buttons */}
-        <div className="absolute left-4 top-4 z-10 flex gap-2">
-          <Button size="sm" onClick={() => { setEditingNodeId(null); setNodeFormOpen(true); }}>
+      <div className="flex flex-1 flex-col">
+        {/* Toolbar */}
+        <div className="flex items-center gap-2 border-b px-4 py-2">
+          <Button size="sm" variant="outline" onClick={() => { setEditingNodeId(null); setNodeFormOpen(true); }}>
             + 노드
           </Button>
-          <Button size="sm" onClick={() => { setEditingTripleId(null); setTripleFormOpen(true); }}>
+          <Button size="sm" variant="outline" onClick={() => { setEditingTripleId(null); setTripleFormOpen(true); }}>
             + 트리플
           </Button>
-          <Button size="sm" variant={isDirty ? "default" : "outline"} onClick={save}>
+          <div className="flex-1" />
+          <Button size="sm" onClick={save} disabled={!isDirty}>
             저장
           </Button>
         </div>
 
-        {/* Violation banner at bottom-left */}
-        {failCount > 0 && (
-          <div className="absolute bottom-4 left-4 z-10">
-            <Alert variant="destructive" className="w-auto">
-              <AlertDescription>
-                {failCount}건의 규칙 위반이 있습니다
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
+        {/* Canvas + violation banner */}
+        <div className="relative flex-1">
+          {/* Violation banner at bottom-left */}
+          {failCount > 0 && (
+            <div className="absolute bottom-4 left-4 z-10">
+              <Alert variant="destructive" className="w-auto">
+                <AlertDescription>
+                  {failCount}건의 규칙 위반이 있습니다
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
 
-        <Canvas
-          graph={graph}
-          violatedNodeIds={violatedNodeIds}
-          violatedTripleIds={violatedTripleIds}
-          selectedNodeId={selectedNodeId}
-          selectedEdgeId={selectedEdgeId}
-          onSelectNode={selectNode}
-          onSelectEdge={selectEdge}
-          onClearSelection={clearSelection}
-          onDoubleClickCanvas={handleDoubleClickCanvas}
-        />
+          <Canvas
+            graph={graph}
+            violatedNodeIds={violatedNodeIds}
+            violatedTripleIds={violatedTripleIds}
+            selectedNodeId={selectedNodeId}
+            selectedEdgeId={selectedEdgeId}
+            onSelectNode={selectNode}
+            onSelectEdge={selectEdge}
+            onClearSelection={clearSelection}
+            onDoubleClickCanvas={handleDoubleClickCanvas}
+          />
+        </div>
       </div>
 
       <DetailPanel
