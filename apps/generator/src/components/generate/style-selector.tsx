@@ -32,9 +32,11 @@ export function StyleSelector({
         스타일
       </label>
       <ToggleGroup
-        type="single"
-        value={value}
-        onValueChange={(v) => v && onChange(v)}
+        value={[value]}
+        onValueChange={(values) => {
+          const next = values[values.length - 1];
+          if (next) onChange(next);
+        }}
         className="flex flex-wrap justify-start gap-1.5"
         disabled={disabled}
       >
