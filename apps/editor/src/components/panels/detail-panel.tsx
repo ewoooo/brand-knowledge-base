@@ -47,15 +47,14 @@ function TripleCard({
                 )}
                 {direction === "outgoing" ? (
                     <>
-                        <span className="text-muted-foreground">→</span>
-                        <span className="text-primary mx-1">
+                        <span className="text-primary">
                             {triple.predicate}
                         </span>
-                        <span className="text-muted-foreground">→</span>
+                        <span className="text-muted-foreground mx-1">→</span>
                         <button
                             type="button"
                             onClick={() => onFocusNode(targetId)}
-                            className="ml-1 font-medium underline-offset-2 hover:underline"
+                            className="font-medium underline-offset-2 hover:underline"
                         >
                             {nodeLabelById(targetId)}
                         </button>
