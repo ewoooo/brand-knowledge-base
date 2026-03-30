@@ -30,6 +30,7 @@ export interface CanvasProps {
   onSelectEdge: (id: string) => void;
   onClearSelection: () => void;
   onDoubleClickCanvas: () => void;
+  onContextMenu: (nodeId: string, position: { x: number; y: number }) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -80,6 +81,7 @@ export default function Canvas({
   onSelectEdge,
   onClearSelection,
   onDoubleClickCanvas,
+  onContextMenu,
 }: CanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null);
@@ -88,11 +90,13 @@ export default function Canvas({
   const onSelectEdgeRef = useRef(onSelectEdge);
   const onClearSelectionRef = useRef(onClearSelection);
   const onDoubleClickCanvasRef = useRef(onDoubleClickCanvas);
+  const onContextMenuRef = useRef(onContextMenu);
 
   onSelectNodeRef.current = onSelectNode;
   onSelectEdgeRef.current = onSelectEdge;
   onClearSelectionRef.current = onClearSelection;
   onDoubleClickCanvasRef.current = onDoubleClickCanvas;
+  onContextMenuRef.current = onContextMenu;
 
   /* ---- build simulation (only when graph data changes) ------------ */
   useEffect(() => {
@@ -244,6 +248,11 @@ export default function Canvas({
       .on("click", (event, d) => {
         event.stopPropagation();
         onSelectNodeRef.current(d.id);
+      })
+      .on("contextmenu", (event: MouseEvent, d: SimNode) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onContextMenuRef.current(d.id, { x: event.clientX, y: event.clientY });
       });
 
     nodeGs

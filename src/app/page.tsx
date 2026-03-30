@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Canvas from "@/components/graph/canvas";
+import { NodeContextMenu } from "@/components/graph/node-context-menu";
 import { Sidebar } from "@/components/panels/sidebar";
 import { DetailPanel } from "@/components/panels/detail-panel";
 import { NodeForm } from "@/components/forms/node-form";
@@ -55,6 +56,9 @@ export default function Home() {
   // Editing state
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [editingTripleId, setEditingTripleId] = useState<string | null>(null);
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{ nodeId: string; position: { x: number; y: number } } | null>(null);
 
   // Derive selected IDs from selection
   const selectedNodeId = selection?.type === "node" ? selection.id : null;
@@ -156,6 +160,15 @@ export default function Home() {
     setNodeFormOpen(true);
   }, []);
 
+  const handleContextMenu = useCallback((nodeId: string, position: { x: number; y: number }) => {
+    setContextMenu({ nodeId, position });
+  }, []);
+
+  const handleAddRelationFromContext = useCallback((_subjectId: string) => {
+    setEditingTripleId(null);
+    setTripleFormOpen(true);
+  }, []);
+
   // --- No graph loaded state ---
   if (!graph) {
     return (
@@ -232,6 +245,7 @@ export default function Home() {
             onSelectEdge={selectEdge}
             onClearSelection={clearSelection}
             onDoubleClickCanvas={handleDoubleClickCanvas}
+            onContextMenu={handleContextMenu}
           />
         </div>
       </div>
@@ -246,6 +260,19 @@ export default function Home() {
         onEditTriple={handleEditTriple}
         onDeleteTriple={removeTriple}
       />
+
+      {/* Context menu */}
+      {contextMenu && graph && (
+        <NodeContextMenu
+          nodeId={contextMenu.nodeId}
+          nodeLabel={graph.nodes.find((n) => n.id === contextMenu.nodeId)?.label ?? ""}
+          position={contextMenu.position}
+          onClose={() => setContextMenu(null)}
+          onAddRelation={handleAddRelationFromContext}
+          onEditNode={(id) => { setEditingNodeId(id); setNodeFormOpen(true); }}
+          onDeleteNode={(id) => { removeNode(id); clearSelection(); }}
+        />
+      )}
 
       {/* Dialogs */}
       <NodeForm
