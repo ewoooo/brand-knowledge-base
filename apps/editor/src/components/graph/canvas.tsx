@@ -27,6 +27,7 @@ export interface CanvasProps {
     selectedNodeId: string | null;
     selectedEdgeId: string | null;
     focusedNodeId: string | null;
+    highlightedNodeIds: Set<string> | null;
     onSelectNode: (id: string) => void;
     onSelectEdge: (id: string) => void;
     onClearSelection: () => void;
@@ -80,6 +81,7 @@ export default function Canvas({
     selectedNodeId,
     selectedEdgeId,
     focusedNodeId,
+    highlightedNodeIds,
     onSelectNode,
     onSelectEdge,
     onClearSelection,
@@ -630,8 +632,53 @@ export default function Canvas({
             },
         );
 
-        // Focus mode
-        if (focusedNodeId) {
+        // Search highlight mode (highest priority)
+        if (highlightedNodeIds) {
+            // Dim non-matching nodes
+            svg.selectAll<SVGGElement, SimNode>("g.nodes g").each(function (d) {
+                d3.select(this).attr(
+                    "opacity",
+                    highlightedNodeIds.has(d.id) ? 1 : 0.15,
+                );
+            });
+
+            // Dim edges where both endpoints are not matched
+            svg.selectAll<SVGLineElement, SimLink>("g.links line").each(
+                function (d) {
+                    const sourceId =
+                        typeof d.source === "object"
+                            ? (d.source as SimNode).id
+                            : d.source;
+                    const targetId =
+                        typeof d.target === "object"
+                            ? (d.target as SimNode).id
+                            : d.target;
+                    const connected =
+                        highlightedNodeIds.has(sourceId as string) &&
+                        highlightedNodeIds.has(targetId as string);
+                    d3.select(this).attr("opacity", connected ? 1 : 0.05);
+                },
+            );
+
+            // Dim edge labels
+            svg.selectAll<SVGGElement, SimLink>("g.link-label").each(
+                function (d) {
+                    const sourceId =
+                        typeof d.source === "object"
+                            ? (d.source as SimNode).id
+                            : d.source;
+                    const targetId =
+                        typeof d.target === "object"
+                            ? (d.target as SimNode).id
+                            : d.target;
+                    const connected =
+                        highlightedNodeIds.has(sourceId as string) &&
+                        highlightedNodeIds.has(targetId as string);
+                    d3.select(this).attr("opacity", connected ? 1 : 0.05);
+                },
+            );
+        // Focus mode (lower priority)
+        } else if (focusedNodeId) {
             // Find neighbor node IDs
             const neighborIds = new Set<string>();
             neighborIds.add(focusedNodeId);
@@ -713,6 +760,7 @@ export default function Canvas({
         violatedNodeIds,
         violatedTripleIds,
         focusedNodeId,
+        highlightedNodeIds,
     ]);
 
     /* ---- JSX -------------------------------------------------------- */
