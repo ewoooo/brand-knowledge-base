@@ -194,17 +194,39 @@ export default function Canvas({
       });
 
     /* -- edge labels ------------------------------------------------ */
-    linkGroup
-      .selectAll<SVGTextElement, SimLink>("text")
+    const linkLabelGs = linkGroup
+      .selectAll<SVGGElement, SimLink>("g.link-label")
       .data(links, (d) => d.id)
-      .join("text")
+      .join("g")
+      .attr("class", "link-label")
       .attr("data-link-id", (d) => d.id)
-      .text((d) => d.predicate)
-      .attr("fill", "rgba(255,255,255,0.7)")
-      .attr("font-size", 12)
-      .attr("text-anchor", "middle")
-      .attr("dy", -4)
       .attr("pointer-events", "none");
+
+    // Background rect (sized after text is rendered)
+    linkLabelGs
+      .append("rect")
+      .attr("fill", "rgba(0,0,0,0.6)")
+      .attr("rx", 3)
+      .attr("ry", 3);
+
+    const linkLabelTexts = linkLabelGs
+      .append("text")
+      .text((d) => d.predicate)
+      .attr("fill", "rgba(255,255,255,0.85)")
+      .attr("font-size", 11)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central");
+
+    // Size background rects to fit text
+    linkLabelTexts.each(function () {
+      const bbox = this.getBBox();
+      const rect = d3.select(this.parentNode as Element).select("rect");
+      rect
+        .attr("x", bbox.x - 4)
+        .attr("y", bbox.y - 2)
+        .attr("width", bbox.width + 8)
+        .attr("height", bbox.height + 4);
+    });
 
     /* -- nodes ------------------------------------------------------ */
     const nodeGroup = g.append("g").attr("class", "nodes");
@@ -220,6 +242,8 @@ export default function Canvas({
         onSelectNodeRef.current(d.id);
       });
 
+    nodeGs.append("title").text((d) => d.label);
+
     nodeGs
       .append("circle")
       .attr("r", (d) => nodeSize(d.type))
@@ -231,10 +255,21 @@ export default function Canvas({
       .append("text")
       .text((d) => d.label)
       .attr("fill", "#ffffff")
-      .attr("font-size", 12)
+      .attr("font-size", 11)
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "central")
-      .attr("pointer-events", "none");
+      .attr("pointer-events", "none")
+      .each(function (d) {
+        const maxWidth = nodeSize(d.type) * 1.6;
+        const textEl = d3.select(this);
+        if (this.getComputedTextLength() > maxWidth) {
+          let text = d.label;
+          while (text.length > 1 && this.getComputedTextLength() > maxWidth) {
+            text = text.slice(0, -1);
+            textEl.text(text + "…");
+          }
+        }
+      });
 
     /* -- drag ------------------------------------------------------- */
     const drag = d3
@@ -278,16 +313,13 @@ export default function Canvas({
           .attr("y2", (d) => (d.target as SimNode).y ?? 0);
 
         linkGroup
-          .selectAll<SVGTextElement, SimLink>("text")
-          .attr("x", (d) => {
+          .selectAll<SVGGElement, SimLink>("g.link-label")
+          .attr("transform", (d) => {
             const sx = (d.source as SimNode).x ?? 0;
-            const tx = (d.target as SimNode).x ?? 0;
-            return (sx + tx) / 2;
-          })
-          .attr("y", (d) => {
             const sy = (d.source as SimNode).y ?? 0;
+            const tx = (d.target as SimNode).x ?? 0;
             const ty = (d.target as SimNode).y ?? 0;
-            return (sy + ty) / 2;
+            return `translate(${(sx + tx) / 2},${(sy + ty) / 2 - 8})`;
           });
 
         nodeGs.attr("transform", (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
