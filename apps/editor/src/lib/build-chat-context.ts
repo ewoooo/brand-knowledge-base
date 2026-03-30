@@ -18,14 +18,21 @@ export function buildChatContext(
         };
     }
 
-    const { context, extraction } = runPipeline(graph, question);
+    try {
+        const { context, extraction } = runPipeline(graph, question);
 
-    if (extraction.entities.length === 0) {
+        if (extraction.entities.length === 0) {
+            return {
+                context: serializeGraphForPrompt(graph),
+                mode: "fallback",
+            };
+        }
+
+        return { context, mode: "rag" };
+    } catch {
         return {
             context: serializeGraphForPrompt(graph),
             mode: "fallback",
         };
     }
-
-    return { context, mode: "rag" };
 }

@@ -21,7 +21,9 @@ export async function POST(req: Request) {
         lastUserMessage?.parts
             ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
             .map((p) => p.text)
-            .join(" ") ?? "";
+            .join(" ")
+        || (typeof lastUserMessage?.content === "string" ? lastUserMessage.content : "")
+        || "";
 
     const { context: graphContext } = buildChatContext(graph, question);
 

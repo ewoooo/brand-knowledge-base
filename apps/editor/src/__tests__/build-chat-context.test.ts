@@ -51,4 +51,18 @@ describe("buildChatContext", () => {
         expect(result.context).toContain("주 색상");
         expect(result.mode).toBe("rag");
     });
+
+    it("비정상 그래프 데이터에서도 폴백으로 동작한다", () => {
+        const brokenGraph: KnowledgeGraph = {
+            metadata: { name: "broken", created: "", updated: "" },
+            nodes: [{ id: "n1", label: "Test" }],
+            triples: [{ id: "t1", subject: "missing", predicate: "rel", object: "also-missing" }],
+            rules: [],
+        };
+
+        // runPipeline이 예외를 던지든 빈 결과를 반환하든 폴백으로 동작해야 함
+        const result = buildChatContext(brokenGraph, "Test");
+        expect(result.context).toBeTruthy();
+        expect(["rag", "fallback"]).toContain(result.mode);
+    });
 });
