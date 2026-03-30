@@ -138,6 +138,26 @@ export default function Canvas({
       .attr("d", "M0,0 L10,3 L0,6")
       .attr("fill", "rgba(255,100,100,0.5)");
 
+    // Glow filter for selected nodes
+    defs
+      .append("filter")
+      .attr("id", "glow")
+      .attr("x", "-50%")
+      .attr("y", "-50%")
+      .attr("width", "200%")
+      .attr("height", "200%")
+      .append("feGaussianBlur")
+      .attr("stdDeviation", "4")
+      .attr("result", "blur");
+
+    defs
+      .select("#glow")
+      .append("feMerge")
+      .call((merge) => {
+        merge.append("feMergeNode").attr("in", "blur");
+        merge.append("feMergeNode").attr("in", "SourceGraphic");
+      });
+
     /* -- data ------------------------------------------------------- */
     const nodes: SimNode[] = graph.nodes
       .filter((n) => !hiddenTypes.has(n.type ?? ""))
@@ -390,11 +410,23 @@ export default function Canvas({
     svg.selectAll<SVGGElement, SimNode>("g.nodes g").each(function (d) {
       const circle = d3.select(this).select("circle");
       if (selectedNodeId === d.id) {
-        circle.attr("stroke", "#ffffff").attr("stroke-width", 3).attr("stroke-dasharray", "none");
+        circle
+          .attr("stroke", "#ffffff")
+          .attr("stroke-width", 3)
+          .attr("stroke-dasharray", "none")
+          .attr("filter", "url(#glow)");
       } else if (violatedNodeIds.has(d.id)) {
-        circle.attr("stroke", "#ff6464").attr("stroke-width", 2).attr("stroke-dasharray", "6 3");
+        circle
+          .attr("stroke", "#ff6464")
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "6 3")
+          .attr("filter", "none");
       } else {
-        circle.attr("stroke", hexToRgba(nodeColor(d.type), 0.6)).attr("stroke-width", 2).attr("stroke-dasharray", "none");
+        circle
+          .attr("stroke", hexToRgba(nodeColor(d.type), 0.6))
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "none")
+          .attr("filter", "none");
       }
     });
 
