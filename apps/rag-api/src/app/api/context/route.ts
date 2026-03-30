@@ -13,7 +13,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const graph = await loadGraph(graphFile);
+  let graph;
+  try {
+    graph = await loadGraph(graphFile);
+  } catch {
+    return NextResponse.json(
+      { error: `Graph file not found: ${graphFile}` },
+      { status: 404 }
+    );
+  }
+
   const result = runPipeline(graph, question, options);
 
   return NextResponse.json({

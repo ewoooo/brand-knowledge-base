@@ -10,7 +10,11 @@ export async function loadGraph(filename: string): Promise<KnowledgeGraph> {
     ? filename
     : `${filename}.kg.json`;
 
-  const filepath = path.join(DATA_DIR, safeName);
+  const filepath = path.resolve(DATA_DIR, safeName);
+  if (!filepath.startsWith(path.resolve(DATA_DIR))) {
+    throw new Error("Invalid graph file path");
+  }
+
   const content = await fs.readFile(filepath, "utf-8");
   return fromJSON(content);
 }

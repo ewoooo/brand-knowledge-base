@@ -1,3 +1,4 @@
+import { anthropic } from "@ai-sdk/anthropic";
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { runPipeline } from "@knowledgeview/graph-rag";
 import { loadGraph } from "@/lib/graph-loader";
@@ -23,17 +24,26 @@ export async function POST(req: Request) {
     );
   }
 
-  const graph = await loadGraph(graphFile);
+  let graph;
+  try {
+    graph = await loadGraph(graphFile);
+  } catch {
+    return new Response(
+      JSON.stringify({ error: `Graph file not found: ${graphFile}` }),
+      { status: 404, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const { context } = runPipeline(graph, question, options);
 
-  const model = options?.model ?? "anthropic/claude-sonnet-4.6";
+  const modelId = options?.model ?? "claude-sonnet-4.6";
 
   const chatMessages = messages
     ? await convertToModelMessages(messages)
     : [{ role: "user" as const, content: question }];
 
   const result = streamText({
-    model,
+    model: anthropic(modelId),
     system: `${SYSTEM_PROMPT}\n\n${context}`,
     messages: chatMessages,
   });
