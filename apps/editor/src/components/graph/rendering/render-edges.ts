@@ -45,7 +45,6 @@ export function renderEdges(
         .append("text")
         .text((d) => d.predicate)
         .attr("fill", "rgba(255,255,255,0.85)")
-        .attr("font-size", 11)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "central");
 

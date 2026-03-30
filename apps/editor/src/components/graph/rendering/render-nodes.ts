@@ -90,6 +90,7 @@ export function renderNodes(
     // 타입 약어 (원 내부)
     nodeGs
         .append("text")
+        .attr("class", "node-icon")
         .text((d) => {
             if (d.type === "brand") return "B";
             if (d.type === "color") return "●";
@@ -99,15 +100,14 @@ export function renderNodes(
         .attr("fill", "rgba(255,255,255,0.7)")
         .attr("font-size", (d) => (d.type === "brand" ? 14 : 12))
         .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "central")
-        .attr("pointer-events", "none");
+        .attr("dominant-baseline", "central");
 
     // 라벨 (원 아래)
     nodeGs
         .append("text")
+        .attr("class", "node-label")
         .text((d) => d.label)
         .attr("fill", "rgba(255,255,255,0.9)")
-        .attr("font-size", 11)
         .attr("text-anchor", "middle")
         .attr("dy", (d) => nodeSize(d.type) + 14)
         .attr("pointer-events", "none");

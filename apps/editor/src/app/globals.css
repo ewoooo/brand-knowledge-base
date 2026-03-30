@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./styles/typography.css";
+@import "./styles/canvas.css";
 @import "./styles/overrides.css";
 @import "./styles/chat.css";
 
@@ -127,16 +129,4 @@
     body {
         @apply bg-background text-foreground;
     }
-}
-
-/* Geist font — outside @layer to override Tailwind's font-sans */
-body {
-    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-}
-code,
-pre,
-kbd,
-samp {
-    font-family:
-        var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
