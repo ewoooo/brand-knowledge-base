@@ -634,12 +634,15 @@ export default function Canvas({
 
         // Search highlight mode (highest priority)
         if (highlightedNodeIds) {
-            // Dim non-matching nodes
+            // Dim non-matching nodes with fade animation
             svg.selectAll<SVGGElement, SimNode>("g.nodes g").each(function (d) {
-                d3.select(this).attr(
-                    "opacity",
-                    highlightedNodeIds.has(d.id) ? 1 : 0.15,
-                );
+                d3.select(this)
+                    .transition()
+                    .duration(300)
+                    .attr(
+                        "opacity",
+                        highlightedNodeIds.has(d.id) ? 1 : 0.15,
+                    );
             });
 
             // Dim edges where both endpoints are not matched
@@ -656,7 +659,10 @@ export default function Canvas({
                     const connected =
                         highlightedNodeIds.has(sourceId as string) &&
                         highlightedNodeIds.has(targetId as string);
-                    d3.select(this).attr("opacity", connected ? 1 : 0.05);
+                    d3.select(this)
+                        .transition()
+                        .duration(300)
+                        .attr("opacity", connected ? 1 : 0.05);
                 },
             );
 
@@ -674,7 +680,10 @@ export default function Canvas({
                     const connected =
                         highlightedNodeIds.has(sourceId as string) &&
                         highlightedNodeIds.has(targetId as string);
-                    d3.select(this).attr("opacity", connected ? 1 : 0.05);
+                    d3.select(this)
+                        .transition()
+                        .duration(300)
+                        .attr("opacity", connected ? 1 : 0.05);
                 },
             );
         // Focus mode (lower priority)
@@ -743,16 +752,19 @@ export default function Canvas({
                 },
             );
         } else {
-            // Reset all opacities
-            svg.selectAll<SVGGElement, SimNode>("g.nodes g").attr("opacity", 1);
-            svg.selectAll<SVGLineElement, SimLink>("g.links line").attr(
-                "opacity",
-                1,
-            );
-            svg.selectAll<SVGGElement, SimLink>("g.link-label").attr(
-                "opacity",
-                1,
-            );
+            // Reset all opacities with fade animation
+            svg.selectAll<SVGGElement, SimNode>("g.nodes g")
+                .transition()
+                .duration(300)
+                .attr("opacity", 1);
+            svg.selectAll<SVGLineElement, SimLink>("g.links line")
+                .transition()
+                .duration(300)
+                .attr("opacity", 1);
+            svg.selectAll<SVGGElement, SimLink>("g.link-label")
+                .transition()
+                .duration(300)
+                .attr("opacity", 1);
         }
     }, [
         selectedNodeId,
