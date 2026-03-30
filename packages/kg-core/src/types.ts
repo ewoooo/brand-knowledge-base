@@ -31,6 +31,7 @@ export interface KnowledgeGraph {
         name: string;
         created: string;
         updated: string;
+        systemPrompt?: string;
     };
     nodes: Node[];
     triples: Triple[];

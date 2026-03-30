@@ -29,6 +29,11 @@ describe("createEmptyGraph", () => {
     expect(graph.triples).toEqual([]);
     expect(graph.rules).toEqual([]);
   });
+
+  it("should not include systemPrompt by default", () => {
+    const graph = createEmptyGraph("테스트");
+    expect(graph.metadata.systemPrompt).toBeUndefined();
+  });
 });
 
 describe("addNode", () => {

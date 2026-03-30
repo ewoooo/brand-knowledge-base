@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { serializeGraphForPrompt } from "../serializer";
+import { serializeGraphForPrompt, fromJSON, toJSON } from "../serializer";
 import type { KnowledgeGraph } from "../types";
 
 describe("serializeGraphForPrompt", () => {
@@ -77,5 +77,35 @@ describe("serializeGraphForPrompt", () => {
         const result = serializeGraphForPrompt(graph);
         expect(result).toContain("미분류 항목");
         expect(result).not.toContain("undefined");
+    });
+});
+
+describe("fromJSON", () => {
+    it("should preserve systemPrompt in metadata", () => {
+        const graph: KnowledgeGraph = {
+            metadata: {
+                name: "프롬프트 테스트",
+                created: "2026-01-01",
+                updated: "2026-01-01",
+                systemPrompt: "당신은 색상 전문가입니다.",
+            },
+            nodes: [],
+            triples: [],
+            rules: [],
+        };
+        const json = toJSON(graph);
+        const restored = fromJSON(json);
+        expect(restored.metadata.systemPrompt).toBe("당신은 색상 전문가입니다.");
+    });
+
+    it("should handle missing systemPrompt gracefully", () => {
+        const json = JSON.stringify({
+            metadata: { name: "테스트", created: "2026-01-01", updated: "2026-01-01" },
+            nodes: [],
+            triples: [],
+            rules: [],
+        });
+        const restored = fromJSON(json);
+        expect(restored.metadata.systemPrompt).toBeUndefined();
     });
 });

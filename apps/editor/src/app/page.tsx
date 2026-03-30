@@ -30,6 +30,7 @@ export default function Home() {
         removeTriple,
         updateTriple,
         addRule,
+        updateSystemPrompt,
     } = useGraph(null);
 
     const { selection, selectNode, selectEdge, clearSelection } =
@@ -341,6 +342,7 @@ export default function Home() {
                     selectNode(nodeId);
                     handleFocusNode(nodeId);
                 }}
+                onUpdateSystemPrompt={updateSystemPrompt}
             />
 
             {/* Context menu */}

@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: anthropic(modelId),
-    system: buildSystemMessage(context),
+    system: buildSystemMessage(context, graph.metadata.systemPrompt),
     messages: chatMessages,
   });
 

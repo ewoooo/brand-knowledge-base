@@ -12,7 +12,12 @@ export function fromJSON(json: string): KnowledgeGraph {
     }
 
     return {
-        metadata: parsed.metadata,
+        metadata: {
+            ...parsed.metadata,
+            ...(parsed.metadata.systemPrompt !== undefined && {
+                systemPrompt: parsed.metadata.systemPrompt,
+            }),
+        },
         nodes: parsed.nodes,
         triples: parsed.triples,
         rules: parsed.rules ?? [],

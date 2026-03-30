@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
         const result = streamText({
             model: anthropic("claude-sonnet-4.6"),
-            system: buildSystemMessage(graphContext),
+            system: buildSystemMessage(graphContext, graph.metadata.systemPrompt),
             messages: await convertToModelMessages(messages),
         });
 

@@ -67,5 +67,14 @@ export function useGraph(initial: KnowledgeGraph | null) {
         addRule: (rule: Omit<Rule, "id">) =>
             modify((g) => addRule(g, { ...rule, id: generateId() })),
         removeRule: (id: string) => modify((g) => removeRule(g, id)),
+        updateSystemPrompt: (prompt: string) =>
+            modify((g) => ({
+                ...g,
+                metadata: {
+                    ...g.metadata,
+                    updated: new Date().toISOString().split("T")[0],
+                    systemPrompt: prompt || undefined,
+                },
+            })),
     };
 }

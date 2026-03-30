@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import type { KnowledgeGraph, Node } from "@knowledgeview/kg-core";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Settings2, ChevronDown } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -15,6 +15,7 @@ interface ChatPanelProps {
     graph: KnowledgeGraph;
     chatId: string;
     onFocusNode: (nodeId: string) => void;
+    onUpdateSystemPrompt?: (prompt: string) => void;
 }
 
 /**
@@ -87,8 +88,10 @@ function processChildren(
     return children;
 }
 
-export function ChatPanel({ graph, chatId, onFocusNode }: ChatPanelProps) {
+export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: ChatPanelProps) {
     const [input, setInput] = useState("");
+    const [showPromptEditor, setShowPromptEditor] = useState(false);
+    const [promptDraft, setPromptDraft] = useState(graph.metadata.systemPrompt ?? "");
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const { messages, sendMessage, status } = useChat({
@@ -150,6 +153,62 @@ export function ChatPanel({ graph, chatId, onFocusNode }: ChatPanelProps) {
 
     return (
         <div className="flex h-full flex-col">
+            {/* System Prompt Editor */}
+            {onUpdateSystemPrompt && (
+                <div className="border-b">
+                    <button
+                        type="button"
+                        onClick={() => setShowPromptEditor((v) => !v)}
+                        className="text-muted-foreground hover:text-foreground flex w-full items-center gap-1.5 px-3 py-2 text-[11px] transition-colors"
+                    >
+                        <Settings2 className="h-3 w-3" />
+                        <span>시스템 프롬프트</span>
+                        {graph.metadata.systemPrompt && (
+                            <span className="bg-primary/10 text-primary rounded px-1 text-[10px]">
+                                커스텀
+                            </span>
+                        )}
+                        <ChevronDown
+                            className={`ml-auto h-3 w-3 transition-transform ${showPromptEditor ? "rotate-180" : ""}`}
+                        />
+                    </button>
+                    {showPromptEditor && (
+                        <div className="space-y-1.5 px-3 pb-3">
+                            <Textarea
+                                value={promptDraft}
+                                onChange={(e) => setPromptDraft(e.target.value)}
+                                placeholder="기본 프롬프트를 사용합니다. 커스텀 프롬프트를 입력하면 기본 프롬프트를 대체합니다."
+                                className="max-h-[120px] min-h-[60px] resize-none text-[11px]"
+                                rows={3}
+                            />
+                            <div className="flex justify-end gap-1">
+                                {promptDraft && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 text-[10px]"
+                                        onClick={() => {
+                                            setPromptDraft("");
+                                            onUpdateSystemPrompt("");
+                                        }}
+                                    >
+                                        초기화
+                                    </Button>
+                                )}
+                                <Button
+                                    size="sm"
+                                    className="h-6 text-[10px]"
+                                    onClick={() => onUpdateSystemPrompt(promptDraft)}
+                                    disabled={promptDraft === (graph.metadata.systemPrompt ?? "")}
+                                >
+                                    적용
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Messages */}
             <ScrollArea ref={scrollAreaRef} className="flex-1">
                 <div className="space-y-3 p-3">
