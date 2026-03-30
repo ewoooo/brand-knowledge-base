@@ -3,10 +3,12 @@ import {
   createEmptyGraph,
   addNode,
   removeNode,
+  updateNode,
   addTriple,
   removeTriple,
+  addRule,
 } from "../operations";
-import type { Node, Triple } from "../types";
+import type { Node, Triple, Rule } from "../types";
 
 const makeNode = (id: string, label: string, type?: string): Node => ({
   id,
@@ -80,6 +82,34 @@ describe("addTriple", () => {
     expect(() =>
       addTriple(graph, makeTriple("t1", "n1", "관계", "missing"))
     ).toThrow("Object node");
+  });
+});
+
+describe("type normalization", () => {
+  it("addNode는 PascalCase type을 kebab-case로 정규화", () => {
+    const graph = createEmptyGraph("테스트");
+    const result = addNode(graph, makeNode("n1", "브랜드", "BrandName"));
+    expect(result.nodes[0].type).toBe("brand-name");
+  });
+
+  it("updateNode는 type 변경 시 정규화", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = addNode(graph, makeNode("n1", "일러스트", "brand"));
+    const result = updateNode(graph, "n1", { type: "AIIllustration" });
+    expect(result.nodes[0].type).toBe("ai-illustration");
+  });
+
+  it("addRule은 condition.nodeType을 정규화", () => {
+    const graph = createEmptyGraph("테스트");
+    const rule: Rule = {
+      id: "r1",
+      name: "테스트 규칙",
+      expression: "∀x (Brand(x) → ∃y has(x,y))",
+      type: "constraint",
+      condition: { nodeType: "CoreValue", predicate: "설명", operator: "must_have" },
+    };
+    const result = addRule(graph, rule);
+    expect(result.rules[0].condition.nodeType).toBe("core-value");
   });
 });
 

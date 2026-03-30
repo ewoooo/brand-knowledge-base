@@ -84,6 +84,7 @@ npx tsx scripts/convert-worxphere.ts
 
 - **`data/` 디렉토리는 프로젝트 루트에 위치** — API route에서 `process.cwd() + "data"`로 런타임 읽기/쓰기를 수행하므로 `src/`로 옮기면 안 됨
 - **kg-core는 순수 함수** — 모든 operation은 불변(immutable)하게 새 그래프를 반환하며 metadata.updated를 자동 갱신
+- **Node type은 반드시 kebab-case** — `normalizeType()`이 `addNode`/`updateNode`/`addRule` 시 자동 정규화 (예: `BrandName` → `brand-name`). 데이터 파일, canvas 색상 매핑, validator 모두 kebab-case 기준으로 동작
 - **Rule 시스템** — `type`("constraint" | "inference" | "validation")과 `condition`(nodeType, predicate, operator)을 함께 사용. `inference`는 시스템 자동 추론용이므로 사용자 UI에 노출 불필요
 - **RAG 파이프라인** — keyword 기반 엔티티 추출 → BFS 서브그래프 순회 → 한국어 마크다운 컨텍스트 생성
 

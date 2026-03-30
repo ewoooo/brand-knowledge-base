@@ -21,6 +21,8 @@ export {
 
 export { validate } from "./validator";
 
+export { normalizeType } from "./normalize-type";
+
 export {
   toJSON,
   fromJSON,

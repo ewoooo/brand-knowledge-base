@@ -223,3 +223,26 @@ samp {
 .dark .chat-markdown hr {
     border-color: oklch(1 0 0 / 10%);
 }
+.chat-markdown table {
+    width: 100%;
+    margin: 0.4em 0;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+.chat-markdown th,
+.chat-markdown td {
+    padding: 0.25em 0.5em;
+    border: 1px solid oklch(0 0 0 / 12%);
+    text-align: left;
+}
+.chat-markdown th {
+    font-weight: 600;
+    background: oklch(0 0 0 / 4%);
+}
+.dark .chat-markdown th,
+.dark .chat-markdown td {
+    border-color: oklch(1 0 0 / 12%);
+}
+.dark .chat-markdown th {
+    background: oklch(1 0 0 / 6%);
+}
