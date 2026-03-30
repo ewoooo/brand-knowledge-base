@@ -79,8 +79,33 @@ export function DetailPanel({
       <ScrollArea className="flex-1">
         {/* Empty state */}
         {!selectedNode && !selectedTriple && (
-          <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
-            노드를 클릭하면 상세 정보가 표시됩니다
+          <div className="flex h-full flex-col items-center justify-center gap-6 p-6 text-center">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground/80">시작하기</p>
+              <p className="text-xs text-muted-foreground">노드를 클릭하면 상세 정보가 여기에 표시됩니다</p>
+            </div>
+            <div className="w-full space-y-2 text-left">
+              <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">캔버스 더블클릭</span>
+                <span className="ml-2 text-foreground/70">새 노드 추가</span>
+              </div>
+              <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">노드 클릭</span>
+                <span className="ml-2 text-foreground/70">정보 보기 · 편집</span>
+              </div>
+              <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">엣지 클릭</span>
+                <span className="ml-2 text-foreground/70">트리플 편집 · 삭제</span>
+              </div>
+              <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">노드 드래그</span>
+                <span className="ml-2 text-foreground/70">위치 이동</span>
+              </div>
+              <div className="rounded-md border border-border/50 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">스크롤</span>
+                <span className="ml-2 text-foreground/70">줌 인/아웃</span>
+              </div>
+            </div>
           </div>
         )}
 
@@ -123,24 +148,42 @@ export function DetailPanel({
                     return (
                       <div
                         key={t.id}
-                        className={`rounded-md border px-3 py-2 text-xs ${
+                        className={`group rounded-md border px-3 py-2 text-xs ${
                           isViolating
                             ? "border-red-500 bg-red-500/5"
                             : "border-border bg-muted/30"
                         }`}
                       >
-                        {isViolating && (
-                          <span className="mr-1 text-red-500">⚠</span>
-                        )}
-                        <span className="font-medium">
-                          {nodeLabelById(t.subject)}
-                        </span>
-                        <span className="mx-1 text-muted-foreground">
-                          →{t.predicate}→
-                        </span>
-                        <span className="font-medium">
-                          {nodeLabelById(t.object)}
-                        </span>
+                        <div className="flex items-start justify-between gap-1">
+                          <div className="min-w-0 flex-1">
+                            {isViolating && (
+                              <span className="mr-1 text-red-500">⚠</span>
+                            )}
+                            <span className="font-medium">
+                              {nodeLabelById(t.subject)}
+                            </span>
+                            <span className="mx-1 text-muted-foreground">
+                              →{t.predicate}→
+                            </span>
+                            <span className="font-medium">
+                              {nodeLabelById(t.object)}
+                            </span>
+                          </div>
+                          <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button
+                              onClick={() => onEditTriple(t.id)}
+                              className="rounded px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            >
+                              편집
+                            </button>
+                            <button
+                              onClick={() => onDeleteTriple(t.id)}
+                              className="rounded px-1.5 py-0.5 text-[10px] text-red-400 hover:bg-red-500/10"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
