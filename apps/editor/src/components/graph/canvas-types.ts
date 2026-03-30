@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import type * as d3 from "d3";
 import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 
@@ -42,12 +43,12 @@ export interface CanvasProps {
 /* ------------------------------------------------------------------ */
 
 export interface CallbackRefs {
-    onSelectNode: React.RefObject<(id: string) => void>;
-    onSelectEdge: React.RefObject<(id: string) => void>;
-    onClearSelection: React.RefObject<() => void>;
-    onDoubleClickCanvas: React.RefObject<() => void>;
-    onFocusNode: React.RefObject<(nodeId: string | null) => void>;
-    onContextMenu: React.RefObject<(nodeId: string, position: { x: number; y: number }) => void>;
+    onSelectNode: RefObject<(id: string) => void>;
+    onSelectEdge: RefObject<(id: string) => void>;
+    onClearSelection: RefObject<() => void>;
+    onDoubleClickCanvas: RefObject<() => void>;
+    onFocusNode: RefObject<(nodeId: string | null) => void>;
+    onContextMenu: RefObject<(nodeId: string, position: { x: number; y: number }) => void>;
 }
 
 /* ------------------------------------------------------------------ */

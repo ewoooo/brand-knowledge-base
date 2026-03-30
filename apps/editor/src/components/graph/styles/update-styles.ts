@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import * as d3 from "d3";
 import type { SimNode, SimLink } from "../canvas-types";
 import { nodeColor, hexToRgba } from "../canvas-types";
@@ -10,8 +11,8 @@ interface UpdateStylesParams {
     violatedTripleIds: Set<string>;
     focusedNodeId: string | null;
     highlightedNodeIds: Set<string> | null;
-    zoomRef: React.RefObject<d3.ZoomBehavior<SVGSVGElement, unknown> | null>;
-    simulationRef: React.RefObject<d3.Simulation<SimNode, SimLink> | null>;
+    zoomRef: RefObject<d3.ZoomBehavior<SVGSVGElement, unknown> | null>;
+    simulationRef: RefObject<d3.Simulation<SimNode, SimLink> | null>;
     svgEl: SVGSVGElement;
 }
 
@@ -144,8 +145,8 @@ function applySearchHighlight(
 function applyFocusMode(
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
     focusedNodeId: string,
-    zoomRef: React.RefObject<d3.ZoomBehavior<SVGSVGElement, unknown> | null>,
-    simulationRef: React.RefObject<d3.Simulation<SimNode, SimLink> | null>,
+    zoomRef: RefObject<d3.ZoomBehavior<SVGSVGElement, unknown> | null>,
+    simulationRef: RefObject<d3.Simulation<SimNode, SimLink> | null>,
     svgEl: SVGSVGElement,
 ) {
     // 포커스 노드로 줌

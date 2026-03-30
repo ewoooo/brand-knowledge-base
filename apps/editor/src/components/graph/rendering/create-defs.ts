@@ -6,6 +6,25 @@ import type * as d3 from "d3";
 export function createDefs(svg: d3.Selection<SVGSVGElement, unknown, null, undefined>) {
     const defs = svg.append("defs");
 
+    // ─── 화살표 마커 설정 ─────────────────────────────────
+    //
+    // viewBox: 마커 내부 좌표계. "0 0 12 8" → 가로 12, 세로 8
+    //
+    // refX, refY: 마커의 어느 지점이 선 끝점(line endpoint)에 붙는가
+    //   - 선 끝점은 tick 핸들러에서 원 둘레로 계산됨
+    //   - refX=12 → 화살표 TIP이 선 끝점에 위치 (원 둘레에 tip이 닿음)
+    //   - refX=6  → 화살표 중간이 선 끝점에 위치
+    //   - refX=0  → 화살표 꼬리가 선 끝점에 위치 (tip이 원 안으로 들어감)
+    //
+    // markerWidth, markerHeight: 화면에 그려지는 마커의 실제 크기 (px)
+    // orient="auto": 선 방향에 맞춰 자동 회전
+    //
+    // path "M0,0 L12,4 L0,8 L3,4 Z":
+    //   (0,0)───→(12,4)  ← tip (뾰족한 끝)
+    //     ↑         ↓
+    //   (0,8)←──(3,4)   ← 안쪽 움푹
+    //
+
     // 화살표 마커 — 일반
     defs.append("marker")
         .attr("id", "arrow-normal")
