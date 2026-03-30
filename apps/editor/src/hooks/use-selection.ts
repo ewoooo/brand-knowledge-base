@@ -3,29 +3,29 @@
 import { useState, useCallback } from "react";
 
 interface Selection {
-  type: "node" | "edge";
-  id: string;
+    type: "node" | "edge";
+    id: string;
 }
 
 export function useSelection() {
-  const [selection, setSelection] = useState<Selection | null>(null);
+    const [selection, setSelection] = useState<Selection | null>(null);
 
-  const selectNode = useCallback((id: string) => {
-    setSelection({ type: "node", id });
-  }, []);
+    const selectNode = useCallback((id: string) => {
+        setSelection({ type: "node", id });
+    }, []);
 
-  const selectEdge = useCallback((id: string) => {
-    setSelection({ type: "edge", id });
-  }, []);
+    const selectEdge = useCallback((id: string) => {
+        setSelection({ type: "edge", id });
+    }, []);
 
-  const clearSelection = useCallback(() => {
-    setSelection(null);
-  }, []);
+    const clearSelection = useCallback(() => {
+        setSelection(null);
+    }, []);
 
-  return {
-    selection,
-    selectNode,
-    selectEdge,
-    clearSelection,
-  };
+    return {
+        selection,
+        selectNode,
+        selectEdge,
+        clearSelection,
+    };
 }

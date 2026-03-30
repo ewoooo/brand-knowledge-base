@@ -95,22 +95,29 @@ editor (kg-core + React/D3)
 질문에서 그래프 탐색의 시작점이 될 엔티티를 찾는다.
 
 **키워드 모드 (기본)**:
+
 - 질문 텍스트를 토큰화
 - 각 토큰을 그래프 노드 label과 매칭 (완전 일치 + 부분 매칭)
 - predicate 키워드도 매칭하여 힌트로 저장
 
 **LLM 모드 (폴백)**:
+
 - 키워드 모드에서 매칭 0개일 때 자동 전환
 - AI SDK `generateText()` + `Output.object()`로 구조화된 엔티티 추출
 - 노드 목록을 프롬프트에 포함하여 정확도 향상
 
 **출력 타입**:
+
 ```typescript
 interface ExtractionResult {
-  entities: { nodeId: string; label: string; matchType: "exact" | "partial" | "semantic" }[];
-  predicateHints: string[];
-  typeHints: string[];
-  mode: "keyword" | "llm";
+    entities: {
+        nodeId: string;
+        label: string;
+        matchType: "exact" | "partial" | "semantic";
+    }[];
+    predicateHints: string[];
+    typeHints: string[];
+    mode: "keyword" | "llm";
 }
 ```
 
@@ -119,6 +126,7 @@ interface ExtractionResult {
 추출된 엔티티에서 BFS로 관련 서브그래프를 수집한다.
 
 **알고리즘**: BFS (너비 우선 탐색)
+
 - 양방향 탐색 (subject→object, object→subject)
 - predicateHint 매칭 트리플 우선 포함
 - 최대 노드 수 제한 (기본 50개)
@@ -131,15 +139,16 @@ interface ExtractionResult {
 | 추천/추론 | 3 | 넓은 컨텍스트 필요 |
 
 **출력 타입**:
+
 ```typescript
 interface SubGraph {
-  nodes: Node[];
-  triples: Triple[];
-  metadata: {
-    startNodes: string[];
-    depth: number;
-    totalHops: number;
-  };
+    nodes: Node[];
+    triples: Triple[];
+    metadata: {
+        startNodes: string[];
+        depth: number;
+        totalHops: number;
+    };
 }
 ```
 
@@ -148,6 +157,7 @@ interface SubGraph {
 서브그래프를 LLM이 이해할 수 있는 자연어 텍스트로 변환한다.
 
 **변환 단계**:
+
 1. 트리플 → 한국어 자연어 문장 ("[subject]는 [predicate]로 [object]를 가진다")
 2. 노드 type 메타데이터 포함
 3. kg-core validator로 규칙 검증, 위반 시 주의사항 추가
@@ -159,14 +169,14 @@ interface SubGraph {
 
 ```typescript
 async function buildContext(
-  graph: KnowledgeGraph,
-  question: string,
-  options?: { depth?: number; extractorMode?: "keyword" | "llm" }
+    graph: KnowledgeGraph,
+    question: string,
+    options?: { depth?: number; extractorMode?: "keyword" | "llm" },
 ): Promise<{
-  context: string;
-  subgraph: SubGraph;
-  extraction: ExtractionResult;
-}>
+    context: string;
+    subgraph: SubGraph;
+    extraction: ExtractionResult;
+}>;
 ```
 
 하나의 함수로 extractor → traverser → context-builder를 순차 실행.
@@ -193,6 +203,7 @@ async function buildContext(
 ```
 
 시스템 프롬프트:
+
 - 브랜드 온톨로지 전문가 역할 부여
 - context-builder 출력을 컨텍스트로 주입
 - 컨텍스트에 없는 정보는 추측하지 않도록 지시
@@ -220,12 +231,12 @@ AI 호출 없이 서브그래프와 자연어 컨텍스트만 반환. evaluator/
 
 ## 테스팅 전략
 
-| 패키지 | 테스트 종류 | 내용 |
-|--------|-----------|------|
-| `kg-core` | 단위 테스트 | types/operations/validator/serializer |
+| 패키지      | 테스트 종류 | 내용                                                |
+| ----------- | ----------- | --------------------------------------------------- |
+| `kg-core`   | 단위 테스트 | types/operations/validator/serializer               |
 | `graph-rag` | 단위 테스트 | extractor 매칭, traverser BFS, context-builder 변환 |
-| `graph-rag` | 통합 테스트 | 풀 파이프라인 (질문 → 컨텍스트) — LLM mock |
-| `rag-api` | API 테스트 | Route Handler 요청/응답 검증 |
+| `graph-rag` | 통합 테스트 | 풀 파이프라인 (질문 → 컨텍스트) — LLM mock          |
+| `rag-api`   | API 테스트  | Route Handler 요청/응답 검증                        |
 
 - `graph-rag` 단위 테스트는 LLM 없이 동작 (키워드 모드 + fixture 그래프)
 - LLM 모드 테스트는 AI SDK mock provider 사용

@@ -1,9 +1,5 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import {
-  streamText,
-  convertToModelMessages,
-  type UIMessage,
-} from "ai";
+import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { serializeGraphForPrompt } from "@knowledgeview/kg-core";
 import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 
@@ -13,18 +9,18 @@ const SYSTEM_PROMPT = `당신은 브랜드 디자인 시스템 지식 그래프 
 한국어로 답변합니다.`;
 
 export async function POST(req: Request) {
-  const {
-    messages,
-    graph,
-  }: { messages: UIMessage[]; graph: KnowledgeGraph } = await req.json();
+    const {
+        messages,
+        graph,
+    }: { messages: UIMessage[]; graph: KnowledgeGraph } = await req.json();
 
-  const graphContext = serializeGraphForPrompt(graph);
+    const graphContext = serializeGraphForPrompt(graph);
 
-  const result = streamText({
-    model: anthropic("claude-sonnet-4-6"),
-    system: `${SYSTEM_PROMPT}\n\n${graphContext}`,
-    messages: await convertToModelMessages(messages),
-  });
+    const result = streamText({
+        model: anthropic("claude-sonnet-4.6"),
+        system: `${SYSTEM_PROMPT}\n\n${graphContext}`,
+        messages: await convertToModelMessages(messages),
+    });
 
-  return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse();
 }
