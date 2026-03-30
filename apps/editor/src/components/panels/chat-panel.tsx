@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import type { KnowledgeGraph, Node } from "@knowledgeview/kg-core";
 import { Send, Loader2, Settings2, ChevronDown } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { extractMentionedNodeIds } from "@/lib/extract-mentioned-nodes";
 
 interface ChatPanelProps {
     graph: KnowledgeGraph;
@@ -115,6 +116,28 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
             viewport.scrollTop = viewport.scrollHeight;
         }
     }, [messages]);
+
+    // Auto-focus: 스트리밍 완료 후 마지막 assistant 메시지에서 첫 번째 언급 노드를 포커스
+    const prevStatusRef = useRef(status);
+    useEffect(() => {
+        const wasStreaming = prevStatusRef.current === "streaming";
+        prevStatusRef.current = status;
+
+        if (!wasStreaming || status !== "ready") return;
+
+        const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+        if (!lastAssistant) return;
+
+        const text = lastAssistant.parts
+            .filter((p): p is { type: "text"; text: string } => p.type === "text")
+            .map((p) => p.text)
+            .join(" ");
+
+        const mentionedIds = extractMentionedNodeIds(text, graph.nodes);
+        if (mentionedIds.length > 0) {
+            onFocusNode(mentionedIds[0]);
+        }
+    }, [status, messages, graph.nodes, onFocusNode]);
 
     // react-markdown 커스텀 컴포넌트: 텍스트 내 노드 라벨을 클릭 가능하게 변환
     const mdComponents = useMemo<Components>(

@@ -91,6 +91,7 @@ export default function Canvas({
 }: CanvasProps) {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const simulationRef = useRef<d3.Simulation<SimNode, SimLink> | null>(null);
+    const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
     // Store latest callbacks in refs so D3 event handlers always call the current version
     const onSelectNodeRef = useRef(onSelectNode);
     const onSelectEdgeRef = useRef(onSelectEdge);
@@ -233,6 +234,7 @@ export default function Canvas({
             });
 
         svg.call(zoom);
+        zoomRef.current = zoom;
 
         /* -- click background ------------------------------------------- */
         svg.on("click", (event) => {
@@ -688,6 +690,29 @@ export default function Canvas({
             );
         // Focus mode (lower priority)
         } else if (focusedNodeId) {
+            // Zoom to focused node
+            const zoom = zoomRef.current;
+            if (zoom) {
+                const focusedNode = simulationRef.current
+                    ?.nodes()
+                    .find((n) => n.id === focusedNodeId);
+                if (focusedNode && focusedNode.x != null && focusedNode.y != null) {
+                    const svgEl = svgRef.current!;
+                    const width = svgEl.clientWidth;
+                    const height = svgEl.clientHeight;
+                    const scale = 1.5;
+                    svg.transition()
+                        .duration(600)
+                        .call(
+                            zoom.transform,
+                            d3.zoomIdentity
+                                .translate(width / 2, height / 2)
+                                .scale(scale)
+                                .translate(-focusedNode.x, -focusedNode.y),
+                        );
+                }
+            }
+
             // Find neighbor node IDs
             const neighborIds = new Set<string>();
             neighborIds.add(focusedNodeId);
