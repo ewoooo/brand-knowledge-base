@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChatPanel } from "@/components/panels/chat-panel";
 import type {
   KnowledgeGraph,
   ValidationResult,
@@ -67,16 +69,17 @@ export function DetailPanel({
   };
 
   return (
-    <div className="flex h-full w-[260px] flex-col border-l">
-      <div className="p-4">
-        <span className="text-xs font-medium uppercase text-muted-foreground">
-          상세 정보
-        </span>
-      </div>
+    <div className="flex h-full w-[280px] flex-col border-l">
+      <Tabs defaultValue="properties" className="flex h-full flex-col">
+        <div className="border-b px-2 pt-2">
+          <TabsList className="w-full">
+            <TabsTrigger value="properties" className="flex-1 text-xs">속성</TabsTrigger>
+            <TabsTrigger value="chat" className="flex-1 text-xs">AI 채팅</TabsTrigger>
+          </TabsList>
+        </div>
 
-      <Separator />
-
-      <ScrollArea className="flex-1">
+        <TabsContent value="properties" className="mt-0 flex-1 overflow-hidden">
+      <ScrollArea className="h-full">
         {/* Empty state */}
         {!selectedNode && !selectedTriple && (
           <div className="flex h-full flex-col items-center justify-center gap-6 p-6 text-center">
@@ -261,6 +264,12 @@ export function DetailPanel({
           </div>
         )}
       </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="chat" className="mt-0 flex-1 overflow-hidden">
+          <ChatPanel graph={graph} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
