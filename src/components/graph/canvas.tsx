@@ -118,31 +118,53 @@ export default function Canvas({
     /* -- defs: arrow markers ---------------------------------------- */
     const defs = svg.append("defs");
 
+    // ─── 화살표 마커 설정 ─────────────────────────────────
+    //
+    // viewBox: 마커 내부 좌표계. "0 0 12 8" → 가로 12, 세로 8
+    //
+    // refX, refY: 마커의 어느 지점이 선 끝점(line endpoint)에 붙는가
+    //   - 선 끝점은 tick 핸들러에서 원 둘레로 계산됨 (아래 참고)
+    //   - refX=12 → 화살표 TIP이 선 끝점에 위치 (원 둘레에 tip이 닿음)
+    //   - refX=6  → 화살표 중간이 선 끝점에 위치
+    //   - refX=0  → 화살표 꼬리가 선 끝점에 위치 (tip이 원 안으로 들어감) ← 현재 문제
+    //
+    // markerWidth, markerHeight: 화면에 그려지는 마커의 실제 크기 (px)
+    //
+    // orient="auto": 선 방향에 맞춰 자동 회전
+    //
+    // path "M0,0 L12,4 L0,8 L3,4 Z":
+    //   (0,0)───→(12,4)  ← tip (뾰족한 끝)
+    //     ↑         ↓
+    //   (0,8)←──(3,4)   ← 안쪽 움푹
+    //
+    // 현재 refX=1 → tip(12,4)이 선 끝점에서 11만큼 앞으로 나감 → 원 안으로 침투
+    // 수정: refX=12 → tip이 정확히 선 끝점(원 둘레)에 위치
+    //
     defs
       .append("marker")
       .attr("id", "arrow-normal")
-      .attr("viewBox", "0 0 10 6")
-      .attr("refX", 10)
-      .attr("refY", 3)
-      .attr("markerWidth", 10)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
+      .attr("viewBox", "0 0 12 8")   // 마커 내부 좌표 공간
+      .attr("refX", 12)              // ← tip(12,4)이 선 끝점(원 둘레)에 붙음
+      .attr("refY", 4)               // 세로 중앙 (8/2 = 4)
+      .attr("markerWidth", 10)       // 화면 렌더링 가로 크기
+      .attr("markerHeight", 8)       // 화면 렌더링 세로 크기
+      .attr("orient", "auto")        // 선 방향에 맞춰 회전
       .append("path")
-      .attr("d", "M0,0 L10,3 L0,6")
-      .attr("fill", "rgba(255,255,255,0.2)");
+      .attr("d", "M0,0 L12,4 L0,8 L3,4 Z")  // 화살표 모양
+      .attr("fill", "rgba(255,255,255,0.35)");
 
     defs
       .append("marker")
       .attr("id", "arrow-violated")
-      .attr("viewBox", "0 0 10 6")
-      .attr("refX", 10)
-      .attr("refY", 3)
+      .attr("viewBox", "0 0 12 8")
+      .attr("refX", 12)              // ← 동일하게 tip이 선 끝점에
+      .attr("refY", 4)
       .attr("markerWidth", 10)
-      .attr("markerHeight", 6)
+      .attr("markerHeight", 8)
       .attr("orient", "auto")
       .append("path")
-      .attr("d", "M0,0 L10,3 L0,6")
-      .attr("fill", "rgba(255,100,100,0.5)");
+      .attr("d", "M0,0 L12,4 L0,8 L3,4 Z")
+      .attr("fill", "rgba(255,100,100,0.6)");
 
     // Glow filter for selected nodes
     defs
@@ -354,10 +376,42 @@ export default function Canvas({
       .on("tick", () => {
         linkGroup
           .selectAll<SVGLineElement, SimLink>("line")
-          .attr("x1", (d) => (d.source as SimNode).x ?? 0)
-          .attr("y1", (d) => (d.source as SimNode).y ?? 0)
-          .attr("x2", (d) => (d.target as SimNode).x ?? 0)
-          .attr("y2", (d) => (d.target as SimNode).y ?? 0);
+          .attr("x1", (d) => {
+            const s = d.source as SimNode;
+            const t = d.target as SimNode;
+            const dx = (t.x ?? 0) - (s.x ?? 0);
+            const dy = (t.y ?? 0) - (s.y ?? 0);
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const r = nodeSize(s.type);
+            return (s.x ?? 0) + (dx / dist) * r;
+          })
+          .attr("y1", (d) => {
+            const s = d.source as SimNode;
+            const t = d.target as SimNode;
+            const dx = (t.x ?? 0) - (s.x ?? 0);
+            const dy = (t.y ?? 0) - (s.y ?? 0);
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const r = nodeSize(s.type);
+            return (s.y ?? 0) + (dy / dist) * r;
+          })
+          .attr("x2", (d) => {
+            const s = d.source as SimNode;
+            const t = d.target as SimNode;
+            const dx = (s.x ?? 0) - (t.x ?? 0);
+            const dy = (s.y ?? 0) - (t.y ?? 0);
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const r = nodeSize(t.type);
+            return (t.x ?? 0) + (dx / dist) * r;
+          })
+          .attr("y2", (d) => {
+            const s = d.source as SimNode;
+            const t = d.target as SimNode;
+            const dx = (s.x ?? 0) - (t.x ?? 0);
+            const dy = (s.y ?? 0) - (t.y ?? 0);
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const r = nodeSize(t.type);
+            return (t.y ?? 0) + (dy / dist) * r;
+          });
 
         linkGroup
           .selectAll<SVGGElement, SimLink>("g.link-label")
@@ -417,6 +471,18 @@ export default function Canvas({
 
     const svg = d3.select(svgEl);
 
+    // Find edges connected to selected node
+    const selectedNodeEdgeIds = new Set<string>();
+    if (selectedNodeId) {
+      svg.selectAll<SVGLineElement, SimLink>("g.links line").each(function (d) {
+        const sourceId = typeof d.source === "object" ? (d.source as SimNode).id : d.source;
+        const targetId = typeof d.target === "object" ? (d.target as SimNode).id : d.target;
+        if (sourceId === selectedNodeId || targetId === selectedNodeId) {
+          selectedNodeEdgeIds.add(d.id);
+        }
+      });
+    }
+
     // Update node styles
     svg.selectAll<SVGGElement, SimNode>("g.nodes g").each(function (d) {
       const circle = d3.select(this).select("circle");
@@ -425,7 +491,7 @@ export default function Canvas({
           .attr("stroke", "#ffffff")
           .attr("stroke-width", 3)
           .attr("stroke-dasharray", "none")
-          .attr("filter", "url(#glow)");
+          .attr("filter", "none");
       } else if (violatedNodeIds.has(d.id)) {
         circle
           .attr("stroke", "#ff6464")
@@ -441,17 +507,35 @@ export default function Canvas({
       }
     });
 
-    // Update edge styles
+    // Update edge styles — glow on edges connected to selected node
     svg.selectAll<SVGLineElement, SimLink>("g.links line").each(function (d) {
       const line = d3.select(this);
       const isViolated = violatedTripleIds.has(d.id);
       const isSelected = selectedEdgeId === d.id;
+      const isConnectedToSelected = selectedNodeEdgeIds.has(d.id);
 
-      line
-        .attr("stroke", isViolated ? "rgba(255,100,100,0.5)" : "rgba(255,255,255,0.2)")
-        .attr("stroke-width", isSelected ? 3 : 1)
-        .attr("stroke-dasharray", isViolated ? "6 3" : "none")
-        .attr("marker-end", isViolated ? "url(#arrow-violated)" : "url(#arrow-normal)");
+      if (isViolated) {
+        line
+          .attr("stroke", "rgba(255,100,100,0.5)")
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "6 3")
+          .attr("marker-end", "url(#arrow-violated)")
+          .attr("filter", "none");
+      } else if (isConnectedToSelected || isSelected) {
+        line
+          .attr("stroke", "rgba(255,255,255,0.6)")
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "none")
+          .attr("marker-end", "url(#arrow-normal)")
+          .attr("filter", "url(#glow)");
+      } else {
+        line
+          .attr("stroke", "rgba(255,255,255,0.2)")
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "none")
+          .attr("marker-end", "url(#arrow-normal)")
+          .attr("filter", "none");
+      }
     });
 
     // Focus mode

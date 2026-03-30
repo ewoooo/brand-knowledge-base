@@ -8,6 +8,6 @@
 
 - 모든 신규 기능 개발 작업 전에 context7 MCP로 관련 라이브러리/프레임워크의 최신 문서를 확인할 것
 
-# Commit Rules
+# Git Rules
 
-@COMMIT_CONVENTION.md
+@GIT_CONVENTION.md
