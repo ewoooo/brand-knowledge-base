@@ -150,7 +150,12 @@ export function DetailPanel({
                     forceMount
                     className="mt-0 flex-1 overflow-hidden data-[state=inactive]:hidden"
                 >
-                    <ChatPanel graph={graph} chatId="detail-panel-chat" onFocusNode={onFocusNode} onUpdateSystemPrompt={onUpdateSystemPrompt} />
+                    <ChatPanel
+                        graph={graph}
+                        chatId="detail-panel-chat"
+                        onFocusNode={onFocusNode}
+                        onUpdateSystemPrompt={onUpdateSystemPrompt}
+                    />
                 </TabsContent>
             </Tabs>
         </div>

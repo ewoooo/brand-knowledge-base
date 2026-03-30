@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { TripleCard } from "@/components/panels/triple-card";
 import { Pencil, Trash2 } from "lucide-react";
-import type { KnowledgeGraph, Node, ValidationResult } from "@knowledgeview/kg-core";
+import type {
+    KnowledgeGraph,
+    Node,
+    ValidationResult,
+} from "@knowledgeview/kg-core";
 
 interface NodeInfoPanelProps {
     graph: KnowledgeGraph;
@@ -41,12 +45,8 @@ export function NodeInfoPanel({
         nodeViolations.map((v) => v.relatedTripleId).filter(Boolean),
     );
 
-    const outgoingTriples = graph.triples.filter(
-        (t) => t.subject === node.id,
-    );
-    const incomingTriples = graph.triples.filter(
-        (t) => t.object === node.id,
-    );
+    const outgoingTriples = graph.triples.filter((t) => t.subject === node.id);
+    const incomingTriples = graph.triples.filter((t) => t.object === node.id);
 
     const nodeLabelById = (id: string) => {
         const n = graph.nodes.find((nd) => nd.id === id);
@@ -81,9 +81,7 @@ export function NodeInfoPanel({
                         <Trash2 className="size-3.5" />
                     </Button>
                 </div>
-                {node.type && (
-                    <Badge variant="secondary">{node.type}</Badge>
-                )}
+                {node.type && <Badge variant="secondary">{node.type}</Badge>}
             </div>
 
             {/* Violation alerts */}

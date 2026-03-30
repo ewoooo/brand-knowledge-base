@@ -34,14 +34,18 @@ export function EdgeInfoPanel({
                         >
                             {nodeLabelById(triple.subject)}
                         </span>
-                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="text-muted-foreground shrink-0">
+                            →
+                        </span>
                         <span
                             className="text-primary max-w-full truncate font-medium"
                             title={triple.predicate}
                         >
                             {triple.predicate}
                         </span>
-                        <span className="text-muted-foreground shrink-0">→</span>
+                        <span className="text-muted-foreground shrink-0">
+                            →
+                        </span>
                         <span
                             className="max-w-full truncate font-medium"
                             title={nodeLabelById(triple.object)}

@@ -34,14 +34,10 @@ export function TripleCard({
             }`}
         >
             <div className="truncate pr-14" title={title}>
-                {isViolating && (
-                    <span className="mr-1 text-red-500">⚠</span>
-                )}
+                {isViolating && <span className="mr-1 text-red-500">⚠</span>}
                 {direction === "outgoing" ? (
                     <>
-                        <span className="text-primary">
-                            {triple.predicate}
-                        </span>
+                        <span className="text-primary">{triple.predicate}</span>
                         <span className="text-muted-foreground mx-1">→</span>
                         <button
                             type="button"
@@ -65,7 +61,7 @@ export function TripleCard({
                     </>
                 )}
             </div>
-            <div className="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="absolute right-2 top-1/2 flex -translate-y-1/2 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                     onClick={() => onEditTriple(triple.id)}
                     className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded px-1.5 py-0.5 text-[10px]"
