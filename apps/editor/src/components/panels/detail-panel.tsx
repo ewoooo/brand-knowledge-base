@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatPanel } from "@/components/panels/chat-panel";
+import { Pencil, Trash2 } from "lucide-react";
 import type { KnowledgeGraph, Triple, ValidationResult } from "@knowledgeview/kg-core";
 
 function TripleCard({
@@ -242,9 +243,27 @@ export function DetailPanel({
                             <div className="max-w-full space-y-4 overflow-hidden p-4">
                                 {/* Label and type */}
                                 <div className="space-y-1">
-                                    <p className="truncate text-base font-semibold" title={selectedNode.label}>
-                                        {selectedNode.label}
-                                    </p>
+                                    <div className="flex items-start gap-1">
+                                        <p className="min-w-0 flex-1 truncate text-base font-semibold" title={selectedNode.label}>
+                                            {selectedNode.label}
+                                        </p>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="size-7 shrink-0"
+                                            onClick={() => onEditNode(selectedNode.id)}
+                                        >
+                                            <Pencil className="size-3.5" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="size-7 shrink-0 text-red-400 hover:text-red-500"
+                                            onClick={() => onDeleteNode(selectedNode.id)}
+                                        >
+                                            <Trash2 className="size-3.5" />
+                                        </Button>
+                                    </div>
                                     {selectedNode.type && (
                                         <Badge variant="secondary">
                                             {selectedNode.type}
@@ -329,31 +348,6 @@ export function DetailPanel({
                                     )}
                                 </div>
 
-                                <Separator />
-
-                                {/* Edit / Delete buttons */}
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1"
-                                        onClick={() =>
-                                            onEditNode(selectedNode.id)
-                                        }
-                                    >
-                                        편집
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        className="flex-1"
-                                        onClick={() =>
-                                            onDeleteNode(selectedNode.id)
-                                        }
-                                    >
-                                        삭제
-                                    </Button>
-                                </div>
                             </div>
                         )}
 
