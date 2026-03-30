@@ -1,4 +1,5 @@
 import type { KnowledgeGraph } from "./types";
+import { normalizeType } from "./normalize-type";
 
 export function toJSON(graph: KnowledgeGraph): string {
     return JSON.stringify(graph, null, 2);
@@ -18,9 +19,15 @@ export function fromJSON(json: string): KnowledgeGraph {
                 systemPrompt: parsed.metadata.systemPrompt,
             }),
         },
-        nodes: parsed.nodes,
+        nodes: parsed.nodes.map((n: { type?: string }) => (
+            n.type ? { ...n, type: normalizeType(n.type) } : n
+        )),
         triples: parsed.triples,
-        rules: parsed.rules ?? [],
+        rules: (parsed.rules ?? []).map((r: { condition?: { nodeType?: string } }) => (
+            r.condition?.nodeType
+                ? { ...r, condition: { ...r.condition, nodeType: normalizeType(r.condition.nodeType) } }
+                : r
+        )),
     };
 }
 
