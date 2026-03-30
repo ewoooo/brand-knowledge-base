@@ -1,95 +1,11 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatPanel } from "@/components/panels/chat-panel";
-import { Pencil, Trash2 } from "lucide-react";
-import type { KnowledgeGraph, Triple, ValidationResult } from "@knowledgeview/kg-core";
-
-function TripleCard({
-    triple,
-    direction,
-    isViolating,
-    nodeLabelById,
-    onFocusNode,
-    onEditTriple,
-    onDeleteTriple,
-}: {
-    triple: Triple;
-    direction: "outgoing" | "incoming";
-    isViolating: boolean;
-    nodeLabelById: (id: string) => string;
-    onFocusNode: (nodeId: string) => void;
-    onEditTriple: (tripleId: string) => void;
-    onDeleteTriple: (tripleId: string) => void;
-}) {
-    const targetId = direction === "outgoing" ? triple.object : triple.subject;
-    const title =
-        direction === "outgoing"
-            ? `${triple.predicate} → ${nodeLabelById(triple.object)}`
-            : `${nodeLabelById(triple.subject)} → ${triple.predicate}`;
-
-    return (
-        <div
-            className={`group overflow-hidden rounded-md border px-3 py-2 text-xs ${
-                isViolating
-                    ? "border-red-500 bg-red-500/5"
-                    : "border-border bg-muted/30"
-            }`}
-        >
-            <div className="truncate" title={title}>
-                {isViolating && (
-                    <span className="mr-1 text-red-500">⚠</span>
-                )}
-                {direction === "outgoing" ? (
-                    <>
-                        <span className="text-primary">
-                            {triple.predicate}
-                        </span>
-                        <span className="text-muted-foreground mx-1">→</span>
-                        <button
-                            type="button"
-                            onClick={() => onFocusNode(targetId)}
-                            className="font-medium underline-offset-2 hover:underline"
-                        >
-                            {nodeLabelById(targetId)}
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <button
-                            type="button"
-                            onClick={() => onFocusNode(targetId)}
-                            className="font-medium underline-offset-2 hover:underline"
-                        >
-                            {nodeLabelById(targetId)}
-                        </button>
-                        <span className="text-muted-foreground mx-1">→</span>
-                        <span className="text-primary">{triple.predicate}</span>
-                    </>
-                )}
-            </div>
-            <div className="mt-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <button
-                    onClick={() => onEditTriple(triple.id)}
-                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded px-1.5 py-0.5 text-[10px]"
-                >
-                    편집
-                </button>
-                <button
-                    onClick={() => onDeleteTriple(triple.id)}
-                    className="rounded px-1.5 py-0.5 text-[10px] text-red-400 hover:bg-red-500/10"
-                >
-                    삭제
-                </button>
-            </div>
-        </div>
-    );
-}
+import { NodeInfoPanel } from "@/components/panels/node-info-panel";
+import { EdgeInfoPanel } from "@/components/panels/edge-info-panel";
+import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
 
 interface DetailPanelProps {
     graph: KnowledgeGraph;
@@ -123,40 +39,6 @@ export function DetailPanel({
     const selectedTriple = selectedEdgeId
         ? (graph.triples.find((t) => t.id === selectedEdgeId) ?? null)
         : null;
-
-    // Violations that apply to the selected node
-    const nodeViolations = selectedNode
-        ? validationResults.flatMap((r) =>
-              r.violations
-                  .filter((v) => v.nodeId === selectedNode.id)
-                  .map((v) => ({
-                      ruleName: r.ruleName,
-                      message: v.message,
-                      relatedTripleId: v.relatedTripleId,
-                  })),
-          )
-        : [];
-
-    // Set of triple IDs that have violations related to the selected node
-    const violatingTripleIds = new Set(
-        nodeViolations.map((v) => v.relatedTripleId).filter(Boolean),
-    );
-
-    // Outgoing triples: selected node is subject (→ points to other nodes)
-    const outgoingTriples = selectedNode
-        ? graph.triples.filter((t) => t.subject === selectedNode.id)
-        : [];
-
-    // Incoming triples: selected node is object (← pointed by other nodes)
-    const incomingTriples = selectedNode
-        ? graph.triples.filter((t) => t.object === selectedNode.id)
-        : [];
-
-    // Helper to resolve node label by id
-    const nodeLabelById = (id: string) => {
-        const node = graph.nodes.find((n) => n.id === id);
-        return node ? node.label : id;
-    };
 
     return (
         <div className="flex h-full w-[350px] min-w-[350px] flex-col overflow-hidden border-l">
@@ -239,175 +121,26 @@ export function DetailPanel({
 
                         {/* Node selected */}
                         {selectedNode && (
-                            <div className="max-w-full space-y-4 overflow-hidden p-4">
-                                {/* Label and type */}
-                                <div className="space-y-1">
-                                    <div className="flex items-start gap-1">
-                                        <p className="min-w-0 flex-1 truncate text-base font-semibold" title={selectedNode.label}>
-                                            {selectedNode.label}
-                                        </p>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="size-7 shrink-0"
-                                            onClick={() => onEditNode(selectedNode.id)}
-                                        >
-                                            <Pencil className="size-3.5" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="size-7 shrink-0 text-red-400 hover:text-red-500"
-                                            onClick={() => onDeleteNode(selectedNode.id)}
-                                        >
-                                            <Trash2 className="size-3.5" />
-                                        </Button>
-                                    </div>
-                                    {selectedNode.type && (
-                                        <Badge variant="secondary">
-                                            {selectedNode.type}
-                                        </Badge>
-                                    )}
-                                </div>
-
-                                {/* Violation alerts */}
-                                {nodeViolations.length > 0 && (
-                                    <div className="space-y-2">
-                                        {nodeViolations.map((v, i) => (
-                                            <Alert
-                                                key={i}
-                                                variant="destructive"
-                                            >
-                                                <AlertTitle>
-                                                    {v.ruleName}
-                                                </AlertTitle>
-                                                <AlertDescription>
-                                                    {v.message}
-                                                </AlertDescription>
-                                            </Alert>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <Separator />
-
-                                {/* Outgoing triples */}
-                                <div>
-                                    <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-                                        나가는 관계 ({outgoingTriples.length})
-                                    </p>
-                                    {outgoingTriples.length === 0 ? (
-                                        <p className="text-muted-foreground text-xs">
-                                            없음
-                                        </p>
-                                    ) : (
-                                        <div className="space-y-1.5">
-                                            {outgoingTriples.map((t) => (
-                                                <TripleCard
-                                                    key={t.id}
-                                                    triple={t}
-                                                    direction="outgoing"
-                                                    isViolating={violatingTripleIds.has(t.id)}
-                                                    nodeLabelById={nodeLabelById}
-                                                    onFocusNode={onFocusNode}
-                                                    onEditTriple={onEditTriple}
-                                                    onDeleteTriple={onDeleteTriple}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <Separator />
-
-                                {/* Incoming triples */}
-                                <div>
-                                    <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-                                        들어오는 관계 ({incomingTriples.length})
-                                    </p>
-                                    {incomingTriples.length === 0 ? (
-                                        <p className="text-muted-foreground text-xs">
-                                            없음
-                                        </p>
-                                    ) : (
-                                        <div className="space-y-1.5">
-                                            {incomingTriples.map((t) => (
-                                                <TripleCard
-                                                    key={t.id}
-                                                    triple={t}
-                                                    direction="incoming"
-                                                    isViolating={violatingTripleIds.has(t.id)}
-                                                    nodeLabelById={nodeLabelById}
-                                                    onFocusNode={onFocusNode}
-                                                    onEditTriple={onEditTriple}
-                                                    onDeleteTriple={onDeleteTriple}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                            </div>
+                            <NodeInfoPanel
+                                graph={graph}
+                                node={selectedNode}
+                                validationResults={validationResults}
+                                onEditNode={onEditNode}
+                                onDeleteNode={onDeleteNode}
+                                onEditTriple={onEditTriple}
+                                onDeleteTriple={onDeleteTriple}
+                                onFocusNode={onFocusNode}
+                            />
                         )}
 
-                        {/* Edge (triple) selected */}
+                        {/* Edge selected */}
                         {selectedTriple && !selectedNode && (
-                            <div className="space-y-4 p-4">
-                                <div className="space-y-1">
-                                    <p className="text-muted-foreground text-xs font-medium uppercase">
-                                        관계
-                                    </p>
-                                    <div className="border-border bg-muted/30 rounded-md border px-3 py-2 text-sm">
-                                        <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                                            <span className="max-w-full truncate font-medium" title={nodeLabelById(selectedTriple.subject)}>
-                                                {nodeLabelById(
-                                                    selectedTriple.subject,
-                                                )}
-                                            </span>
-                                            <span className="text-muted-foreground shrink-0">
-                                                →
-                                            </span>
-                                            <span className="text-primary max-w-full truncate font-medium" title={selectedTriple.predicate}>
-                                                {selectedTriple.predicate}
-                                            </span>
-                                            <span className="text-muted-foreground shrink-0">
-                                                →
-                                            </span>
-                                            <span className="max-w-full truncate font-medium" title={nodeLabelById(selectedTriple.object)}>
-                                                {nodeLabelById(
-                                                    selectedTriple.object,
-                                                )}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <Separator />
-
-                                {/* Edit / Delete buttons */}
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1"
-                                        onClick={() =>
-                                            onEditTriple(selectedTriple.id)
-                                        }
-                                    >
-                                        편집
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        className="flex-1"
-                                        onClick={() =>
-                                            onDeleteTriple(selectedTriple.id)
-                                        }
-                                    >
-                                        삭제
-                                    </Button>
-                                </div>
-                            </div>
+                            <EdgeInfoPanel
+                                graph={graph}
+                                triple={selectedTriple}
+                                onEditTriple={onEditTriple}
+                                onDeleteTriple={onDeleteTriple}
+                            />
                         )}
                     </ScrollArea>
                 </TabsContent>
