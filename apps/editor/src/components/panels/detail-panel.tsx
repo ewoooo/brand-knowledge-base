@@ -18,6 +18,7 @@ interface DetailPanelProps {
     onDeleteNode: (nodeId: string) => void;
     onEditTriple: (tripleId: string) => void;
     onDeleteTriple: (tripleId: string) => void;
+    onFocusNode: (nodeId: string) => void;
 }
 
 export function DetailPanel({
@@ -29,6 +30,7 @@ export function DetailPanel({
     onDeleteNode,
     onEditTriple,
     onDeleteTriple,
+    onFocusNode,
 }: DetailPanelProps) {
     const selectedNode = selectedNodeId
         ? (graph.nodes.find((n) => n.id === selectedNodeId) ?? null)
@@ -358,7 +360,7 @@ export function DetailPanel({
                     forceMount
                     className="mt-0 flex-1 overflow-hidden data-[state=inactive]:hidden"
                 >
-                    <ChatPanel graph={graph} chatId="detail-panel-chat" />
+                    <ChatPanel graph={graph} chatId="detail-panel-chat" onFocusNode={onFocusNode} />
                 </TabsContent>
             </Tabs>
         </div>

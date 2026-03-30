@@ -337,6 +337,10 @@ export default function Home() {
                 onDeleteNode={removeNode}
                 onEditTriple={handleEditTriple}
                 onDeleteTriple={removeTriple}
+                onFocusNode={(nodeId: string) => {
+                    selectNode(nodeId);
+                    handleFocusNode(nodeId);
+                }}
             />
 
             {/* Context menu */}

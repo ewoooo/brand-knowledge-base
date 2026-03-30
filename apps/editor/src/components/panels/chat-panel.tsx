@@ -2,21 +2,92 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import type { KnowledgeGraph } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, Node } from "@knowledgeview/kg-core";
 import { Send, Loader2 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 interface ChatPanelProps {
     graph: KnowledgeGraph;
     chatId: string;
+    onFocusNode: (nodeId: string) => void;
 }
 
-export function ChatPanel({ graph, chatId }: ChatPanelProps) {
+/**
+ * 텍스트에서 노드 라벨을 감지하여 클릭 가능한 요소로 변환
+ */
+function highlightNodeLabels(
+    text: string,
+    nodes: Node[],
+    onFocusNode: (id: string) => void,
+): ReactNode {
+    if (nodes.length === 0) return text;
+
+    // 라벨 → 노드 매핑 (긴 라벨부터 매칭하여 부분 매칭 방지)
+    const sorted = [...nodes]
+        .filter((n) => n.label.length >= 2)
+        .sort((a, b) => b.label.length - a.label.length);
+
+    // 정규식 특수문자 이스케이프
+    const escaped = sorted.map((n) => ({
+        node: n,
+        pattern: n.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+    }));
+
+    const regex = new RegExp(`(${escaped.map((e) => e.pattern).join("|")})`, "g");
+    const labelToNode = new Map(sorted.map((n) => [n.label, n]));
+
+    const parts = text.split(regex);
+    if (parts.length === 1) return text;
+
+    return parts.map((part, i) => {
+        const node = labelToNode.get(part);
+        if (node) {
+            return (
+                <button
+                    key={i}
+                    type="button"
+                    onClick={() => onFocusNode(node.id)}
+                    className="bg-primary/10 text-primary hover:bg-primary/20 inline cursor-pointer rounded px-0.5 font-medium underline decoration-dotted underline-offset-2 transition-colors"
+                >
+                    {part}
+                </button>
+            );
+        }
+        return part;
+    });
+}
+
+/**
+ * React children를 재귀적으로 순회하며 문자열에서 노드 라벨을 하이라이트
+ */
+function processChildren(
+    children: ReactNode,
+    nodes: Node[],
+    onFocusNode: (id: string) => void,
+): ReactNode {
+    if (typeof children === "string") {
+        return highlightNodeLabels(children, nodes, onFocusNode);
+    }
+    if (Array.isArray(children)) {
+        return children.map((child, i) =>
+            typeof child === "string" ? (
+                <span key={i}>
+                    {highlightNodeLabels(child, nodes, onFocusNode)}
+                </span>
+            ) : (
+                child
+            ),
+        );
+    }
+    return children;
+}
+
+export function ChatPanel({ graph, chatId, onFocusNode }: ChatPanelProps) {
     const [input, setInput] = useState("");
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +112,27 @@ export function ChatPanel({ graph, chatId }: ChatPanelProps) {
             viewport.scrollTop = viewport.scrollHeight;
         }
     }, [messages]);
+
+    // react-markdown 커스텀 컴포넌트: 텍스트 내 노드 라벨을 클릭 가능하게 변환
+    const mdComponents = useMemo<Components>(
+        () => ({
+            p: ({ children }) => (
+                <p>{processChildren(children, graph.nodes, onFocusNode)}</p>
+            ),
+            li: ({ children }) => (
+                <li>{processChildren(children, graph.nodes, onFocusNode)}</li>
+            ),
+            td: ({ children }) => (
+                <td>{processChildren(children, graph.nodes, onFocusNode)}</td>
+            ),
+            strong: ({ children }) => (
+                <strong>
+                    {processChildren(children, graph.nodes, onFocusNode)}
+                </strong>
+            ),
+        }),
+        [graph.nodes, onFocusNode],
+    );
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,6 +199,9 @@ export function ChatPanel({ graph, chatId }: ChatPanelProps) {
                                                         remarkPlugins={[
                                                             remarkGfm,
                                                         ]}
+                                                        components={
+                                                            mdComponents
+                                                        }
                                                     >
                                                         {part.text}
                                                     </ReactMarkdown>
