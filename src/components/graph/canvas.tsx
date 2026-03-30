@@ -21,6 +21,7 @@ interface SimLink extends d3.SimulationLinkDatum<SimNode> {
 
 export interface CanvasProps {
   graph: KnowledgeGraph;
+  hiddenTypes: Set<string>;
   violatedNodeIds: Set<string>;
   violatedTripleIds: Set<string>;
   selectedNodeId: string | null;
@@ -70,6 +71,7 @@ function hexToRgba(hex: string, alpha: number): string {
 
 export default function Canvas({
   graph,
+  hiddenTypes,
   violatedNodeIds,
   violatedTripleIds,
   selectedNodeId,
@@ -133,11 +135,13 @@ export default function Canvas({
       .attr("fill", "rgba(255,100,100,0.5)");
 
     /* -- data ------------------------------------------------------- */
-    const nodes: SimNode[] = graph.nodes.map((n) => ({
-      id: n.id,
-      label: n.label,
-      type: n.type,
-    }));
+    const nodes: SimNode[] = graph.nodes
+      .filter((n) => !hiddenTypes.has(n.type ?? ""))
+      .map((n) => ({
+        id: n.id,
+        label: n.label,
+        type: n.type,
+      }));
 
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
@@ -362,9 +366,9 @@ export default function Canvas({
     return () => {
       simulation.stop();
     };
-  // Only rebuild simulation when graph structure changes
+  // Only rebuild simulation when graph structure or filters change
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [graph]);
+  }, [graph, hiddenTypes]);
 
   /* ---- update styles (selection/violation) without rebuilding ------ */
   useEffect(() => {

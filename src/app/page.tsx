@@ -32,6 +32,21 @@ export default function Home() {
   const { selection, selectNode, selectEdge, clearSelection } = useSelection();
   const { results, violatedNodeIds, violatedTripleIds, failCount } = useRules(graph);
 
+  // Filter state
+  const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
+
+  const toggleTypeFilter = useCallback((type: string) => {
+    setHiddenTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  }, []);
+
   // Dialog state
   const [nodeFormOpen, setNodeFormOpen] = useState(false);
   const [tripleFormOpen, setTripleFormOpen] = useState(false);
@@ -152,6 +167,8 @@ export default function Home() {
           validationResults={results}
           onAddRule={() => setRuleFormOpen(true)}
           graph={null}
+          hiddenTypes={hiddenTypes}
+          onToggleType={toggleTypeFilter}
         />
         <div className="flex flex-1 items-center justify-center">
           <p className="text-muted-foreground">
@@ -172,6 +189,8 @@ export default function Home() {
         validationResults={results}
         onAddRule={() => setRuleFormOpen(true)}
         graph={graph}
+        hiddenTypes={hiddenTypes}
+        onToggleType={toggleTypeFilter}
       />
 
       <div className="flex flex-1 flex-col">
@@ -204,6 +223,7 @@ export default function Home() {
 
           <Canvas
             graph={graph}
+            hiddenTypes={hiddenTypes}
             violatedNodeIds={violatedNodeIds}
             violatedTripleIds={violatedTripleIds}
             selectedNodeId={selectedNodeId}

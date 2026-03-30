@@ -22,6 +22,8 @@ interface SidebarProps {
   validationResults: ValidationResult[];
   onAddRule: () => void;
   graph: KnowledgeGraph | null;
+  hiddenTypes: Set<string>;
+  onToggleType: (type: string) => void;
 }
 
 export function Sidebar({
@@ -31,6 +33,8 @@ export function Sidebar({
   validationResults,
   onAddRule,
   graph,
+  hiddenTypes,
+  onToggleType,
 }: SidebarProps) {
   const [graphs, setGraphs] = useState<GraphListItem[]>([]);
 
@@ -62,7 +66,7 @@ export function Sidebar({
                   : "text-muted-foreground hover:bg-accent/50"
               }`}
             >
-              📁 {g.name}
+              {g.name}
             </button>
           ))}
         </ScrollArea>
@@ -97,7 +101,12 @@ export function Sidebar({
             {Array.from(new Set(graph.nodes.map((n) => n.type).filter(Boolean))).map((type) => {
               const count = graph.nodes.filter((n) => n.type === type).length;
               return (
-                <Badge key={type} variant="secondary" className="text-xs">
+                <Badge
+                  key={type}
+                  variant={hiddenTypes.has(type as string) ? "outline" : "secondary"}
+                  className={`cursor-pointer text-xs ${hiddenTypes.has(type as string) ? "opacity-40 line-through" : ""}`}
+                  onClick={() => onToggleType(type as string)}
+                >
                   {type} <span className="ml-1 opacity-60">{count}</span>
                 </Badge>
               );
