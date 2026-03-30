@@ -700,7 +700,7 @@ export default function Canvas({
                     const svgEl = svgRef.current!;
                     const width = svgEl.clientWidth;
                     const height = svgEl.clientHeight;
-                    const scale = 1.5;
+                    const scale = 1.2;
                     svg.transition()
                         .duration(600)
                         .call(
