@@ -27,13 +27,13 @@ export function TripleCard({
 
     return (
         <div
-            className={`group overflow-hidden rounded-md border px-3 py-2 text-xs ${
+            className={`group relative overflow-hidden rounded-md border px-3 py-2 text-xs ${
                 isViolating
                     ? "border-red-500 bg-red-500/5"
                     : "border-border bg-muted/30"
             }`}
         >
-            <div className="truncate" title={title}>
+            <div className="truncate pr-14" title={title}>
                 {isViolating && (
                     <span className="mr-1 text-red-500">⚠</span>
                 )}
@@ -65,7 +65,7 @@ export function TripleCard({
                     </>
                 )}
             </div>
-            <div className="mt-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                     onClick={() => onEditTriple(triple.id)}
                     className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded px-1.5 py-0.5 text-[10px]"
