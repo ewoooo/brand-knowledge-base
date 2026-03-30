@@ -355,9 +355,10 @@ export function DetailPanel({
 
                 <TabsContent
                     value="chat"
-                    className="mt-0 flex-1 overflow-hidden"
+                    forceMount
+                    className="mt-0 flex-1 overflow-hidden data-[state=inactive]:hidden"
                 >
-                    <ChatPanel graph={graph} />
+                    <ChatPanel graph={graph} chatId="detail-panel-chat" />
                 </TabsContent>
             </Tabs>
         </div>

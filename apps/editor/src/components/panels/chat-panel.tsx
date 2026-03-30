@@ -11,13 +11,15 @@ import { Send, Loader2 } from "lucide-react";
 
 interface ChatPanelProps {
     graph: KnowledgeGraph;
+    chatId: string;
 }
 
-export function ChatPanel({ graph }: ChatPanelProps) {
+export function ChatPanel({ graph, chatId }: ChatPanelProps) {
     const [input, setInput] = useState("");
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const { messages, sendMessage, status } = useChat({
+        id: chatId,
         transport: new DefaultChatTransport({
             api: "/api/chat",
             prepareSendMessagesRequest: ({ id, messages }) => ({
@@ -30,8 +32,11 @@ export function ChatPanel({ graph }: ChatPanelProps) {
 
     // Auto-scroll to bottom on new messages
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        const viewport = scrollAreaRef.current?.querySelector(
+            "[data-radix-scroll-area-viewport]",
+        );
+        if (viewport) {
+            viewport.scrollTop = viewport.scrollHeight;
         }
     }, [messages]);
 
@@ -52,8 +57,8 @@ export function ChatPanel({ graph }: ChatPanelProps) {
     return (
         <div className="flex h-full flex-col">
             {/* Messages */}
-            <ScrollArea className="flex-1">
-                <div ref={scrollRef} className="space-y-3 p-3">
+            <ScrollArea ref={scrollAreaRef} className="flex-1">
+                <div className="space-y-3 p-3">
                     {messages.length === 0 && (
                         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
                             <p className="text-muted-foreground text-xs">
