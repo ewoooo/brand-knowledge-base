@@ -26,10 +26,12 @@ export interface CanvasProps {
   violatedTripleIds: Set<string>;
   selectedNodeId: string | null;
   selectedEdgeId: string | null;
+  focusedNodeId: string | null;
   onSelectNode: (id: string) => void;
   onSelectEdge: (id: string) => void;
   onClearSelection: () => void;
   onDoubleClickCanvas: () => void;
+  onFocusNode: (nodeId: string | null) => void;
   onContextMenu: (nodeId: string, position: { x: number; y: number }) => void;
 }
 
@@ -77,10 +79,12 @@ export default function Canvas({
   violatedTripleIds,
   selectedNodeId,
   selectedEdgeId,
+  focusedNodeId,
   onSelectNode,
   onSelectEdge,
   onClearSelection,
   onDoubleClickCanvas,
+  onFocusNode,
   onContextMenu,
 }: CanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -90,12 +94,14 @@ export default function Canvas({
   const onSelectEdgeRef = useRef(onSelectEdge);
   const onClearSelectionRef = useRef(onClearSelection);
   const onDoubleClickCanvasRef = useRef(onDoubleClickCanvas);
+  const onFocusNodeRef = useRef(onFocusNode);
   const onContextMenuRef = useRef(onContextMenu);
 
   onSelectNodeRef.current = onSelectNode;
   onSelectEdgeRef.current = onSelectEdge;
   onClearSelectionRef.current = onClearSelection;
   onDoubleClickCanvasRef.current = onDoubleClickCanvas;
+  onFocusNodeRef.current = onFocusNode;
   onContextMenuRef.current = onContextMenu;
 
   /* ---- build simulation (only when graph data changes) ------------ */
@@ -273,6 +279,11 @@ export default function Canvas({
         event.preventDefault();
         event.stopPropagation();
         onContextMenuRef.current(d.id, { x: event.clientX, y: event.clientY });
+      })
+      .on("dblclick", (event: MouseEvent, d: SimNode) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onFocusNodeRef.current(d.id);
       });
 
     nodeGs
@@ -442,7 +453,46 @@ export default function Canvas({
         .attr("stroke-dasharray", isViolated ? "6 3" : "none")
         .attr("marker-end", isViolated ? "url(#arrow-violated)" : "url(#arrow-normal)");
     });
-  }, [selectedNodeId, selectedEdgeId, violatedNodeIds, violatedTripleIds]);
+
+    // Focus mode
+    if (focusedNodeId) {
+      // Find neighbor node IDs
+      const neighborIds = new Set<string>();
+      neighborIds.add(focusedNodeId);
+      svg.selectAll<SVGLineElement, SimLink>("g.links line").each(function (d) {
+        const sourceId = typeof d.source === "object" ? (d.source as SimNode).id : d.source;
+        const targetId = typeof d.target === "object" ? (d.target as SimNode).id : d.target;
+        if (sourceId === focusedNodeId) neighborIds.add(targetId as string);
+        if (targetId === focusedNodeId) neighborIds.add(sourceId as string);
+      });
+
+      // Dim non-neighbor nodes
+      svg.selectAll<SVGGElement, SimNode>("g.nodes g").each(function (d) {
+        d3.select(this).attr("opacity", neighborIds.has(d.id) ? 1 : 0.15);
+      });
+
+      // Dim non-connected edges
+      svg.selectAll<SVGLineElement, SimLink>("g.links line").each(function (d) {
+        const sourceId = typeof d.source === "object" ? (d.source as SimNode).id : d.source;
+        const targetId = typeof d.target === "object" ? (d.target as SimNode).id : d.target;
+        const connected = sourceId === focusedNodeId || targetId === focusedNodeId;
+        d3.select(this).attr("opacity", connected ? 1 : 0.05);
+      });
+
+      // Dim non-connected edge labels
+      svg.selectAll<SVGGElement, SimLink>("g.link-label").each(function (d) {
+        const sourceId = typeof d.source === "object" ? (d.source as SimNode).id : d.source;
+        const targetId = typeof d.target === "object" ? (d.target as SimNode).id : d.target;
+        const connected = sourceId === focusedNodeId || targetId === focusedNodeId;
+        d3.select(this).attr("opacity", connected ? 1 : 0.05);
+      });
+    } else {
+      // Reset all opacities
+      svg.selectAll<SVGGElement, SimNode>("g.nodes g").attr("opacity", 1);
+      svg.selectAll<SVGLineElement, SimLink>("g.links line").attr("opacity", 1);
+      svg.selectAll<SVGGElement, SimLink>("g.link-label").attr("opacity", 1);
+    }
+  }, [selectedNodeId, selectedEdgeId, violatedNodeIds, violatedTripleIds, focusedNodeId]);
 
   /* ---- JSX -------------------------------------------------------- */
   return (

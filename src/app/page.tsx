@@ -60,6 +60,9 @@ export default function Home() {
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ nodeId: string; position: { x: number; y: number } } | null>(null);
 
+  // Focus state
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
+
   // Derive selected IDs from selection
   const selectedNodeId = selection?.type === "node" ? selection.id : null;
   const selectedEdgeId = selection?.type === "edge" ? selection.id : null;
@@ -164,6 +167,16 @@ export default function Home() {
     setContextMenu({ nodeId, position });
   }, []);
 
+  const handleFocusNode = useCallback((nodeId: string | null) => {
+    setFocusedNodeId((prev) => prev === nodeId ? null : nodeId);
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    clearSelection();
+    setFocusedNodeId(null);
+    setContextMenu(null);
+  }, [clearSelection]);
+
   const handleAddRelationFromContext = useCallback((_subjectId: string) => {
     setEditingTripleId(null);
     setTripleFormOpen(true);
@@ -241,10 +254,12 @@ export default function Home() {
             violatedTripleIds={violatedTripleIds}
             selectedNodeId={selectedNodeId}
             selectedEdgeId={selectedEdgeId}
+            focusedNodeId={focusedNodeId}
             onSelectNode={selectNode}
             onSelectEdge={selectEdge}
-            onClearSelection={clearSelection}
+            onClearSelection={handleClearSelection}
             onDoubleClickCanvas={handleDoubleClickCanvas}
+            onFocusNode={handleFocusNode}
             onContextMenu={handleContextMenu}
           />
         </div>
