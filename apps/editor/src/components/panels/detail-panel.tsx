@@ -70,7 +70,6 @@ function TripleCard({
                         </button>
                         <span className="text-muted-foreground mx-1">→</span>
                         <span className="text-primary">{triple.predicate}</span>
-                        <span className="text-muted-foreground ml-1">→</span>
                     </>
                 )}
             </div>
