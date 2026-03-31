@@ -56,13 +56,13 @@ describe("nodeColor", () => {
     });
 
     it("type이 undefined이면 concept 기본값 반환", () => {
-        expect(nodeColor(undefined)).toBe("#888888");
-        expect(nodeColor(undefined, registry)).toBe("#888888");
+        expect(nodeColor(undefined)).toBe("#777777");
+        expect(nodeColor(undefined, registry)).toBe("#777777");
     });
 
     it("알 수 없는 타입이면 concept 기본값 반환", () => {
-        expect(nodeColor("unknown-type")).toBe("#888888");
-        expect(nodeColor("unknown-type", registry)).toBe("#888888");
+        expect(nodeColor("unknown-type")).toBe("#777777");
+        expect(nodeColor("unknown-type", registry)).toBe("#777777");
     });
 });
 

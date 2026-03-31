@@ -130,6 +130,7 @@ export default function Canvas({
             schema: graph.schema,
         });
     }, [
+        graph.schema,
         selectedNodeId,
         selectedEdgeId,
         violatedNodeIds,
