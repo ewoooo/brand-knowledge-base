@@ -176,15 +176,99 @@ describe("addTriple (스키마 검증)", () => {
     ).toThrow("targetTypes");
   });
 
-  it("1:1 카디널리티 위반 시 거부", () => {
+  it("1:1 카디널리티 — subject 중복 거부", () => {
     let graph = makeGraphWithSchema();
     graph = addNode(graph, makeNode("n3", "Pretendard", "typography"));
     graph = addNode(graph, makeNode("n4", "Inter", "typography"));
     graph = addTriple(graph, makeTriple("t1", "n1", "primary-font", "n3"));
-    // 두 번째 primary-font는 1:1 위반
+    // 같은 subject가 두 번째 primary-font → 1:1 위반
     expect(() =>
       addTriple(graph, makeTriple("t2", "n1", "primary-font", "n4"))
     ).toThrow("cardinality");
+  });
+
+  it("1:1 카디널리티 — object 중복 거부", () => {
+    let graph = makeGraphWithSchema();
+    graph = addNode(graph, makeNode("n3", "Pretendard", "typography"));
+    graph = addNode(graph, makeNode("n5", "BrandB", "brand"));
+    graph = addTriple(graph, makeTriple("t1", "n1", "primary-font", "n3"));
+    // 다른 subject가 같은 object로 primary-font → 1:1 object 쪽 위반
+    expect(() =>
+      addTriple(graph, makeTriple("t2", "n5", "primary-font", "n3"))
+    ).toThrow("cardinality");
+  });
+
+  it("N:1 카디널리티 — subject 중복 거부", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = {
+      ...graph,
+      schema: {
+        nodeTypes: testSchema.nodeTypes,
+        linkTypes: [
+          {
+            predicate: "belongs-to",
+            displayName: "소속",
+            sourceTypes: ["color"],
+            targetTypes: ["brand"],
+            cardinality: "N:1",
+          },
+        ],
+      },
+    };
+    graph = addNode(graph, makeNode("n1", "#2E5BFF", "color"));
+    graph = addNode(graph, makeNode("n2", "BrandA", "brand"));
+    graph = addNode(graph, makeNode("n3", "BrandB", "brand"));
+    graph = addTriple(graph, makeTriple("t1", "n1", "belongs-to", "n2"));
+    // 같은 subject가 두 번째 belongs-to → N:1 위반 (subject당 하나)
+    expect(() =>
+      addTriple(graph, makeTriple("t2", "n1", "belongs-to", "n3"))
+    ).toThrow("cardinality");
+  });
+
+  it("N:1 카디널리티 — 다른 subject는 같은 object 허용", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = {
+      ...graph,
+      schema: {
+        nodeTypes: testSchema.nodeTypes,
+        linkTypes: [
+          {
+            predicate: "belongs-to",
+            displayName: "소속",
+            sourceTypes: ["color"],
+            targetTypes: ["brand"],
+            cardinality: "N:1",
+          },
+        ],
+      },
+    };
+    graph = addNode(graph, makeNode("n1", "#2E5BFF", "color"));
+    graph = addNode(graph, makeNode("n2", "#FF0000", "color"));
+    graph = addNode(graph, makeNode("n3", "BrandA", "brand"));
+    graph = addTriple(graph, makeTriple("t1", "n1", "belongs-to", "n3"));
+    // 다른 subject가 같은 object → N:1 허용 (N개 subject가 1개 object 가리킴)
+    const result = addTriple(graph, makeTriple("t2", "n2", "belongs-to", "n3"));
+    expect(result.triples).toHaveLength(2);
+  });
+
+  it("1:N 카디널리티 — object 중복 거부", () => {
+    // 1:N = subject는 여러 object 가능, 각 object는 하나의 subject에만
+    let graph = makeGraphWithSchema();
+    graph = addNode(graph, makeNode("n5", "BrandB", "brand"));
+    graph = addTriple(graph, makeTriple("t1", "n1", "has-color", "n2"));
+    // 다른 subject가 같은 object → 1:N object 쪽 위반
+    expect(() =>
+      addTriple(graph, makeTriple("t2", "n5", "has-color", "n2"))
+    ).toThrow("cardinality");
+  });
+
+  it("1:N 카디널리티 — 같은 subject 다른 object 허용", () => {
+    let graph = makeGraphWithSchema();
+    graph = addNode(graph, makeNode("n3", "#FF0000", "color"));
+    graph = addTriple(graph, makeTriple("t1", "n1", "has-color", "n2"));
+    // 같은 subject가 다른 object → 1:N 허용
+    const result = addTriple(graph, makeTriple("t2", "n1", "has-color", "n3"));
+    expect(result.triples).toHaveLength(2);
   });
 
   it("빈 sourceTypes는 모든 타입 허용", () => {

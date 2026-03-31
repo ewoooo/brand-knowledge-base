@@ -101,22 +101,36 @@ export function addTriple(
                 `Node type "${objectNode.type}" is not in targetTypes [${linkType.targetTypes.join(", ")}] for predicate "${triple.predicate}"`,
             );
         }
+        // subject 쪽 제약: 1:1, N:1 — 각 subject당 predicate 하나
+        if (
+            linkType.cardinality === "1:1" ||
+            linkType.cardinality === "N:1"
+        ) {
+            const existingFromSubject = graph.triples.find(
+                (t) =>
+                    t.subject === triple.subject &&
+                    t.predicate === triple.predicate,
+            );
+            if (existingFromSubject) {
+                throw new Error(
+                    `cardinality ${linkType.cardinality} violation: "${triple.subject}" already has predicate "${triple.predicate}"`,
+                );
+            }
+        }
+        // object 쪽 제약: 1:1, 1:N — 각 object당 predicate 하나
         if (
             linkType.cardinality === "1:1" ||
             linkType.cardinality === "1:N"
         ) {
-            // 1:1 — subject당 하나의 predicate만 허용
-            if (linkType.cardinality === "1:1") {
-                const existing = graph.triples.find(
-                    (t) =>
-                        t.subject === triple.subject &&
-                        t.predicate === triple.predicate,
+            const existingToObject = graph.triples.find(
+                (t) =>
+                    t.object === triple.object &&
+                    t.predicate === triple.predicate,
+            );
+            if (existingToObject) {
+                throw new Error(
+                    `cardinality ${linkType.cardinality} violation: "${triple.object}" is already target of predicate "${triple.predicate}"`,
                 );
-                if (existing) {
-                    throw new Error(
-                        `cardinality 1:1 violation: "${triple.subject}" already has predicate "${triple.predicate}"`,
-                    );
-                }
             }
         }
     }
