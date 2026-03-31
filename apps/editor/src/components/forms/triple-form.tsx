@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -16,9 +16,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import type { Node } from "@knowledgeview/kg-core";
+import { ArrowRight, ChevronsUpDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getChoseong } from "es-hangul";
+import type { Node, LinkType } from "@knowledgeview/kg-core";
 
 interface TripleFormProps {
     open: boolean;
@@ -29,6 +44,7 @@ interface TripleFormProps {
         object: string;
     }) => void;
     nodes: Node[];
+    linkTypes?: LinkType[];
     initial?: { subject: string; predicate: string; object: string };
 }
 
@@ -37,11 +53,13 @@ export function TripleForm({
     onClose,
     onSubmit,
     nodes,
+    linkTypes,
     initial,
 }: TripleFormProps) {
     const [subject, setSubject] = useState(initial?.subject ?? "");
     const [predicate, setPredicate] = useState(initial?.predicate ?? "");
     const [object, setObject] = useState(initial?.object ?? "");
+    const [predicateOpen, setPredicateOpen] = useState(false);
 
     useEffect(() => {
         if (open) {
@@ -53,6 +71,26 @@ export function TripleForm({
 
     const isEditing = !!initial;
     const canSubmit = subject.trim() && predicate.trim() && object.trim();
+
+    // subject/object 노드 타입 기반으로 허용 predicate 필터링
+    const filteredLinkTypes = useMemo(() => {
+        if (!linkTypes?.length) return [];
+
+        const subjectNode = nodes.find((n) => n.id === subject);
+        const objectNode = nodes.find((n) => n.id === object);
+
+        return linkTypes.filter((lt) => {
+            const sourceOk =
+                lt.sourceTypes.length === 0 ||
+                !subjectNode ||
+                lt.sourceTypes.includes(subjectNode.type);
+            const targetOk =
+                lt.targetTypes.length === 0 ||
+                !objectNode ||
+                lt.targetTypes.includes(objectNode.type);
+            return sourceOk && targetOk;
+        });
+    }, [linkTypes, nodes, subject, object]);
 
     function handleSubmit() {
         if (!canSubmit) return;
@@ -131,11 +169,21 @@ export function TripleForm({
                         <label className="pl-1 text-sm font-medium text-neutral-400">
                             관계
                         </label>
-                        <Input
-                            placeholder="관계 입력 (예: hasColor, isPartOf)"
-                            value={predicate}
-                            onChange={(e) => setPredicate(e.target.value)}
-                        />
+                        {filteredLinkTypes.length > 0 ? (
+                            <PredicateCombobox
+                                value={predicate}
+                                onChange={setPredicate}
+                                linkTypes={filteredLinkTypes}
+                                open={predicateOpen}
+                                onOpenChange={setPredicateOpen}
+                            />
+                        ) : (
+                            <Input
+                                placeholder="관계 입력 (예: has-color, is-part-of)"
+                                value={predicate}
+                                onChange={(e) => setPredicate(e.target.value)}
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -149,5 +197,99 @@ export function TripleForm({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Predicate Combobox (Popover + Command)                             */
+/* ------------------------------------------------------------------ */
+
+function PredicateCombobox({
+    value,
+    onChange,
+    linkTypes,
+    open,
+    onOpenChange,
+}: {
+    value: string;
+    onChange: (v: string) => void;
+    linkTypes: LinkType[];
+    open: boolean;
+    onOpenChange: (v: boolean) => void;
+}) {
+    const selected = linkTypes.find((lt) => lt.predicate === value);
+
+    return (
+        <Popover open={open} onOpenChange={onOpenChange}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between font-normal"
+                >
+                    <span className="truncate">
+                        {selected
+                            ? selected.displayName
+                            : "관계 선택"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command
+                    filter={(value, search) => {
+                        const lt = linkTypes.find(
+                            (l) => l.predicate === value,
+                        );
+                        if (!lt) return 0;
+                        const target = `${lt.displayName} ${lt.predicate}`;
+                        const lower = search.toLowerCase();
+                        if (target.toLowerCase().includes(lower)) return 1;
+                        if (getChoseong(target).includes(search)) return 1;
+                        return 0;
+                    }}
+                >
+                    <CommandInput placeholder="관계 검색..." />
+                    <CommandList>
+                        <CommandEmpty>일치하는 관계가 없습니다</CommandEmpty>
+                        <CommandGroup>
+                            {linkTypes.map((lt) => (
+                                <CommandItem
+                                    key={lt.predicate}
+                                    value={lt.predicate}
+                                    onSelect={(v) => {
+                                        onChange(v === value ? "" : v);
+                                        onOpenChange(false);
+                                    }}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 size-4",
+                                            value === lt.predicate
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                        )}
+                                    />
+                                    <div className="flex min-w-0 flex-col">
+                                        <span className="truncate text-sm">
+                                            {lt.displayName}
+                                        </span>
+                                        {lt.description && (
+                                            <span className="text-muted-foreground truncate text-xs">
+                                                {lt.description}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="text-muted-foreground ml-auto shrink-0 font-mono text-xs">
+                                        {lt.predicate}
+                                    </span>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
     );
 }

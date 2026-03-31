@@ -1,6 +1,6 @@
 import type { KnowledgeGraph, ValidationResult } from "./types";
 
-export function validate(graph: KnowledgeGraph): ValidationResult[] {
+function validateRules(graph: KnowledgeGraph): ValidationResult[] {
     return graph.rules.map((rule) => {
         const targetNodes = graph.nodes.filter(
             (n) => n.type === rule.condition.nodeType,
@@ -79,4 +79,74 @@ export function validate(graph: KnowledgeGraph): ValidationResult[] {
             violations,
         } satisfies ValidationResult;
     });
+}
+
+function validateSchema(graph: KnowledgeGraph): ValidationResult[] {
+    if (!graph.schema) return [];
+
+    const results: ValidationResult[] = [];
+    const validTypes = new Set(graph.schema.nodeTypes.map((nt) => nt.type));
+    const validPredicates = new Set(graph.schema.linkTypes.map((lt) => lt.predicate));
+
+    // 노드 타입 검증
+    const nodeTypeViolations: ValidationResult["violations"] = [];
+    for (const node of graph.nodes) {
+        if (!validTypes.has(node.type)) {
+            nodeTypeViolations.push({
+                nodeId: node.id,
+                message: `노드 "${node.label}"의 타입 "${node.type}"이 스키마에 정의되지 않았습니다`,
+            });
+        }
+    }
+    results.push({
+        ruleId: "schema:node-type",
+        ruleName: "노드 타입 스키마 검증",
+        status: nodeTypeViolations.length === 0 ? "pass" : "fail",
+        violations: nodeTypeViolations,
+    });
+
+    // 필수 속성 검증
+    const propViolations: ValidationResult["violations"] = [];
+    for (const node of graph.nodes) {
+        const nodeType = graph.schema.nodeTypes.find((nt) => nt.type === node.type);
+        if (!nodeType) continue;
+        for (const propDef of nodeType.properties) {
+            if (propDef.required && (node.props == null || !(propDef.key in node.props))) {
+                propViolations.push({
+                    nodeId: node.id,
+                    message: `노드 "${node.label}"에 필수 속성 "${propDef.key}"이 없습니다`,
+                });
+            }
+        }
+    }
+    results.push({
+        ruleId: "schema:required-props",
+        ruleName: "필수 속성 검증",
+        status: propViolations.length === 0 ? "pass" : "fail",
+        violations: propViolations,
+    });
+
+    // 관계 타입 검증
+    const linkViolations: ValidationResult["violations"] = [];
+    for (const triple of graph.triples) {
+        if (!validPredicates.has(triple.predicate)) {
+            linkViolations.push({
+                nodeId: triple.subject,
+                message: `관계 "${triple.predicate}"가 스키마에 정의되지 않았습니다`,
+                relatedTripleId: triple.id,
+            });
+        }
+    }
+    results.push({
+        ruleId: "schema:link-type",
+        ruleName: "관계 타입 스키마 검증",
+        status: linkViolations.length === 0 ? "pass" : "fail",
+        violations: linkViolations,
+    });
+
+    return results;
+}
+
+export function validate(graph: KnowledgeGraph): ValidationResult[] {
+    return [...validateSchema(graph), ...validateRules(graph)];
 }
