@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import type { TypeRegistry } from "@knowledgeview/kg-core";
 import type { SimNode, SimLink } from "../canvas-types";
 import { nodeSize } from "../canvas-types";
 
@@ -12,6 +13,7 @@ export function createSimulation(
     height: number,
     linkGroup: d3.Selection<SVGGElement, unknown, null, undefined>,
     nodeGs: d3.Selection<SVGGElement, SimNode, SVGGElement, unknown>,
+    schema?: TypeRegistry,
 ) {
     const simulation = d3
         .forceSimulation<SimNode>(nodes)
@@ -26,7 +28,7 @@ export function createSimulation(
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force(
             "collide",
-            d3.forceCollide<SimNode>().radius((d) => nodeSize(d.type) + 20),
+            d3.forceCollide<SimNode>().radius((d) => nodeSize(d.type, schema) + 20),
         )
         .on("tick", () => {
             // 엣지 위치 업데이트 (원 둘레 기준)
@@ -38,7 +40,7 @@ export function createSimulation(
                     const dx = (t.x ?? 0) - (s.x ?? 0);
                     const dy = (t.y ?? 0) - (s.y ?? 0);
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    return (s.x ?? 0) + (dx / dist) * nodeSize(s.type);
+                    return (s.x ?? 0) + (dx / dist) * nodeSize(s.type, schema);
                 })
                 .attr("y1", (d) => {
                     const s = d.source as SimNode;
@@ -46,7 +48,7 @@ export function createSimulation(
                     const dx = (t.x ?? 0) - (s.x ?? 0);
                     const dy = (t.y ?? 0) - (s.y ?? 0);
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    return (s.y ?? 0) + (dy / dist) * nodeSize(s.type);
+                    return (s.y ?? 0) + (dy / dist) * nodeSize(s.type, schema);
                 })
                 .attr("x2", (d) => {
                     const s = d.source as SimNode;
@@ -54,7 +56,7 @@ export function createSimulation(
                     const dx = (s.x ?? 0) - (t.x ?? 0);
                     const dy = (s.y ?? 0) - (t.y ?? 0);
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    return (t.x ?? 0) + (dx / dist) * nodeSize(t.type);
+                    return (t.x ?? 0) + (dx / dist) * nodeSize(t.type, schema);
                 })
                 .attr("y2", (d) => {
                     const s = d.source as SimNode;
@@ -62,7 +64,7 @@ export function createSimulation(
                     const dx = (s.x ?? 0) - (t.x ?? 0);
                     const dy = (s.y ?? 0) - (t.y ?? 0);
                     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    return (t.y ?? 0) + (dy / dist) * nodeSize(t.type);
+                    return (t.y ?? 0) + (dy / dist) * nodeSize(t.type, schema);
                 });
 
             // 엣지 라벨 위치

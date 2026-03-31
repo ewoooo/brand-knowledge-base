@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import type { TypeRegistry } from "@knowledgeview/kg-core";
 import type { SimNode, SimLink, CallbackRefs } from "../canvas-types";
 import { nodeColor, nodeSize, hexToRgba } from "../canvas-types";
 
@@ -10,6 +11,7 @@ export function renderNodes(
     nodes: SimNode[],
     linkGroup: d3.Selection<SVGGElement, unknown, null, undefined>,
     refs: Pick<CallbackRefs, "onSelectNode" | "onFocusNode" | "onContextMenu">,
+    schema?: TypeRegistry,
 ) {
     const nodeGroup = g.append("g").attr("class", "nodes");
 
@@ -82,9 +84,9 @@ export function renderNodes(
     // 원형
     nodeGs
         .append("circle")
-        .attr("r", (d) => nodeSize(d.type))
-        .attr("fill", (d) => hexToRgba(nodeColor(d.type), 0.2))
-        .attr("stroke", (d) => hexToRgba(nodeColor(d.type), 0.6))
+        .attr("r", (d) => nodeSize(d.type, schema))
+        .attr("fill", (d) => hexToRgba(nodeColor(d.type, schema), 0.2))
+        .attr("stroke", (d) => hexToRgba(nodeColor(d.type, schema), 0.6))
         .attr("stroke-width", 2);
 
     // 타입 약어 (원 내부)
@@ -109,7 +111,7 @@ export function renderNodes(
         .text((d) => d.label)
         .attr("fill", "rgba(255,255,255,0.9)")
         .attr("text-anchor", "middle")
-        .attr("dy", (d) => nodeSize(d.type) + 14)
+        .attr("dy", (d) => nodeSize(d.type, schema) + 14)
         .attr("pointer-events", "none");
 
     return nodeGs;

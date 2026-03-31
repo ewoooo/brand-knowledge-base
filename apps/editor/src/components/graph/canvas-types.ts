@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import type * as d3 from "d3";
-import type { KnowledgeGraph } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, TypeRegistry } from "@knowledgeview/kg-core";
 
 /* ------------------------------------------------------------------ */
 /*  Simulation types                                                   */
@@ -9,7 +9,7 @@ import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 export interface SimNode extends d3.SimulationNodeDatum {
     id: string;
     label: string;
-    type?: string;
+    type: string;
 }
 
 export interface SimLink extends d3.SimulationLinkDatum<SimNode> {
@@ -60,7 +60,7 @@ export interface CallbackRefs {
 const NODE_COLORS: Record<string, string> = {
     brand: "#6496ff",
     typography: "#64ff96",
-    concept: "#888888",
+    concept: "#777777",
     color: "#ff5733",
     application: "#995733",
 };
@@ -73,11 +73,19 @@ const NODE_SIZES: Record<string, number> = {
     application: 20,
 };
 
-export function nodeColor(type?: string): string {
+export function nodeColor(type: string | undefined, schema?: TypeRegistry): string {
+    if (schema && type) {
+        const nt = schema.nodeTypes.find((n) => n.type === type);
+        if (nt?.visual?.color) return nt.visual.color;
+    }
     return NODE_COLORS[type ?? "concept"] ?? NODE_COLORS["concept"];
 }
 
-export function nodeSize(type?: string): number {
+export function nodeSize(type: string | undefined, schema?: TypeRegistry): number {
+    if (schema && type) {
+        const nt = schema.nodeTypes.find((n) => n.type === type);
+        if (nt?.visual?.size != null) return nt.visual.size;
+    }
     return NODE_SIZES[type ?? "concept"] ?? NODE_SIZES["concept"];
 }
 
