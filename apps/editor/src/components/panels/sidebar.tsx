@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
+import { getNodeTypeDisplayName } from "@/lib/schema-display";
 
 interface GraphListItem {
     filename: string;
@@ -22,6 +23,7 @@ interface SidebarProps {
     validationResults: ValidationResult[];
     onAddRule: () => void;
     graph: KnowledgeGraph | null;
+    schema?: TypeRegistry;
     hiddenTypes: Set<string>;
     onToggleType: (type: string) => void;
 }
@@ -33,6 +35,7 @@ export function Sidebar({
     validationResults,
     onAddRule,
     graph,
+    schema,
     hiddenTypes,
     onToggleType,
 }: SidebarProps) {
@@ -123,6 +126,7 @@ export function Sidebar({
                             const count = graph.nodes.filter(
                                 (n) => n.type === type,
                             ).length;
+                            const displayName = getNodeTypeDisplayName(schema, type as string);
                             return (
                                 <Badge
                                     key={type}
@@ -133,9 +137,9 @@ export function Sidebar({
                                     }
                                     className={`max-w-full cursor-pointer text-xs ${hiddenTypes.has(type as string) ? "line-through opacity-40" : ""}`}
                                     onClick={() => onToggleType(type as string)}
-                                    title={`${type} (${count})`}
+                                    title={`${displayName} (${type}) — ${count}개`}
                                 >
-                                    <span className="truncate">{type}</span>
+                                    <span className="truncate">{displayName}</span>
                                     <span className="ml-1 shrink-0 opacity-60">
                                         {count}
                                     </span>

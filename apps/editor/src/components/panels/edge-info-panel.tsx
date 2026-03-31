@@ -1,10 +1,13 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { KnowledgeGraph, Triple } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, Triple, TypeRegistry } from "@knowledgeview/kg-core";
+import { getLinkTypeDisplayName, getLinkTypeInfo } from "@/lib/schema-display";
 
 interface EdgeInfoPanelProps {
     graph: KnowledgeGraph;
     triple: Triple;
+    schema?: TypeRegistry;
     onEditTriple: (tripleId: string) => void;
     onDeleteTriple: (tripleId: string) => void;
 }
@@ -12,6 +15,7 @@ interface EdgeInfoPanelProps {
 export function EdgeInfoPanel({
     graph,
     triple,
+    schema,
     onEditTriple,
     onDeleteTriple,
 }: EdgeInfoPanelProps) {
@@ -19,6 +23,9 @@ export function EdgeInfoPanel({
         const n = graph.nodes.find((nd) => nd.id === id);
         return n ? n.label : id;
     };
+
+    const linkInfo = getLinkTypeInfo(schema, triple.predicate);
+    const predicateDisplay = getLinkTypeDisplayName(schema, triple.predicate);
 
     return (
         <div className="space-y-4 p-4">
@@ -41,7 +48,7 @@ export function EdgeInfoPanel({
                             className="text-primary max-w-full truncate font-medium"
                             title={triple.predicate}
                         >
-                            {triple.predicate}
+                            {predicateDisplay}
                         </span>
                         <span className="text-muted-foreground shrink-0">
                             →
@@ -55,6 +62,22 @@ export function EdgeInfoPanel({
                     </div>
                 </div>
             </div>
+
+            {/* LinkType 상세 정보 */}
+            {linkInfo && (
+                <>
+                    <div className="flex flex-wrap gap-1.5">
+                        <Badge variant="outline" className="text-xs font-normal">
+                            {linkInfo.cardinality}
+                        </Badge>
+                    </div>
+                    {linkInfo.description && (
+                        <p className="text-muted-foreground text-xs">
+                            {linkInfo.description}
+                        </p>
+                    )}
+                </>
+            )}
 
             <Separator />
 

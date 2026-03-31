@@ -8,12 +8,16 @@ import { Pencil, Trash2 } from "lucide-react";
 import type {
     KnowledgeGraph,
     Node,
+    TypeRegistry,
     ValidationResult,
 } from "@knowledgeview/kg-core";
+import { PropertyEditor, getFieldsForType } from "@/components/forms/property-editor";
+import { getNodeTypeDisplayName } from "@/lib/schema-display";
 
 interface NodeInfoPanelProps {
     graph: KnowledgeGraph;
     node: Node;
+    schema?: TypeRegistry;
     validationResults: ValidationResult[];
     onEditNode: (nodeId: string) => void;
     onDeleteNode: (nodeId: string) => void;
@@ -25,6 +29,7 @@ interface NodeInfoPanelProps {
 export function NodeInfoPanel({
     graph,
     node,
+    schema,
     validationResults,
     onEditNode,
     onDeleteNode,
@@ -54,6 +59,11 @@ export function NodeInfoPanel({
         return n ? n.label : id;
     };
 
+    const schemaProperties = getFieldsForType(schema, node.type);
+    const hasSchemaProps = schemaProperties.length > 0;
+    const hasFallbackProps =
+        !schema && node.props && Object.keys(node.props).length > 0;
+
     return (
         <div className="max-w-full space-y-4 overflow-hidden p-4">
             {/* Label and type */}
@@ -82,8 +92,49 @@ export function NodeInfoPanel({
                         <Trash2 className="size-3.5" />
                     </Button>
                 </div>
-                {node.type && <Badge variant="secondary">{node.type}</Badge>}
+                {node.type && (
+                    <Badge variant="secondary" title={node.type}>
+                        {getNodeTypeDisplayName(schema, node.type)}
+                    </Badge>
+                )}
             </div>
+
+            {/* Properties (read-only, schema-driven) */}
+            {hasSchemaProps && (
+                <>
+                    <Separator />
+                    <PropertyEditor
+                        properties={schemaProperties}
+                        values={node.props ?? {}}
+                        onChange={() => {}}
+                        readOnly
+                    />
+                </>
+            )}
+
+            {/* Properties (fallback: raw key-value when no schema) */}
+            {!hasSchemaProps && hasFallbackProps && (
+                <>
+                    <Separator />
+                    <div className="space-y-3">
+                        <p className="text-muted-foreground text-xs font-medium uppercase">
+                            속성
+                        </p>
+                        <div className="space-y-2">
+                            {Object.entries(node.props!).map(([key, val]) => (
+                                <div key={key} className="space-y-0.5">
+                                    <p className="text-muted-foreground text-[11px]">
+                                        {key}
+                                    </p>
+                                    <p className="truncate text-sm" title={String(val)}>
+                                        {String(val)}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Violation alerts */}
             {nodeViolations.length > 0 && (
