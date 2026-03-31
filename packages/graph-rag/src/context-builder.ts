@@ -1,5 +1,5 @@
 import { validate } from "@knowledgeview/kg-core";
-import type { KnowledgeGraph, Rule, TypeRegistry, NodeType } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, Rule, TypeRegistry } from "@knowledgeview/kg-core";
 import type { SubGraph } from "./types";
 
 interface BuildContextOptions {
@@ -21,7 +21,7 @@ export function buildContext(
     : null;
 
   const entityLines = subgraph.nodes.map((n) => {
-    const type = n.type ? ` (${n.type})` : "";
+    const type = ` (${n.type})`;
     const nodeType = nodeTypeMap?.get(n.type);
     const desc = nodeType ? ` — ${nodeType.description}` : "";
     const propsStr = n.props && Object.keys(n.props).length > 0
