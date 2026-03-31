@@ -1,5 +1,5 @@
 import { PanelSection } from "@/components/panels/panel-section";
-import { TripleCard } from "@/components/panels/triple-card";
+import { TripleCard } from "@/components/ui/patterns/cards/triple-card";
 import type { Triple } from "@knowledgeview/kg-core";
 
 interface TripleSectionProps {

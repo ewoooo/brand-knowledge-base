@@ -12,6 +12,7 @@ import type {
     ValidationResult,
 } from "@knowledgeview/kg-core";
 import { getNodeTypeDisplayName } from "@/lib/schema-display";
+import { RuleCard } from "@/components/ui/patterns/cards/rule-card";
 
 interface GraphListItem {
     filename: string;
@@ -67,7 +68,7 @@ export function Sidebar({
                         </Button>
                     }
                 />
-                <ScrollArea className="h-[120px]">
+                <ScrollArea className="h-[80px]">
                     {graphs.map((g) => (
                         <button
                             key={g.filename}
@@ -178,29 +179,7 @@ export function Sidebar({
                         </p>
                     )}
                     {validationResults.map((r) => (
-                        <div
-                            key={r.ruleId}
-                            className="border-border mb-1.5 border-b px-3 py-2 text-xs last:border-b-0"
-                        >
-                            <div
-                                className="flex items-center gap-1.5 truncate font-medium"
-                                title={r.ruleName}
-                            >
-                                <span
-                                    className={`size-1.5 shrink-0 rounded-full ${
-                                        r.status === "pass"
-                                            ? "bg-[#4da375]"
-                                            : "bg-[#d94f4f]"
-                                    }`}
-                                />
-                                {r.ruleName}
-                            </div>
-                            <div className="text-muted-foreground truncate pl-3">
-                                {r.status === "pass"
-                                    ? "통과"
-                                    : `${r.violations.length}건 위반`}
-                            </div>
-                        </div>
+                        <RuleCard key={r.ruleId} result={r} />
                     ))}
                 </ScrollArea>
             </div>
