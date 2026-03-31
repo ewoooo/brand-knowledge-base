@@ -1,9 +1,10 @@
 import { validate } from "@knowledgeview/kg-core";
-import type { KnowledgeGraph, Rule } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, Rule, TypeRegistry } from "@knowledgeview/kg-core";
 import type { SubGraph } from "./types";
 
 interface BuildContextOptions {
   rules?: Rule[];
+  schema?: TypeRegistry;
 }
 
 export function buildContext(
@@ -15,10 +16,18 @@ export function buildContext(
   }
 
   const nodeMap = new Map(subgraph.nodes.map((n) => [n.id, n]));
+  const nodeTypeMap = options.schema
+    ? new Map(options.schema.nodeTypes.map((nt) => [nt.type, nt]))
+    : null;
 
   const entityLines = subgraph.nodes.map((n) => {
-    const type = n.type ? ` (${n.type})` : "";
-    return `- ${n.label}${type}`;
+    const type = ` (${n.type})`;
+    const nodeType = nodeTypeMap?.get(n.type);
+    const desc = nodeType ? ` — ${nodeType.description}` : "";
+    const propsStr = n.props && Object.keys(n.props).length > 0
+      ? ` [${Object.entries(n.props).map(([k, v]) => `${k}: ${v}`).join(", ")}]`
+      : "";
+    return `- ${n.label}${type}${desc}${propsStr}`;
   });
 
   const relationLines = subgraph.triples.map((t) => {

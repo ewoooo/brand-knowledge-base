@@ -20,7 +20,10 @@ export function runPipeline(
     predicateHints: extraction.predicateHints,
   });
 
-  const context = buildContext(subgraph, { rules: graph.rules });
+  const context = buildContext(subgraph, {
+    rules: graph.rules,
+    schema: graph.schema,
+  });
 
   return { context, subgraph, extraction };
 }
