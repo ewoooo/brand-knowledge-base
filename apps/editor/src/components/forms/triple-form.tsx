@@ -32,7 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getChoseong } from "es-hangul";
+import { commandFilter } from "@/lib/search-match";
 import type { Node, LinkType } from "@knowledgeview/kg-core";
 
 interface TripleFormProps {
@@ -243,11 +243,10 @@ function PredicateCombobox({
                             (l) => l.predicate === value,
                         );
                         if (!lt) return 0;
-                        const target = `${lt.displayName} ${lt.predicate}`;
-                        const lower = search.toLowerCase();
-                        if (target.toLowerCase().includes(lower)) return 1;
-                        if (getChoseong(target).includes(search)) return 1;
-                        return 0;
+                        return commandFilter(
+                            `${lt.displayName} ${lt.predicate}`,
+                            search,
+                        );
                     }}
                 >
                     <CommandInput placeholder="관계 검색..." />
