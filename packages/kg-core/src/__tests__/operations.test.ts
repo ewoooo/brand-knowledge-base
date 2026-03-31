@@ -319,7 +319,7 @@ describe("addNode (props 전달)", () => {
 });
 
 describe("updateNode (props 머지)", () => {
-  it("기존 props에 새 props를 shallow merge한다", () => {
+  it("props는 전체 교체된다", () => {
     let graph = createEmptyGraph("테스트");
     graph = addNode(graph, {
       id: "n1",
@@ -330,7 +330,7 @@ describe("updateNode (props 머지)", () => {
     const result = updateNode(graph, "n1", {
       props: { hexCode: "#FF0000", usage: "danger" },
     });
-    // shallow merge: 새 props가 기존을 덮음
+    // props 전체 교체: 기존 category는 유실됨
     expect(result.nodes[0].props).toEqual({ hexCode: "#FF0000", usage: "danger" });
   });
 });
