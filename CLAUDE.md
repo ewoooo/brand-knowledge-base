@@ -80,3 +80,33 @@ npx tsx scripts/convert-worxphere.ts
 
 - 새로운 기능/수정 작업 시작 시 반드시 main에서 feature 브랜치를 생성할 것 (`using-git-worktrees` 스킬 실행)
 - PR 생성 시 반드시 다음 스킬을 실행할 것: `verification-before-completion`, `requesting-code-review`, `finishing-a-development-branch`
+
+## gstack
+
+웹 브라우징은 gstack의 /browse 스킬을 사용할 것. mcp__claude-in-chrome__* 도구는 사용하지 않음.
+
+사용 가능한 스킬: /office-hours, /plan-ceo-review, /plan-eng-review, /plan-design-review,
+/design-consultation, /design-shotgun, /design-html, /review, /ship, /land-and-deploy,
+/canary, /benchmark, /browse, /connect-chrome, /qa, /qa-only, /design-review,
+/setup-browser-cookies, /setup-deploy, /retro, /investigate, /document-release, /codex,
+/cso, /autoplan, /careful, /freeze, /guard, /unfreeze, /gstack-upgrade, /learn.
+
+스킬이 동작하지 않으면 `cd .claude/skills/gstack && ./setup` 실행.
+
+## Skill routing
+
+When the user's request matches an available skill, ALWAYS invoke it using the Skill
+tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
+The skill has specialized workflows that produce better results than ad-hoc answers.
+
+Key routing rules:
+- Product ideas, "is this worth building", brainstorming → invoke office-hours
+- Bugs, errors, "why is this broken", 500 errors → invoke investigate
+- Ship, deploy, push, create PR → invoke ship
+- QA, test the site, find bugs → invoke qa
+- Code review, check my diff → invoke review
+- Update docs after shipping → invoke document-release
+- Weekly retro → invoke retro
+- Design system, brand → invoke design-consultation
+- Visual audit, design polish → invoke design-review
+- Architecture review → invoke plan-eng-review
