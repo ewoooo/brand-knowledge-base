@@ -49,6 +49,13 @@ next-env.d.ts
 # turbo
 .turbo/
 
+# IDE
+.idea/
+.vscode/
+
+# logs
+*.log
+
 # claude local config
 .claude/
 .gstack/

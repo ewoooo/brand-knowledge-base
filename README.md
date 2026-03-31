@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KnowledgeView
+
+지식 그래프 편집기 + RAG 파이프라인. 브랜드 가이드라인 등의 도메인 지식을 **노드-트리플-규칙** 구조로 시각화하고, AI 대화를 통해 탐색합니다.
+
+## Architecture
+
+```
+apps/
+├── editor        Next.js 16 — D3 기반 그래프 편집 UI (3패널 레이아웃)
+├── rag-api       Next.js 16 — RAG 질의 API 서버
+└── generator     Next.js 16 — 그래프 생성기
+
+packages/
+├── kg-core       순수 함수: 타입, CRUD, 검증, 직렬화
+├── graph-rag     RAG 파이프라인: 엔티티 추출 → BFS → 컨텍스트
+└── chat-core     채팅 코어 로직
+```
+
+**의존 관계:** `editor → kg-core`, `rag-api → graph-rag → kg-core`
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local   # ANTHROPIC_API_KEY 설정
+pnpm dev                     # 전체 워크스페이스 실행
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| 앱 | 포트 |
+|----|------|
+| editor | `localhost:3000` |
+| rag-api | `localhost:3001` |
+| generator | `localhost:3002` |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev          # 전체 dev 서버
+pnpm build        # 전체 빌드
+pnpm test         # 전체 테스트 (Vitest)
+pnpm lint         # 전체 린트
+```
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js 16 · React 19 · TypeScript 5 · D3 v7 · shadcn/ui · Tailwind CSS 4 · AI SDK v6 · Vitest · Turborepo · pnpm 10

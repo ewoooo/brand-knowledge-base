@@ -40,6 +40,10 @@ npx tsx scripts/convert-worxphere.ts
 - 새 앱 추가 시 다음 번호(3003~)를 순차 할당
 - 포트 충돌 시: `lsof -ti:<포트> | xargs kill`
 
+## Active Phase
+
+현재 **Phase 0 (TypeRegistry 도입)** 진행 중. 작업 시작 전 반드시 `docs/phases/phase-0-report.md`를 읽고 현재 상태를 확인할 것. 작업 후에는 해당 파일의 상태 테이블과 세션 로그를 업데이트할 것.
+
 ## Key Rules
 
 - **`data/` 디렉토리는 프로젝트 루트에 위치** — API route에서 `process.cwd() + "data"`로 읽기/쓰기
