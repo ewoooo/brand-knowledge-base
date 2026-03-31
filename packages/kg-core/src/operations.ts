@@ -1,4 +1,4 @@
-import type { KnowledgeGraph, Node, Triple, Rule } from "./types";
+import type { KnowledgeGraph, Node, Triple, Rule, PropertyDef } from "./types";
 import { normalizeType } from "./normalize-type";
 
 export function createEmptyGraph(name: string): KnowledgeGraph {
@@ -205,5 +205,78 @@ export function removeRule(
             ...graph.metadata,
             updated: new Date().toISOString().split("T")[0],
         },
+    };
+}
+
+// --- Schema CRUD ---
+
+export function addPropertyDef(
+    graph: KnowledgeGraph,
+    nodeType: string,
+    propertyDef: PropertyDef,
+): KnowledgeGraph {
+    if (!graph.schema) throw new Error("Schema is not defined");
+    const nt = graph.schema.nodeTypes.find((t) => t.type === nodeType);
+    if (!nt) throw new Error(`NodeType '${nodeType}' not found`);
+    if (nt.properties.some((p) => p.key === propertyDef.key)) {
+        throw new Error(`Property '${propertyDef.key}' already exists on '${nodeType}'`);
+    }
+    return {
+        ...graph,
+        schema: {
+            ...graph.schema,
+            nodeTypes: graph.schema.nodeTypes.map((t) =>
+                t.type === nodeType
+                    ? { ...t, properties: [...t.properties, propertyDef] }
+                    : t,
+            ),
+        },
+        metadata: { ...graph.metadata, updated: new Date().toISOString().split("T")[0] },
+    };
+}
+
+export function removePropertyDef(
+    graph: KnowledgeGraph,
+    nodeType: string,
+    propertyKey: string,
+): KnowledgeGraph {
+    if (!graph.schema) throw new Error("Schema is not defined");
+    return {
+        ...graph,
+        schema: {
+            ...graph.schema,
+            nodeTypes: graph.schema.nodeTypes.map((t) =>
+                t.type === nodeType
+                    ? { ...t, properties: t.properties.filter((p) => p.key !== propertyKey) }
+                    : t,
+            ),
+        },
+        metadata: { ...graph.metadata, updated: new Date().toISOString().split("T")[0] },
+    };
+}
+
+export function updatePropertyDef(
+    graph: KnowledgeGraph,
+    nodeType: string,
+    propertyKey: string,
+    updates: Partial<Omit<PropertyDef, "key">>,
+): KnowledgeGraph {
+    if (!graph.schema) throw new Error("Schema is not defined");
+    return {
+        ...graph,
+        schema: {
+            ...graph.schema,
+            nodeTypes: graph.schema.nodeTypes.map((t) =>
+                t.type === nodeType
+                    ? {
+                          ...t,
+                          properties: t.properties.map((p) =>
+                              p.key === propertyKey ? { ...p, ...updates } : p,
+                          ),
+                      }
+                    : t,
+            ),
+        },
+        metadata: { ...graph.metadata, updated: new Date().toISOString().split("T")[0] },
     };
 }

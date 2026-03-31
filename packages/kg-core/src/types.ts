@@ -3,7 +3,7 @@
 export interface PropertyDef {
     key: string;
     displayName: string;
-    valueType: "string" | "number" | "boolean" | "date" | "url" | "enum";
+    valueType: "string" | "text" | "number" | "boolean" | "date" | "url" | "enum" | "array";
     required?: boolean;
     enumValues?: string[];
     description?: string;
@@ -57,6 +57,7 @@ export interface Node {
     id: string;
     label: string;
     type: string;
+    description?: string;
     props?: Record<string, unknown>;
 }
 

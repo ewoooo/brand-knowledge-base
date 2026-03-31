@@ -22,6 +22,9 @@ export {
   updateTriple,
   addRule,
   removeRule,
+  addPropertyDef,
+  removePropertyDef,
+  updatePropertyDef,
 } from "./operations";
 
 export { validate } from "./validator";
