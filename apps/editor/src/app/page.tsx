@@ -254,10 +254,12 @@ export default function Home() {
                         ? {
                               label: dialogs.editingNode.label,
                               type: dialogs.editingNode.type,
+                              props: dialogs.editingNode.props,
                           }
                         : undefined
                 }
                 existingTypes={[...new Set(graph.nodes.map((n) => n.type))]}
+                schema={graph.schema}
             />
 
             <TripleForm
