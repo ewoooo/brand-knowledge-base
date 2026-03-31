@@ -257,9 +257,7 @@ export default function Home() {
                           }
                         : undefined
                 }
-                existingTypes={graph.nodes
-                    .map((n) => n.type)
-                    .filter((t): t is string => !!t)}
+                existingTypes={[...new Set(graph.nodes.map((n) => n.type))]}
             />
 
             <TripleForm

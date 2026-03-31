@@ -134,7 +134,7 @@ export function NodeForm({
                             <div className="flex gap-2">
                                 <Select value={type} onValueChange={setType}>
                                     <SelectTrigger className="flex-1">
-                                        <SelectValue placeholder="타입 선택 (선택사항)" />
+                                        <SelectValue placeholder="타입 선택" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {allTypes.map((t) => (
