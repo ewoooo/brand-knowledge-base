@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import * as d3 from "d3";
+import type { TypeRegistry } from "@knowledgeview/kg-core";
 import type { SimNode, SimLink } from "../canvas-types";
 import { nodeColor, hexToRgba } from "../canvas-types";
 
@@ -14,6 +15,7 @@ interface UpdateStylesParams {
     zoomRef: RefObject<d3.ZoomBehavior<SVGSVGElement, unknown> | null>;
     simulationRef: RefObject<d3.Simulation<SimNode, SimLink> | null>;
     svgEl: SVGSVGElement;
+    schema?: TypeRegistry;
 }
 
 /**
@@ -31,6 +33,7 @@ export function updateStyles({
     zoomRef,
     simulationRef,
     svgEl,
+    schema,
 }: UpdateStylesParams) {
     // 선택된 노드에 연결된 엣지 수집
     const selectedNodeEdgeIds = new Set<string>();
@@ -63,7 +66,7 @@ export function updateStyles({
                 .attr("filter", "none");
         } else {
             circle
-                .attr("stroke", hexToRgba(nodeColor(d.type), 0.6))
+                .attr("stroke", hexToRgba(nodeColor(d.type, schema), 0.6))
                 .attr("stroke-width", 2)
                 .attr("stroke-dasharray", "none")
                 .attr("filter", "none");

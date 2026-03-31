@@ -96,15 +96,16 @@ export default function Canvas({
         });
 
         // 렌더링
+        const schema = graph.schema;
         const linkGroup = renderEdges(g, links, refs);
-        const nodeGs = renderNodes(g, nodes, linkGroup, refs);
+        const nodeGs = renderNodes(g, nodes, linkGroup, refs, schema);
 
         // 시뮬레이션
-        const simulation = createSimulation(nodes, links, width, height, linkGroup, nodeGs);
+        const simulation = createSimulation(nodes, links, width, height, linkGroup, nodeGs, schema);
         simulationRef.current = simulation;
 
         // 뷰 맞춤
-        simulation.on("end", () => fitToView(svg, zoom, nodes, width, height));
+        simulation.on("end", () => fitToView(svg, zoom, nodes, width, height, schema));
 
         return () => { simulation.stop(); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -126,6 +127,7 @@ export default function Canvas({
             zoomRef,
             simulationRef,
             svgEl,
+            schema: graph.schema,
         });
     }, [
         selectedNodeId,

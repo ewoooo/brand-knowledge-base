@@ -267,6 +267,7 @@ export default function Home() {
                 onClose={dialogs.closeTripleForm}
                 onSubmit={dialogs.handleTripleSubmit}
                 nodes={graph.nodes}
+                linkTypes={graph.schema?.linkTypes}
                 initial={
                     dialogs.editingTriple
                         ? {

@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import type { TypeRegistry } from "@knowledgeview/kg-core";
 import type { SimNode } from "../canvas-types";
 import { nodeSize } from "../canvas-types";
 
@@ -11,6 +12,7 @@ export function fitToView(
     nodes: SimNode[],
     width: number,
     height: number,
+    schema?: TypeRegistry,
 ) {
     const padding = 60;
     let minX = Infinity,
@@ -19,7 +21,7 @@ export function fitToView(
         maxY = -Infinity;
 
     nodes.forEach((n) => {
-        const r = nodeSize(n.type);
+        const r = nodeSize(n.type, schema);
         if ((n.x ?? 0) - r < minX) minX = (n.x ?? 0) - r;
         if ((n.y ?? 0) - r < minY) minY = (n.y ?? 0) - r;
         if ((n.x ?? 0) + r > maxX) maxX = (n.x ?? 0) + r;

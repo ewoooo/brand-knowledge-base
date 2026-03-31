@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import type * as d3 from "d3";
-import type { KnowledgeGraph } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, TypeRegistry } from "@knowledgeview/kg-core";
 
 /* ------------------------------------------------------------------ */
 /*  Simulation types                                                   */
@@ -73,11 +73,19 @@ const NODE_SIZES: Record<string, number> = {
     application: 20,
 };
 
-export function nodeColor(type?: string): string {
+export function nodeColor(type?: string, schema?: TypeRegistry): string {
+    if (schema) {
+        const nt = schema.nodeTypes.find((n) => n.type === type);
+        if (nt?.visual?.color) return nt.visual.color;
+    }
     return NODE_COLORS[type ?? "concept"] ?? NODE_COLORS["concept"];
 }
 
-export function nodeSize(type?: string): number {
+export function nodeSize(type?: string, schema?: TypeRegistry): number {
+    if (schema) {
+        const nt = schema.nodeTypes.find((n) => n.type === type);
+        if (nt?.visual?.size) return nt.visual.size;
+    }
     return NODE_SIZES[type ?? "concept"] ?? NODE_SIZES["concept"];
 }
 
