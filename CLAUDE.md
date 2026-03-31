@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 KnowledgeView는 지식 그래프(Knowledge Graph) 편집기 + RAG 파이프라인 프로젝트로, 브랜드 가이드라인 등의 도메인 지식을 노드-트리플-규칙 구조로 시각화하고 AI 대화를 통해 탐색할 수 있다.
 
-상세 아키텍처: `docs/architecture.md` 참조 (에디터 파일 구조, 컴포넌트 트리, CSS 구조, D3 모듈 등)
+상세 아키텍처: `docs/specs/architecture.md` 참조 (에디터 파일 구조, 컴포넌트 트리, CSS 구조, D3 모듈 등)
 
 ## Commands
 
@@ -76,7 +76,7 @@ npx tsx scripts/convert-worxphere.ts
 
 ## Git Rules
 
-@GIT_CONVENTION.md
+@docs/guides/git-convention.md
 
 - 새로운 기능/수정 작업 시작 시 반드시 main에서 feature 브랜치를 생성할 것 (`using-git-worktrees` 스킬 실행)
 - PR 생성 시 반드시 다음 스킬을 실행할 것: `verification-before-completion`, `requesting-code-review`, `finishing-a-development-branch`

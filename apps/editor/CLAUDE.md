@@ -2,7 +2,7 @@
 
 지식 그래프 편집기 — D3 기반 시각화 + 실시간 규칙 검증 + AI 채팅
 
-상세 구조: `docs/architecture.md` 참조 (컴포넌트 트리, 훅 구조, Canvas 모듈, CSS 구조)
+상세 구조: `docs/specs/architecture.md` 참조 (컴포넌트 트리, 훅 구조, Canvas 모듈, CSS 구조)
 
 ## 명령어
 

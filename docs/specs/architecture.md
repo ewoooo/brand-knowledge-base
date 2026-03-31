@@ -111,8 +111,8 @@ app/styles/
 
 ## Data Methodology (SPO + FOL)
 
-설계 스펙: `docs/superpowers/specs/2026-03-30-knowledgeview-design.md`
-로드맵: `docs/superpowers/specs/2026-03-30-knowledgeview-roadmap.md`
+설계 스펙: `docs/archive/2026-03-30-mvp/specs/2026-03-30-knowledgeview-design.md`
+로드맵: `docs/archive/2026-03-30-mvp/specs/2026-03-30-knowledgeview-roadmap.md`
 
 ### SPO (Subject-Predicate-Object)
 

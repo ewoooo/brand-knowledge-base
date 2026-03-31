@@ -2,7 +2,7 @@
 
 지식 그래프의 타입 정의, 불변 CRUD, 검증, 직렬화를 담당하는 순수 TypeScript 패키지
 
-상세 도메인 모델: `docs/architecture.md` 참조
+상세 도메인 모델: `docs/specs/architecture.md` 참조
 
 ## 명령어
 
