@@ -17,6 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import type { Node } from "@knowledgeview/kg-core";
 
 interface TripleFormProps {
@@ -68,7 +69,7 @@ export function TripleForm({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>
                         {isEditing ? "관계 편집" : "새 관계 추가"}
@@ -76,51 +77,65 @@ export function TripleForm({
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4 py-2">
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium">
-                            주어 (Subject)
-                        </label>
-                        <Select value={subject} onValueChange={setSubject}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="노드 선택" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {nodes.map((node) => (
-                                    <SelectItem key={node.id} value={node.id}>
-                                        {node.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    {/* Subject → Object (같은 행) */}
+                    <div className="flex items-end gap-4">
+                        <div className="flex min-w-0 flex-1 flex-col space-y-2">
+                            <label className="pl-1 text-sm font-medium text-neutral-400">
+                                주어
+                            </label>
+                            <Select value={subject} onValueChange={setSubject}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="노드 선택" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {nodes.map((node) => (
+                                        <SelectItem
+                                            key={node.id}
+                                            value={node.id}
+                                        >
+                                            {node.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="text-muted-foreground flex h-9 shrink-0 items-center">
+                            <ArrowRight className="size-4" />
+                        </div>
+
+                        <div className="flex min-w-0 flex-1 flex-col items-end justify-end space-y-2">
+                            <label className="pr-1 text-sm font-medium text-neutral-400">
+                                목적어
+                            </label>
+                            <Select value={object} onValueChange={setObject}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="노드 선택" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {nodes.map((node) => (
+                                        <SelectItem
+                                            key={node.id}
+                                            value={node.id}
+                                        >
+                                            {node.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium">
-                            서술어 (Predicate)
+                    {/* Predicate */}
+                    <div className="flex flex-col space-y-2">
+                        <label className="pl-1 text-sm font-medium text-neutral-400">
+                            관계
                         </label>
                         <Input
                             placeholder="관계 입력 (예: hasColor, isPartOf)"
                             value={predicate}
                             onChange={(e) => setPredicate(e.target.value)}
                         />
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium">
-                            목적어 (Object)
-                        </label>
-                        <Select value={object} onValueChange={setObject}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="노드 선택" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {nodes.map((node) => (
-                                    <SelectItem key={node.id} value={node.id}>
-                                        {node.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
                     </div>
                 </div>
 

@@ -48,7 +48,9 @@ export interface CallbackRefs {
     onClearSelection: RefObject<() => void>;
     onDoubleClickCanvas: RefObject<() => void>;
     onFocusNode: RefObject<(nodeId: string | null) => void>;
-    onContextMenu: RefObject<(nodeId: string, position: { x: number; y: number }) => void>;
+    onContextMenu: RefObject<
+        (nodeId: string, position: { x: number; y: number }) => void
+    >;
 }
 
 /* ------------------------------------------------------------------ */
@@ -57,24 +59,26 @@ export interface CallbackRefs {
 
 const NODE_COLORS: Record<string, string> = {
     brand: "#6496ff",
-    color: "#ff5733",
     typography: "#64ff96",
     concept: "#888888",
+    color: "#ff5733",
+    application: "#995733",
 };
 
 const NODE_SIZES: Record<string, number> = {
     brand: 36,
-    color: 26,
     typography: 26,
     concept: 22,
+    color: 20,
+    application: 20,
 };
 
 export function nodeColor(type?: string): string {
-    return NODE_COLORS[type ?? "concept"] ?? NODE_COLORS.concept;
+    return NODE_COLORS[type ?? "concept"] ?? NODE_COLORS["concept"];
 }
 
 export function nodeSize(type?: string): number {
-    return NODE_SIZES[type ?? "concept"] ?? NODE_SIZES.concept;
+    return NODE_SIZES[type ?? "concept"] ?? NODE_SIZES["concept"];
 }
 
 export function hexToRgba(hex: string, alpha: number): string {
