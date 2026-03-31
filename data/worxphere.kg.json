@@ -2,7 +2,7 @@
   "metadata": {
     "name": "Worxphere",
     "created": "2026-03-30T00:00:00Z",
-    "updated": "2026-03-30",
+    "updated": "2026-03-31",
     "schemaVersion": "2.0"
   },
   "schema": {
@@ -524,112 +524,200 @@
     {
       "id": "42755e94-da4f-4037-b1a8-1ef2e5062154",
       "label": "Spectrum Black",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#182432",
+        "category": "primary"
+      }
     },
     {
       "id": "3a39c7d5-3557-48ac-9191-7cd1f8db87ae",
       "label": "Stellar Glow",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#FAFFDC",
+        "category": "primary"
+      }
     },
     {
       "id": "f15311a6-682e-4d1a-90b7-918c83163efe",
       "label": "Stellar Glow 01",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#FFFFFA",
+        "category": "secondary"
+      }
     },
     {
       "id": "983da0dc-4a03-483a-bed1-5b461e410459",
       "label": "Stellar Glow 02",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#FDFFF0",
+        "category": "secondary"
+      }
     },
     {
       "id": "8f849c9b-5695-4196-8ab9-896d021ab1ac",
       "label": "Stellar Glow 03",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#FBFFE6",
+        "category": "secondary"
+      }
     },
     {
       "id": "18157391-022e-4e1b-924f-e84700314636",
       "label": "Spectrum Gray 01",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#F5FAFF",
+        "category": "neutral"
+      }
     },
     {
       "id": "6fd36c58-7afb-4e74-ac00-2f737d3b5dd4",
       "label": "Spectrum Gray 02",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#D2DAE1",
+        "category": "neutral"
+      }
     },
     {
       "id": "3c4bc44f-bf52-44d0-a3c4-783260b60459",
       "label": "Spectrum Gray 03",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#B4BEC8",
+        "category": "neutral"
+      }
     },
     {
       "id": "62cb494f-d472-4f32-8405-6014dc9425cf",
       "label": "Spectrum Gray 04",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#96A0AA",
+        "category": "neutral"
+      }
     },
     {
       "id": "437ac1d1-eebe-419d-804e-7575877edadc",
       "label": "Spectrum Gray 05",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#78828C",
+        "category": "neutral"
+      }
     },
     {
       "id": "ebe4de06-0b8c-459f-b4cd-ecae6c1c5b0a",
       "label": "Spectrum Gray 06",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#5A646E",
+        "category": "neutral"
+      }
     },
     {
       "id": "1e97885c-59ef-4871-a29e-b28fd3311688",
       "label": "Spectrum Gray 07",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#2D3741",
+        "category": "neutral"
+      }
     },
     {
       "id": "73702d0f-d12e-4a1d-88bb-7e1bea7e29aa",
       "label": "Mono Color 01",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#E2E2E2",
+        "category": "mono"
+      }
     },
     {
       "id": "80247e45-23a9-45fe-b7e1-3a61866e5e44",
       "label": "Mono Color 02",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#C5C5C5",
+        "category": "mono"
+      }
     },
     {
       "id": "60d4ca7d-976b-4424-9ff2-8bda5adf10de",
       "label": "Mono Color 03",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#AAAAAA",
+        "category": "mono"
+      }
     },
     {
       "id": "5c1cb449-ddfb-401a-86d8-d7000aab6df4",
       "label": "Mono Color 04",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#8D8D8D",
+        "category": "mono"
+      }
     },
     {
       "id": "d5aa93ed-4c09-4ac6-8b46-7be46b249bab",
       "label": "Mono Color 05",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#727272",
+        "category": "mono"
+      }
     },
     {
       "id": "354a64c9-fb3e-4ee6-aa55-548db755dc6c",
       "label": "Mono Color 06",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#555555",
+        "category": "mono"
+      }
     },
     {
       "id": "068fb505-de79-43e5-8b7a-326ae617e691",
       "label": "Mono Color 07",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#393939",
+        "category": "mono"
+      }
     },
     {
       "id": "0d058a05-33cc-4f21-a48f-3123326566b0",
       "label": "Mono Color 08",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#1C1C1C",
+        "category": "mono"
+      }
     },
     {
       "id": "cfb894d0-2ae7-46e1-b231-ce169e97da28",
       "label": "White",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#FFFFFF",
+        "category": "neutral"
+      }
     },
     {
       "id": "0ea38042-85b6-4a6a-b545-502474b9a983",
       "label": "Black",
-      "type": "color"
+      "type": "color",
+      "props": {
+        "hexCode": "#000000",
+        "category": "neutral"
+      }
     },
     {
       "id": "e768cfd7-1e4f-44a9-9d49-07e8993d41b5",
@@ -644,7 +732,10 @@
     {
       "id": "dd62f20b-6578-42b1-8344-4707c7160cca",
       "label": "마이크로 타이포그래피",
-      "type": "typography"
+      "type": "usage-rule",
+      "props": {
+        "severity": "mandatory"
+      }
     },
     {
       "id": "8908cb90-8a59-4d00-a5c8-97e3c69c4ab8",
@@ -1017,24 +1108,6 @@
       "subject": "57b92a7b-b79e-4d6c-86a2-ec8fa0736f46",
       "predicate": "ownsColor",
       "object": "0ea38042-85b6-4a6a-b545-502474b9a983"
-    },
-    {
-      "id": "1331a9cf-c28e-4660-851e-1a2aeb94fc36",
-      "subject": "57b92a7b-b79e-4d6c-86a2-ec8fa0736f46",
-      "predicate": "ownsTypography",
-      "object": "e768cfd7-1e4f-44a9-9d49-07e8993d41b5"
-    },
-    {
-      "id": "71c665cd-86b5-4a34-9271-c5a0ee6c4d05",
-      "subject": "57b92a7b-b79e-4d6c-86a2-ec8fa0736f46",
-      "predicate": "ownsTypography",
-      "object": "0e41808d-7318-41a4-ba0e-c924b5e1fbe4"
-    },
-    {
-      "id": "90d4e4b5-84fe-4622-9dc3-408df464dbba",
-      "subject": "57b92a7b-b79e-4d6c-86a2-ec8fa0736f46",
-      "predicate": "ownsTypography",
-      "object": "dd62f20b-6578-42b1-8344-4707c7160cca"
     },
     {
       "id": "d7cf7427-4533-45ca-a96d-f9af18a9ee58",
