@@ -2,6 +2,8 @@
  * PascalCase / camelCase → kebab-case 변환.
  * 노드 타입 정규화에 사용. 이미 kebab-case/소문자면 그대로 반환.
  */
+export function normalizeType(type: string): string;
+export function normalizeType(type: string | undefined): string | undefined;
 export function normalizeType(type: string | undefined): string | undefined {
     if (type === undefined) return undefined;
     if (type === "") return "";

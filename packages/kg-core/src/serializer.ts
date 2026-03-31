@@ -14,14 +14,21 @@ export function fromJSON(json: string): KnowledgeGraph {
 
     return {
         metadata: {
-            ...parsed.metadata,
+            name: parsed.metadata.name,
+            created: parsed.metadata.created,
+            updated: parsed.metadata.updated,
+            ...(parsed.metadata.schemaVersion !== undefined && {
+                schemaVersion: parsed.metadata.schemaVersion,
+            }),
             ...(parsed.metadata.systemPrompt !== undefined && {
                 systemPrompt: parsed.metadata.systemPrompt,
             }),
         },
-        nodes: parsed.nodes.map((n: { type?: string }) => (
-            n.type ? { ...n, type: normalizeType(n.type) } : n
-        )),
+        ...(parsed.schema && { schema: parsed.schema }),
+        nodes: parsed.nodes.map((n: { type: string }) => ({
+            ...n,
+            type: normalizeType(n.type),
+        })),
         triples: parsed.triples,
         rules: (parsed.rules ?? []).map((r: { condition?: { nodeType?: string } }) => (
             r.condition?.nodeType
@@ -36,10 +43,36 @@ export function generateId(): string {
 }
 
 export function serializeGraphForPrompt(graph: KnowledgeGraph): string {
+    const sections: string[] = [
+        `## 현재 그래프: ${graph.metadata.name}`,
+    ];
+
+    if (graph.schema) {
+        const ntLines = graph.schema.nodeTypes.map((nt) => {
+            const propsStr = nt.properties.length > 0
+                ? ` [속성: ${nt.properties.map((p) => p.key).join(", ")}]`
+                : "";
+            return `- ${nt.type} (${nt.displayName}): ${nt.description}${propsStr}`;
+        });
+        const ltLines = graph.schema.linkTypes.map((lt) => {
+            const src = lt.sourceTypes.length > 0 ? lt.sourceTypes.join(", ") : "*";
+            const tgt = lt.targetTypes.length > 0 ? lt.targetTypes.join(", ") : "*";
+            return `- ${lt.predicate} (${lt.displayName}): ${src} → ${tgt} (${lt.cardinality})`;
+        });
+        sections.push(
+            "",
+            `### 노드 타입 (${graph.schema.nodeTypes.length}개)`,
+            ...(ntLines.length > 0 ? ntLines : ["(없음)"]),
+            "",
+            `### 관계 타입 (${graph.schema.linkTypes.length}개)`,
+            ...(ltLines.length > 0 ? ltLines : ["(없음)"]),
+        );
+    }
+
     const nodeMap = new Map(graph.nodes.map((n) => [n.id, n]));
 
     const nodeLines = graph.nodes.map(
-        (n) => `- ${n.label}${n.type ? ` (${n.type})` : ""}`,
+        (n) => `- ${n.label} (${n.type})`,
     );
 
     const tripleLines = graph.triples.map((t) => {
@@ -52,8 +85,7 @@ export function serializeGraphForPrompt(graph: KnowledgeGraph): string {
         (r) => `- ${r.name} (${r.type}): ${r.expression}`,
     );
 
-    return [
-        `## 현재 그래프: ${graph.metadata.name}`,
+    sections.push(
         "",
         `### 노드 (${graph.nodes.length}개)`,
         ...(nodeLines.length > 0 ? nodeLines : ["(없음)"]),
@@ -63,5 +95,7 @@ export function serializeGraphForPrompt(graph: KnowledgeGraph): string {
         "",
         `### 규칙 (${graph.rules.length}개)`,
         ...(ruleLines.length > 0 ? ruleLines : ["(없음)"]),
-    ].join("\n");
+    );
+
+    return sections.join("\n");
 }

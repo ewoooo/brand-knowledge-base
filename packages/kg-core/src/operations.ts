@@ -15,7 +15,7 @@ export function addNode(graph: KnowledgeGraph, node: Node): KnowledgeGraph {
     if (graph.nodes.some((n) => n.id === node.id)) {
         throw new Error(`Node with id ${node.id} already exists`);
     }
-    const normalized = node.type ? { ...node, type: normalizeType(node.type) } : node;
+    const normalized = { ...node, type: normalizeType(node.type) };
     return {
         ...graph,
         nodes: [...graph.nodes, normalized],
@@ -67,12 +67,60 @@ export function addTriple(
     graph: KnowledgeGraph,
     triple: Triple,
 ): KnowledgeGraph {
-    if (!graph.nodes.some((n) => n.id === triple.subject)) {
+    const subjectNode = graph.nodes.find((n) => n.id === triple.subject);
+    if (!subjectNode) {
         throw new Error(`Subject node ${triple.subject} not found`);
     }
-    if (!graph.nodes.some((n) => n.id === triple.object)) {
+    const objectNode = graph.nodes.find((n) => n.id === triple.object);
+    if (!objectNode) {
         throw new Error(`Object node ${triple.object} not found`);
     }
+
+    if (graph.schema) {
+        const linkType = graph.schema.linkTypes.find(
+            (lt) => lt.predicate === triple.predicate,
+        );
+        if (!linkType) {
+            throw new Error(
+                `Predicate "${triple.predicate}" is not defined in schema linkTypes`,
+            );
+        }
+        if (
+            linkType.sourceTypes.length > 0 &&
+            !linkType.sourceTypes.includes(subjectNode.type)
+        ) {
+            throw new Error(
+                `Node type "${subjectNode.type}" is not in sourceTypes [${linkType.sourceTypes.join(", ")}] for predicate "${triple.predicate}"`,
+            );
+        }
+        if (
+            linkType.targetTypes.length > 0 &&
+            !linkType.targetTypes.includes(objectNode.type)
+        ) {
+            throw new Error(
+                `Node type "${objectNode.type}" is not in targetTypes [${linkType.targetTypes.join(", ")}] for predicate "${triple.predicate}"`,
+            );
+        }
+        if (
+            linkType.cardinality === "1:1" ||
+            linkType.cardinality === "1:N"
+        ) {
+            // 1:1 — subject당 하나의 predicate만 허용
+            if (linkType.cardinality === "1:1") {
+                const existing = graph.triples.find(
+                    (t) =>
+                        t.subject === triple.subject &&
+                        t.predicate === triple.predicate,
+                );
+                if (existing) {
+                    throw new Error(
+                        `cardinality 1:1 violation: "${triple.subject}" already has predicate "${triple.predicate}"`,
+                    );
+                }
+            }
+        }
+    }
+
     return {
         ...graph,
         triples: [...graph.triples, triple],

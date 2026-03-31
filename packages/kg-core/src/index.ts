@@ -1,4 +1,9 @@
 export type {
+  PropertyDef,
+  NodeType,
+  LinkType,
+  TypeRegistry,
+  TripleMetadata,
   Triple,
   Node,
   RuleCondition,
