@@ -17,6 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PropertyEditor, getFieldsForType } from "./property-editor";
 import type { TypeRegistry } from "@knowledgeview/kg-core";
@@ -131,8 +132,9 @@ export function NodeForm({
                 <ScrollArea className="max-h-[60vh]">
                     <div className="flex flex-col gap-4 py-2 pr-3">
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium">레이블</label>
+                            <Label htmlFor="node-label" className="text-sm font-medium">레이블</Label>
                             <Input
+                                id="node-label"
                                 placeholder="노드 이름 입력"
                                 value={label}
                                 onChange={(e) => setLabel(e.target.value)}
@@ -142,7 +144,7 @@ export function NodeForm({
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium">타입</label>
+                            <Label className="text-sm font-medium">타입</Label>
                             {!hasSchema && isCustom ? (
                                 <div className="flex gap-2">
                                     <Input
@@ -150,7 +152,6 @@ export function NodeForm({
                                         value={customType}
                                         onChange={(e) => setCustomType(e.target.value)}
                                         onKeyDown={handleKeyDown}
-                                        autoFocus
                                     />
                                     <Button
                                         variant="ghost"
@@ -172,7 +173,7 @@ export function NodeForm({
                                         <SelectContent>
                                             {typeOptions.map((opt) => (
                                                 <SelectItem key={opt.value} value={opt.value}>
-                                                    {opt.label}
+                                                    <span className="truncate" title={opt.label}>{opt.label}</span>
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
