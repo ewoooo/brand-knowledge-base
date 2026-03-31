@@ -30,13 +30,13 @@ export function TripleCard({
         <div
             className={`group relative cursor-pointer overflow-hidden rounded-md border px-3 py-2 text-xs transition-colors hover:bg-muted/50 ${
                 isViolating
-                    ? "border-red-500 bg-red-500/5"
-                    : "border-border bg-muted/30"
+                    ? "border-[#d94f4f]/30"
+                    : "border-border"
             }`}
             onClick={() => onEditTriple(triple.id)}
         >
             <div className="truncate pr-7" title={title}>
-                {isViolating && <span className="mr-1 text-red-500">⚠</span>}
+                {isViolating && <span className="mr-1.5 inline-block size-1.5 shrink-0 rounded-full bg-[#d94f4f]" />}
                 {direction === "outgoing" ? (
                     <>
                         <span className="text-primary">{triple.predicate}</span>
@@ -75,7 +75,7 @@ export function TripleCard({
                         e.stopPropagation();
                         onDeleteTriple(triple.id);
                     }}
-                    className="rounded p-0.5 text-red-400 hover:bg-red-500/10 hover:text-red-500"
+                    className="rounded p-0.5 text-[#d94f4f]/60 hover:text-[#d94f4f]"
                 >
                     <Trash2 className="size-3.5" />
                 </button>

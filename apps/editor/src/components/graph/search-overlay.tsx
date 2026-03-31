@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/primitives/input";
 
 interface SearchOverlayProps {
     open: boolean;

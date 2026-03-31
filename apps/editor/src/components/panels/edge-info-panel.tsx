@@ -1,6 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/primitives/badge";
+import { Button } from "@/components/ui/primitives/button";
+import { SectionHeader } from "@/components/ui/patterns/section-header";
+import { Separator } from "@/components/ui/primitives/separator";
 import type { KnowledgeGraph, Triple, TypeRegistry } from "@knowledgeview/kg-core";
 import { getLinkTypeDisplayName, getLinkTypeInfo } from "@/lib/schema-display";
 
@@ -30,9 +31,7 @@ export function EdgeInfoPanel({
     return (
         <div className="space-y-4 p-4">
             <div className="space-y-1">
-                <p className="text-muted-foreground text-xs font-medium uppercase">
-                    관계
-                </p>
+                <SectionHeader title="관계" />
                 <div className="border-border bg-muted/30 rounded-md border px-3 py-2 text-sm">
                     <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
                         <span

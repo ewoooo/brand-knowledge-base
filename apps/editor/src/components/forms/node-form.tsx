@@ -7,26 +7,27 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/patterns/dialog";
+import { Input } from "@/components/ui/primitives/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@/components/ui/patterns/select";
+import { Button } from "@/components/ui/primitives/button";
+import { Label } from "@/components/ui/primitives/label";
+import { ScrollArea } from "@/components/ui/patterns/scroll-area";
+import { Textarea } from "@/components/ui/primitives/textarea";
 import { PropertyEditor, getFieldsForType } from "./property-editor";
 import type { TypeRegistry } from "@knowledgeview/kg-core";
 
 interface NodeFormProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (node: { label: string; type: string; props?: Record<string, unknown> }) => void;
-    initial?: { label: string; type?: string; props?: Record<string, unknown> };
+    onSubmit: (node: { label: string; type: string; description?: string; props?: Record<string, unknown> }) => void;
+    initial?: { label: string; type?: string; description?: string; props?: Record<string, unknown> };
     existingTypes?: string[];
     schema?: TypeRegistry;
 }
@@ -43,6 +44,7 @@ export function NodeForm({
 }: NodeFormProps) {
     const [label, setLabel] = useState(initial?.label ?? "");
     const [type, setType] = useState<string>(initial?.type ?? "");
+    const [description, setDescription] = useState(initial?.description ?? "");
     const [customType, setCustomType] = useState("");
     const [isCustom, setIsCustom] = useState(false);
     const [props, setProps] = useState<Record<string, unknown>>(initial?.props ?? {});
@@ -60,6 +62,7 @@ export function NodeForm({
     useEffect(() => {
         if (open) {
             setLabel(initial?.label ?? "");
+            setDescription(initial?.description ?? "");
             setProps(initial?.props ?? {});
             const initialType = initial?.type ?? "";
             if (hasSchema) {
@@ -100,13 +103,16 @@ export function NodeForm({
         const finalType = isCustom ? customType.trim() : type;
         if (!finalType) return;
         const hasProps = Object.keys(props).length > 0;
+        const trimmedDesc = description.trim();
         onSubmit({
             label: label.trim(),
             type: finalType,
+            ...(trimmedDesc ? { description: trimmedDesc } : {}),
             ...(hasProps ? { props } : {}),
         });
         setLabel("");
         setType("");
+        setDescription("");
         setCustomType("");
         setIsCustom(false);
         setProps({});
@@ -140,6 +146,18 @@ export function NodeForm({
                                 onChange={(e) => setLabel(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 autoFocus
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <Label htmlFor="node-description" className="text-sm font-medium">설명</Label>
+                            <Textarea
+                                id="node-description"
+                                placeholder="노드에 대한 설명 (선택)"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                rows={3}
+                                className="resize-none text-sm"
                             />
                         </div>
 

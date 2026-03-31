@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { KnowledgeGraph, Node, Triple, Rule } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, Node, Triple, Rule, PropertyDef } from "@knowledgeview/kg-core";
 import {
     addNode,
     removeNode,
@@ -11,6 +11,9 @@ import {
     updateTriple,
     addRule,
     removeRule,
+    addPropertyDef,
+    removePropertyDef,
+    updatePropertyDef,
     generateId,
 } from "@knowledgeview/kg-core";
 
@@ -76,5 +79,11 @@ export function useGraph(initial: KnowledgeGraph | null) {
                     systemPrompt: prompt || undefined,
                 },
             })),
+        addPropertyDef: (nodeType: string, prop: PropertyDef) =>
+            modify((g) => addPropertyDef(g, nodeType, prop)),
+        removePropertyDef: (nodeType: string, propertyKey: string) =>
+            modify((g) => removePropertyDef(g, nodeType, propertyKey)),
+        updatePropertyDef: (nodeType: string, propertyKey: string, updates: Partial<Omit<PropertyDef, "key">>) =>
+            modify((g) => updatePropertyDef(g, nodeType, propertyKey, updates)),
     };
 }

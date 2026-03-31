@@ -15,8 +15,8 @@ import { useRules } from "@/hooks/use-rules";
 import { useDialogs } from "@/hooks/use-dialogs";
 import { useContextMenu } from "@/hooks/use-context-menu";
 import { useSearch } from "@/hooks/use-search";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/primitives/button";
+import { Alert, AlertDescription } from "@/components/ui/patterns/alert";
 
 export default function Home() {
     const {
@@ -33,6 +33,8 @@ export default function Home() {
         updateTriple,
         addRule,
         updateSystemPrompt,
+        addPropertyDef,
+        removePropertyDef,
     } = useGraph(null);
 
     const { selection, selectNode, selectEdge, clearSelection } =
@@ -223,6 +225,8 @@ export default function Home() {
                     handleFocusNode(nodeId);
                 }}
                 onUpdateSystemPrompt={updateSystemPrompt}
+                onAddPropertyDef={addPropertyDef}
+                onRemovePropertyDef={removePropertyDef}
             />
 
             {/* Context menu */}
@@ -256,6 +260,7 @@ export default function Home() {
                         ? {
                               label: dialogs.editingNode.label,
                               type: dialogs.editingNode.type,
+                              description: dialogs.editingNode.description,
                               props: dialogs.editingNode.props,
                           }
                         : undefined

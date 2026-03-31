@@ -17,7 +17,10 @@ export function formatPropertyValue(
             return value ? "예" : "아니오";
         case "number":
             return String(value);
+        case "array":
+            return Array.isArray(value) ? value.join(", ") : String(value);
         case "string":
+        case "text":
         case "date":
         case "url":
         case "enum":
@@ -39,11 +42,17 @@ export function parsePropertyInput(
         }
         case "boolean":
             return input === "true";
+        case "text":
         case "string":
         case "date":
         case "url":
         case "enum":
             return input;
+        case "array":
+            return input
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
         default:
             return input;
     }

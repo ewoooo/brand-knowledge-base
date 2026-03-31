@@ -1,16 +1,18 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/primitives/input";
+import { Textarea } from "@/components/ui/primitives/textarea";
+import { Label } from "@/components/ui/primitives/label";
+import { SectionHeader } from "@/components/ui/patterns/section-header";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/patterns/select";
+import { Switch } from "@/components/ui/primitives/switch";
+import { Badge } from "@/components/ui/primitives/badge";
 import { ExternalLink } from "lucide-react";
 import type { PropertyDef, TypeRegistry } from "@knowledgeview/kg-core";
 import { formatPropertyValue, isHexColor, parsePropertyInput } from "./property-format";
@@ -64,9 +66,7 @@ export function PropertyEditor({
 
         return (
             <div className="space-y-3">
-                <p className="text-muted-foreground text-xs font-medium uppercase">
-                    속성
-                </p>
+                <SectionHeader title="속성" />
                 <div className="space-y-2">
                     {displayFields.map((prop) => (
                         <ReadOnlyField
@@ -82,9 +82,7 @@ export function PropertyEditor({
 
     return (
         <div className="space-y-3">
-            <p className="text-muted-foreground text-xs font-medium uppercase">
-                속성
-            </p>
+            <SectionHeader title="속성" />
             <div className="space-y-3">
                 {properties.map((prop) => (
                     <EditField
@@ -117,7 +115,19 @@ function ReadOnlyField({
             <p className="text-muted-foreground text-[11px]">
                 {prop.displayName}
             </p>
-            {prop.valueType === "url" && formatted ? (
+            {prop.valueType === "text" ? (
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {formatted || <span className="text-muted-foreground">—</span>}
+                </p>
+            ) : prop.valueType === "array" && Array.isArray(value) ? (
+                <div className="flex flex-wrap gap-1">
+                    {value.map((item, i) => (
+                        <Badge key={i} variant="outline" className="text-xs font-normal">
+                            {String(item)}
+                        </Badge>
+                    ))}
+                </div>
+            ) : prop.valueType === "url" && formatted ? (
                 <a
                     href={formatted}
                     target="_blank"
@@ -215,6 +225,35 @@ function renderInput(
                     value={typeof value === "string" ? value : ""}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={prop.displayName}
+                />
+            );
+
+        case "text":
+            return (
+                <Textarea
+                    id={id}
+                    value={typeof value === "string" ? value : ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={prop.displayName}
+                    rows={3}
+                    className="resize-none text-sm"
+                />
+            );
+
+        case "array":
+            return (
+                <Input
+                    id={id}
+                    value={Array.isArray(value) ? value.join(", ") : ""}
+                    onChange={(e) =>
+                        onChange(
+                            e.target.value
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean),
+                        )
+                    }
+                    placeholder="쉼표로 구분 입력"
                 />
             );
 

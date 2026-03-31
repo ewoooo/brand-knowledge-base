@@ -7,20 +7,13 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/patterns/dialog";
+import { Input } from "@/components/ui/primitives/input";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/patterns/popover";
 import {
     Command,
     CommandEmpty,
@@ -28,8 +21,8 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/patterns/command";
+import { Button } from "@/components/ui/primitives/button";
 import { ArrowRight, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { commandFilter } from "@/lib/search-match";
@@ -59,6 +52,8 @@ export function TripleForm({
     const [subject, setSubject] = useState(initial?.subject ?? "");
     const [predicate, setPredicate] = useState(initial?.predicate ?? "");
     const [object, setObject] = useState(initial?.object ?? "");
+    const [subjectOpen, setSubjectOpen] = useState(false);
+    const [objectOpen, setObjectOpen] = useState(false);
     const [predicateOpen, setPredicateOpen] = useState(false);
 
     useEffect(() => {
@@ -121,21 +116,14 @@ export function TripleForm({
                             <label className="pl-1 text-sm font-medium text-neutral-400">
                                 주어
                             </label>
-                            <Select value={subject} onValueChange={setSubject}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="노드 선택" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {nodes.map((node) => (
-                                        <SelectItem
-                                            key={node.id}
-                                            value={node.id}
-                                        >
-                                            {node.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <NodeCombobox
+                                value={subject}
+                                onChange={setSubject}
+                                nodes={nodes}
+                                open={subjectOpen}
+                                onOpenChange={setSubjectOpen}
+                                placeholder="주어 선택"
+                            />
                         </div>
 
                         <div className="text-muted-foreground flex h-9 shrink-0 items-center">
@@ -146,21 +134,14 @@ export function TripleForm({
                             <label className="pr-1 text-sm font-medium text-neutral-400">
                                 목적어
                             </label>
-                            <Select value={object} onValueChange={setObject}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="노드 선택" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {nodes.map((node) => (
-                                        <SelectItem
-                                            key={node.id}
-                                            value={node.id}
-                                        >
-                                            {node.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <NodeCombobox
+                                value={object}
+                                onChange={setObject}
+                                nodes={nodes}
+                                open={objectOpen}
+                                onOpenChange={setObjectOpen}
+                                placeholder="목적어 선택"
+                            />
                         </div>
                     </div>
 
@@ -197,6 +178,90 @@ export function TripleForm({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Node Combobox (Popover + Command)                                  */
+/* ------------------------------------------------------------------ */
+
+function NodeCombobox({
+    value,
+    onChange,
+    nodes,
+    open,
+    onOpenChange,
+    placeholder,
+}: {
+    value: string;
+    onChange: (v: string) => void;
+    nodes: Node[];
+    open: boolean;
+    onOpenChange: (v: boolean) => void;
+    placeholder: string;
+}) {
+    const selected = nodes.find((n) => n.id === value);
+
+    return (
+        <Popover open={open} onOpenChange={onOpenChange}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between font-normal"
+                >
+                    <span className="truncate">
+                        {selected ? selected.label : placeholder}
+                    </span>
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command
+                    filter={(value, search) => {
+                        const node = nodes.find((n) => n.id === value);
+                        if (!node) return 0;
+                        return commandFilter(
+                            `${node.label} ${node.type}`,
+                            search,
+                        );
+                    }}
+                >
+                    <CommandInput placeholder="노드 검색..." />
+                    <CommandList>
+                        <CommandEmpty>일치하는 노드가 없습니다</CommandEmpty>
+                        <CommandGroup>
+                            {nodes.map((node) => (
+                                <CommandItem
+                                    key={node.id}
+                                    value={node.id}
+                                    onSelect={(v) => {
+                                        onChange(v === value ? "" : v);
+                                        onOpenChange(false);
+                                    }}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 size-4",
+                                            value === node.id
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                        )}
+                                    />
+                                    <span className="truncate text-sm">
+                                        {node.label}
+                                    </span>
+                                    <span className="text-muted-foreground ml-auto shrink-0 text-xs">
+                                        {node.type}
+                                    </span>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
     );
 }
 

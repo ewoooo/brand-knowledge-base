@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import type { KnowledgeGraph, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
+import { Badge } from "@/components/ui/primitives/badge";
+import { Button } from "@/components/ui/primitives/button";
+import { ScrollArea } from "@/components/ui/patterns/scroll-area";
+import { SectionHeader } from "@/components/ui/patterns/section-header";
+import { Separator } from "@/components/ui/primitives/separator";
+import type {
+    KnowledgeGraph,
+    TypeRegistry,
+    ValidationResult,
+} from "@knowledgeview/kg-core";
 import { getNodeTypeDisplayName } from "@/lib/schema-display";
 
 interface GraphListItem {
@@ -50,14 +55,18 @@ export function Sidebar({
     return (
         <div className="flex h-full w-[220px] min-w-[220px] flex-col overflow-hidden border-r">
             <div className="p-4">
-                <div className="mb-2 flex items-center justify-between">
-                    <span className="text-muted-foreground text-xs font-medium uppercase">
-                        그래프
-                    </span>
-                    <Button variant="ghost" size="sm" onClick={onCreateGraph}>
-                        + 새 그래프
-                    </Button>
-                </div>
+                <SectionHeader
+                    title="그래프"
+                    action={
+                        <Button
+                            variant="ghost"
+                            size="xs"
+                            onClick={onCreateGraph}
+                        >
+                            + 새 그래프
+                        </Button>
+                    }
+                />
                 <ScrollArea className="h-[120px]">
                     {graphs.map((g) => (
                         <button
@@ -80,9 +89,7 @@ export function Sidebar({
 
             {graph && (
                 <div className="px-4 py-3">
-                    <span className="text-muted-foreground text-xs font-medium uppercase">
-                        통계
-                    </span>
+                    <SectionHeader title="통계" />
                     <div className="mt-2 grid grid-cols-3 gap-2 text-center">
                         <div className="bg-muted/30 rounded-md px-2 py-1.5">
                             <div className="truncate text-lg font-semibold">
@@ -114,9 +121,7 @@ export function Sidebar({
 
             {graph && graph.nodes.length > 0 && (
                 <div className="px-4 py-3">
-                    <span className="text-muted-foreground text-xs font-medium uppercase">
-                        노드 타입
-                    </span>
+                    <SectionHeader title="노드 타입" />
                     <div className="mt-2 flex flex-wrap gap-1.5">
                         {Array.from(
                             new Set(
@@ -126,7 +131,10 @@ export function Sidebar({
                             const count = graph.nodes.filter(
                                 (n) => n.type === type,
                             ).length;
-                            const displayName = getNodeTypeDisplayName(schema, type as string);
+                            const displayName = getNodeTypeDisplayName(
+                                schema,
+                                type as string,
+                            );
                             return (
                                 <Badge
                                     key={type}
@@ -139,7 +147,9 @@ export function Sidebar({
                                     onClick={() => onToggleType(type as string)}
                                     title={`${displayName} (${type}) — ${count}개`}
                                 >
-                                    <span className="truncate">{displayName}</span>
+                                    <span className="truncate">
+                                        {displayName}
+                                    </span>
                                     <span className="ml-1 shrink-0 opacity-60">
                                         {count}
                                     </span>
@@ -153,14 +163,14 @@ export function Sidebar({
             <Separator />
 
             <div className="flex-1 p-4">
-                <div className="mb-2 flex items-center justify-between">
-                    <span className="text-muted-foreground text-xs font-medium uppercase">
-                        규칙
-                    </span>
-                    <Button variant="ghost" size="sm" onClick={onAddRule}>
-                        + 추가
-                    </Button>
-                </div>
+                <SectionHeader
+                    title="규칙"
+                    action={
+                        <Button variant="ghost" size="xs" onClick={onAddRule}>
+                            + 추가
+                        </Button>
+                    }
+                />
                 <ScrollArea className="h-full">
                     {validationResults.length === 0 && (
                         <p className="text-muted-foreground text-xs">
@@ -170,16 +180,22 @@ export function Sidebar({
                     {validationResults.map((r) => (
                         <div
                             key={r.ruleId}
-                            className={`mb-1.5 rounded-md border-l-2 px-3 py-2 text-xs ${
-                                r.status === "pass"
-                                    ? "border-green-500 bg-green-500/5"
-                                    : "border-red-500 bg-red-500/5"
-                            }`}
+                            className="border-border mb-1.5 border-b px-3 py-2 text-xs last:border-b-0"
                         >
-                            <div className="truncate font-medium" title={r.ruleName}>
-                                {r.status === "pass" ? "✓" : "✗"} {r.ruleName}
+                            <div
+                                className="flex items-center gap-1.5 truncate font-medium"
+                                title={r.ruleName}
+                            >
+                                <span
+                                    className={`size-1.5 shrink-0 rounded-full ${
+                                        r.status === "pass"
+                                            ? "bg-[#4da375]"
+                                            : "bg-[#d94f4f]"
+                                    }`}
+                                />
+                                {r.ruleName}
                             </div>
-                            <div className="text-muted-foreground truncate">
+                            <div className="text-muted-foreground truncate pl-3">
                                 {r.status === "pass"
                                     ? "통과"
                                     : `${r.violations.length}건 위반`}
