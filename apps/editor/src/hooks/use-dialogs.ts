@@ -3,7 +3,7 @@ import type { Node, Triple, Rule, KnowledgeGraph } from "@knowledgeview/kg-core"
 
 interface UseDialogsOptions {
     graph: KnowledgeGraph | null;
-    addNode: (data: { label: string; type?: string }) => void;
+    addNode: (data: Omit<Node, "id">) => void;
     updateNode: (id: string, updates: Partial<Omit<Node, "id">>) => void;
     addTriple: (data: { subject: string; predicate: string; object: string }) => void;
     updateTriple: (id: string, updates: Partial<Omit<Triple, "id">>) => void;
@@ -75,7 +75,7 @@ export function useDialogs({
 
     // Submit
     const handleNodeSubmit = useCallback(
-        (data: { label: string; type?: string }) => {
+        (data: Omit<Node, "id">) => {
             if (editingNodeId) {
                 updateNode(editingNodeId, data);
             } else {

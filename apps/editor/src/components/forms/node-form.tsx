@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 interface NodeFormProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (node: { label: string; type?: string }) => void;
+    onSubmit: (node: { label: string; type: string }) => void;
     initial?: { label: string; type?: string };
     existingTypes?: string[];
 }
@@ -69,7 +69,8 @@ export function NodeForm({
     function handleSubmit() {
         if (!label.trim()) return;
         const finalType = isCustom ? customType.trim() : type;
-        onSubmit({ label: label.trim(), type: finalType || undefined });
+        if (!finalType) return;
+        onSubmit({ label: label.trim(), type: finalType });
         setLabel("");
         setType("");
         setCustomType("");
@@ -162,7 +163,7 @@ export function NodeForm({
                     <Button variant="outline" onClick={onClose}>
                         취소
                     </Button>
-                    <Button onClick={handleSubmit} disabled={!label.trim()}>
+                    <Button onClick={handleSubmit} disabled={!label.trim() || !(isCustom ? customType.trim() : type)}>
                         {isEditing ? "저장" : "추가"}
                     </Button>
                 </DialogFooter>
