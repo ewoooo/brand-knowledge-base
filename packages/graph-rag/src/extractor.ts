@@ -1,3 +1,7 @@
+// TODO: Phase 2 완료 후 벡터 검색 도입 필요성 재검토
+// 현재 keyword 매칭은 71 노드 규모에서 충분하지만,
+// 그래프 300+ 노드 또는 lint API 반복 호출 시 fallback 비율/토큰 비용 측정 후 판단
+// → TODOS.md "벡터 검색 기반 entity extraction 도입 검토" 참조
 import type { KnowledgeGraph } from "@knowledgeview/kg-core";
 import type { ExtractionResult } from "./types";
 
