@@ -370,6 +370,7 @@ Task 7 (테스트)               ← Task 1과 병행 (TDD), Task 2~6과 병행
 | D4 | 편집 모드: 수직 스택 (옵션 A) | Dialog max-w-md(448px)에서 2열 그리드는 좁아서 불편. 모든 필드 동일 전체 너비로 쌓기가 가장 단순하고 일관적 | 2열 그리드 (채택 안 함 — Dialog 폭에서 너무 좁음) |
 | D5 | 읽기 모드: 컬러 스와치 + enum 뱃지 스타일 (옵션 C) | valueType별 특화 표시 — hexCode는 컬러 칩 + mono, enum은 border-only 뱃지, url은 링크. DESIGN.md 토큰 준수 | 편집 UI와 동일 (채택 안 함 — readOnly 시 input 비활성화는 시각적으로 불필요) |
 | D6 | 타입 변경 시 props 즉시 초기화 | 노드 생성 시 아직 저장 전이라 데이터 유실 걱정 없음. 편집 시 타입 변경 자체가 드문 작업이므로 복잡한 UX 불필요 | 확인 다이얼로그 (채택 안 함 — 과잉 UX) |
+| D7 | 컴포넌트 렌더링 테스트 생략, 순수 함수 유닛 테스트만 작성 | editor의 vitest는 node 환경(jsdom 없음). RTL 설정 추가는 Phase 1 범위 밖. 순수 헬퍼(getFieldsForType, getDisplayFields, formatPropertyValue 등)로 핵심 로직 충분히 커버 | RTL + jsdom 도입 (채택 안 함 — 설정 비용 대비 Phase 1 범위 초과) |
 
 ---
 

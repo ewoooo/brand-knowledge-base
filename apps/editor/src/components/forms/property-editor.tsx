@@ -46,7 +46,7 @@ export function getDisplayFields(
 interface PropertyEditorProps {
     properties: PropertyDef[];
     values: Record<string, unknown>;
-    onChange: (key: string, value: unknown) => void;
+    onChange?: (key: string, value: unknown) => void;
     readOnly?: boolean;
 }
 
@@ -91,7 +91,7 @@ export function PropertyEditor({
                         key={prop.key}
                         prop={prop}
                         value={values[prop.key]}
-                        onChange={(val) => onChange(prop.key, val)}
+                        onChange={(val) => onChange?.(prop.key, val)}
                     />
                 ))}
             </div>

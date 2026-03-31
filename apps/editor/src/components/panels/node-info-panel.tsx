@@ -62,7 +62,7 @@ export function NodeInfoPanel({
     const schemaProperties = getFieldsForType(schema, node.type);
     const hasSchemaProps = schemaProperties.length > 0;
     const hasFallbackProps =
-        !schema && node.props && Object.keys(node.props).length > 0;
+        !hasSchemaProps && node.props && Object.keys(node.props).length > 0;
 
     return (
         <div className="max-w-full space-y-4 overflow-hidden p-4">
@@ -106,7 +106,6 @@ export function NodeInfoPanel({
                     <PropertyEditor
                         properties={schemaProperties}
                         values={node.props ?? {}}
-                        onChange={() => {}}
                         readOnly
                     />
                 </>
