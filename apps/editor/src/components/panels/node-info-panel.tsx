@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CountBadge } from "@/components/ui/count-badge";
 import { Separator } from "@/components/ui/separator";
 import { TripleCard } from "@/components/panels/triple-card";
 import { Pencil, Trash2 } from "lucide-react";
@@ -100,9 +101,12 @@ export function NodeInfoPanel({
 
             {/* Outgoing triples */}
             <div>
-                <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-                    나가는 관계 ({outgoingTriples.length})
-                </p>
+                <div className="mb-2 flex items-center gap-1.5">
+                    <p className="text-muted-foreground text-xs font-medium uppercase">
+                        나가는 관계
+                    </p>
+                    <CountBadge count={outgoingTriples.length} />
+                </div>
                 {outgoingTriples.length === 0 ? (
                     <p className="text-muted-foreground text-xs">없음</p>
                 ) : (
@@ -127,9 +131,12 @@ export function NodeInfoPanel({
 
             {/* Incoming triples */}
             <div>
-                <p className="text-muted-foreground mb-2 text-xs font-medium uppercase">
-                    들어오는 관계 ({incomingTriples.length})
-                </p>
+                <div className="mb-2 flex items-center gap-1.5">
+                    <p className="text-muted-foreground text-xs font-medium uppercase">
+                        들어오는 관계
+                    </p>
+                    <CountBadge count={incomingTriples.length} />
+                </div>
                 {incomingTriples.length === 0 ? (
                     <p className="text-muted-foreground text-xs">없음</p>
                 ) : (
