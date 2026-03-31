@@ -93,6 +93,13 @@ npx tsx scripts/convert-worxphere.ts
 
 스킬이 동작하지 않으면 `cd .claude/skills/gstack && ./setup` 실행.
 
+## Design System
+
+Always read DESIGN.md before making any visual or UI decisions.
+All font choices, colors, spacing, motion, and aesthetic direction are defined there.
+Do not deviate without explicit user approval.
+In QA mode, flag any code that doesn't match DESIGN.md.
+
 ## Skill routing
 
 When the user's request matches an available skill, ALWAYS invoke it using the Skill

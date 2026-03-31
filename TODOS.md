@@ -2,6 +2,12 @@
 
 ## P0
 
+### ~~DESIGN.md 생성 (/design-consultation)~~ ✅ 완료 (2026-03-31)
+- Linear 스타일 기반 DESIGN.md 생성 완료
+- v1(Industrial) → v2(Porto Rocha) → v3(Linear) 비교 후 v3 선택
+- 모션 시스템: Emil Kowalski animations.dev 기반 추가
+- **Source:** /design-consultation (2026-03-31)
+
 ### Phase 0: 온톨로지 구조 설계
 - **What:** Palantir식 타입 레지스트리(NodeType, LinkType) 도입 + Combobox 교체 + RAG 스키마 주입
 - **Why:** Phase 1의 PDF→KG 변환, Phase 2의 lint 정확도, Phase 3의 amendment 구조 모두 이 스키마에 의존. 이게 없으면 "어떤 구조로 변환할 것인가"가 정의되지 않은 채 데이터를 만들게 됨
