@@ -42,7 +42,9 @@ npx tsx scripts/convert-worxphere.ts
 
 ## Active Phase
 
-현재 **Phase 0 (TypeRegistry 도입)** 진행 중. 작업 시작 전 반드시 `docs/phases/phase-0-report.md`를 읽고 현재 상태를 확인할 것. 작업 후에는 해당 파일의 상태 테이블과 세션 로그를 업데이트할 것.
+현재 **Phase 1 (스키마 기반 UI)** 진행 중. 작업 시작 전 반드시 `docs/phases/phase-1-report.md`를 읽고 현재 상태를 파악할 것. 작업 후에는 해당 파일의 상태 테이블과 세션 로그를 업데이트할 것.
+
+- Phase 0 (완료): `docs/phases/phase-0-report.md`
 
 ## Key Rules
 

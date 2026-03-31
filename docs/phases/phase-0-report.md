@@ -2,19 +2,119 @@
 
 > **세션간 통신 문서** — 어떤 세션이든 이 파일을 읽고 현재 진행 상태를 파악한 뒤, 작업 후 반드시 업데이트할 것.
 
-## 상태: NOT STARTED
+## 상태: PHASE 0 COMPLETE
 
-| 항목 | 상태 | 담당 세션 | 완료일 |
-|------|------|-----------|--------|
-| Task 1: 타입 정의 | NOT STARTED | - | - |
-| Task 2: operations 확장 | NOT STARTED | - | - |
-| Task 3: serializer 확장 | NOT STARTED | - | - |
-| Task 4: validator 확장 | NOT STARTED | - | - |
-| Task 5: RAG 스키마 주입 | NOT STARTED | - | - |
-| Task 6: canvas-types 동적 읽기 | NOT STARTED | - | - |
-| Task 7: Combobox 교체 | NOT STARTED | - | - |
-| Task 8: 테스트 | NOT STARTED | - | - |
-| Task 9: 데이터 마이그레이션 | NOT STARTED | - | - |
+| 항목 | 상태 | 라운드 | 담당 세션 | 완료일 |
+|------|------|--------|-----------|--------|
+| Task 1: 타입 정의 | DONE | R1 | 세션 A | 2026-03-31 |
+| Task 2: operations 확장 | DONE | R1 | 세션 A | 2026-03-31 |
+| Task 3: serializer 확장 | DONE | R1 | 세션 A | 2026-03-31 |
+| Task 4: validator 확장 | DONE | R1 | 세션 A | 2026-03-31 |
+| Task 5: RAG 스키마 주입 | DONE | R2 | 세션 C | 2026-03-31 |
+| Task 6: canvas-types 동적 읽기 | DONE | R2 | 세션 B | 2026-03-31 |
+| Task 7: Combobox 교체 | DONE | R2 | 세션 B | 2026-03-31 |
+| Task 8: 테스트 | DONE | R1 | 세션 A | 2026-03-31 |
+| Task 9: 데이터 마이그레이션 | DONE | R3 | 세션 A | 2026-03-31 |
+
+---
+
+## 라운드 실행 계획
+
+### Round 1 — 선행 필수 (직렬, 완료)
+
+> kg-core 타입 시스템 확립. 후속 모든 작업의 계약(contract).
+
+| 세션 | 작업 | 상태 |
+|------|------|------|
+| **세션 A** | Task 1 (types) + Task 8 (tests) + Task 2 (operations) + Task 3 (serializer) + Task 4 (validator) | **DONE** ✅ |
+
+**커밋:** `0a5ecdb` feat: kg-core에 TypeRegistry 스키마 레이어 도입
+**결과:** 테스트 31 → 69개, 타입 에러 0
+
+### Round 2 — Task 1~4 완료 후 병렬 (서브 브랜치 전략)
+
+> kg-core 계약이 확정됐으므로 editor UI, RAG 작업을 **동시에** 진행.
+> 각 세션은 `feat/phase0-type-registry`에서 서브 브랜치를 생성하여 작업.
+> 완료 후 서브 브랜치를 `feat/phase0-type-registry`로 머지.
+
+#### 브랜치 구조
+
+```
+main
+ └─ feat/phase0-type-registry          ← R1 완료 (base)
+      ├─ feat/phase0-editor-ui         ← 세션 B (worktree: .worktrees/feat-phase0-editor-ui)
+      └─ feat/phase0-rag               ← 세션 C (worktree: .worktrees/feat-phase0-rag)
+```
+
+#### 세션별 시작 방법
+
+**세션 B (editor UI):**
+```bash
+cd /Users/plusx/Documents/@KnowledgeView
+git worktree add .worktrees/feat-phase0-editor-ui -b feat/phase0-editor-ui feat/phase0-type-registry
+cd .worktrees/feat-phase0-editor-ui && pnpm install
+```
+
+**세션 C (RAG):**
+```bash
+cd /Users/plusx/Documents/@KnowledgeView
+git worktree add .worktrees/feat-phase0-rag -b feat/phase0-rag feat/phase0-type-registry
+cd .worktrees/feat-phase0-rag && pnpm install
+```
+
+#### 머지 순서 (Round 2 완료 후)
+
+```bash
+git checkout feat/phase0-type-registry
+git merge feat/phase0-editor-ui    # 파일 겹침 없음 → auto-merge
+git merge feat/phase0-rag          # 파일 겹침 없음 → auto-merge
+```
+
+#### 파일 충돌 가능성
+
+| 세션 B 파일 | 세션 C 파일 | 겹침 |
+|------------|------------|------|
+| `apps/editor/src/components/canvas/types/canvas-types.ts` | `packages/graph-rag/src/context-builder.ts` | 없음 |
+| `apps/editor/src/components/panel/triple-form.tsx` | `packages/chat-core/src/build-chat-context.ts` | 없음 |
+
+**충돌 위험 0%** — 서로 다른 패키지의 파일을 건드림.
+
+#### 상태
+
+| 세션 | 브랜치 | 작업 | 상태 |
+|------|--------|------|------|
+| **세션 B** | `feat/phase0-editor-ui` | Task 6 (canvas-types) + Task 7 (Combobox) | **DONE** ✅ |
+| **세션 C** | `feat/phase0-rag` | Task 5 (RAG 스키마 주입) | **DONE** ✅ |
+
+### Round 3 — Round 2 머지 후 (직렬)
+
+> 전체 스키마 + UI + RAG가 준비된 뒤 실 데이터 마이그레이션.
+> `feat/phase0-type-registry` 브랜치에서 직접 작업.
+
+| 세션 | 작업 | 상태 | 비고 |
+|------|------|------|------|
+| **아무 세션** | Task 9 (데이터 마이그레이션) | NOT STARTED | worxphere.kg.json에 schema 추가 + props 분리 |
+
+### 최종 PR
+
+Round 3 완료 후 `feat/phase0-type-registry` → `main` PR 생성.
+
+### 시각화
+
+```
+시간 →
+
+R1:  [A: types+tests+ops+serializer+validator ▓▓▓▓▓▓▓▓▓▓▓▓] ✅ DONE
+     branch: feat/phase0-type-registry                       │
+                                                              │ (서브 브랜치 분기)
+R2:  ─────────────────────────────────────────────────────────├─[B: canvas+combobox ▓▓▓▓▓▓]
+     branch: feat/phase0-editor-ui                            │   ↘ merge
+                                                              └─[C: RAG 주입 ▓▓▓▓]
+     branch: feat/phase0-rag                                        ↘ merge
+                                                                          │
+R3:  ─────────────────────────────────────────────────────────────────────── └─[migration ▓▓▓]
+     branch: feat/phase0-type-registry                                          ↘ PR → main
+```
 
 ---
 
@@ -349,7 +449,12 @@ Task 1 완료 후:
 
 | 시간 | 세션 | 작업 내용 | 변경 파일 | 상태 |
 |------|------|-----------|-----------|------|
-| - | - | - | - | - |
+| 2026-03-31 15:28 | 세션 A (R1) | Task 1~4 + 8: TypeRegistry 타입 도입, operations/serializer/validator 확장, TDD 69테스트 | types.ts, operations.ts, serializer.ts, validator.ts, normalize-type.ts, index.ts, schema.test.ts, operations.test.ts, serializer.test.ts, validator.test.ts | DONE ✅ |
+| 2026-03-31 15:49 | 세션 C (R2) | Task 5: RAG 컨텍스트에 스키마 주입 — buildContext에 schema 옵션, 노드 description + props 표시 | context-builder.ts, index.ts (graph-rag), context-builder.test.ts | DONE ✅ |
+| 2026-03-31 15:58 | 세션 B (R2) | Task 6 + 7: canvas-types 동적 읽기 (nodeColor/nodeSize에 schema 파라미터 추가, D3 체인 전파) + Combobox 교체 (Popover+Command, 초성 검색, 타입 필터링) | canvas-types.ts, render-nodes.ts, create-simulation.ts, fit-to-view.ts, update-styles.ts, canvas.tsx, triple-form.tsx, page.tsx, canvas-types.test.ts + popover.tsx 추가 | DONE ✅ |
+| 2026-03-31 15:57 | 세션 A (리뷰) | 카디널리티 검증 보강 — 1:1 object쪽, N:1, 1:N 누락 수정 + INFORMATIONAL 3건 정리 (dead branch, 미사용 import, 테스트 주석) | operations.ts, operations.test.ts, context-builder.ts | DONE ✅ |
+| 2026-03-31 16:09 | 세션 A (머지) | R2 서브 브랜치 머지 — feat/phase0-editor-ui + feat/phase0-rag → feat/phase0-type-registry. 충돌 0건, 전체 141테스트 통과 | (머지 커밋 2개) | DONE ✅ |
+| 2026-03-31 16:15 | 세션 A (R3) | Task 9: 데이터 마이그레이션 — 16 NodeType + 18 LinkType + schemaVersion 2.0. 스키마 검증 3/3 통과 | scripts/migrate-to-schema.ts, data/worxphere.kg.json | DONE ✅ |
 
 ---
 
@@ -359,7 +464,9 @@ Task 1 완료 후:
 
 | 번호 | 결정 | 이유 | 대안 |
 |------|------|------|------|
-| - | - | - | - |
+| D1 | Node.type을 optional → required로 변경 | TypeRegistry 연결에 필수. 타입 없는 노드는 스키마 검증 불가 | 기본값 "unknown" 할당 (채택 안 함 — 명시적 타입 강제가 데이터 품질에 유리) |
+| D2 | normalizeType에 함수 오버로드 추가 | string 입력 시 string 반환 보장. 없으면 Node.type 필수인데 반환이 string\|undefined라 타입 에러 | non-null assertion (!) 사용 (채택 안 함 — 타입 안전성 저하) |
+| D3 | addTriple 스키마 검증은 schema 있을 때만 | 하위 호환: 기존 .kg.json에 schema 없으면 자유 모드 유지 | 항상 검증 (채택 안 함 — 기존 데이터 깨짐) |
 
 ---
 
