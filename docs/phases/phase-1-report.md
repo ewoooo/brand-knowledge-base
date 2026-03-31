@@ -34,17 +34,53 @@ Phase 0에서 kg-core에 TypeRegistry(NodeType, LinkType, PropertyDef) 스키마
 
 ## 라운드 실행 계획
 
-### Round 1 — 선행 필수 (직렬)
+### Round 1 — 선행 필수 (직렬, 완료)
 
 > PropertyEditor 컴포넌트 — 모든 props UI의 기반 빌딩 블록.
 
 | 세션 | 작업 | 상태 |
 |------|------|------|
-| **세션 A** | Task 1 (PropertyEditor) + Task 7-일부 (PropertyEditor 테스트) | NOT STARTED |
+| **세션 A** | Task 1 (PropertyEditor) + Task 7-일부 (PropertyEditor 테스트) | **DONE** ✅ |
 
-### Round 2 — R1 완료 후 병렬
+**커밋:** `08fb784`~`718764f` (7 commits)
+**결과:** 테스트 29개 추가 (전체 58개), 빌드 통과
+
+### Round 2 — R1 완료 후 병렬 (서브 브랜치 전략)
 
 > PropertyEditor가 준비되면 NodeForm/NodeInfoPanel에 통합 + 독립적인 displayName 작업 병행.
+> 각 세션은 `feat/phase1-property-editor`에서 서브 브랜치를 생성하여 작업.
+> 완료 후 서브 브랜치를 `feat/phase1-property-editor`로 머지.
+
+#### 브랜치 구조
+
+```
+main
+ └─ feat/phase1-property-editor          ← R1 완료 (base)
+      ├─ feat/phase1-node-form           ← 세션 A (worktree: .worktrees/feat-phase1-node-form)
+      └─ feat/phase1-info-panels         ← 세션 B (worktree: .worktrees/feat-phase1-info-panels)
+```
+
+#### 세션별 시작 방법
+
+**세션 A (NodeForm + useDialogs):**
+```bash
+cd /Users/plusx/Documents/@KnowledgeView/.worktrees/feat-phase1-node-form
+# pnpm install 완료됨
+```
+
+**세션 B (InfoPanels + Sidebar):**
+```bash
+cd /Users/plusx/Documents/@KnowledgeView/.worktrees/feat-phase1-info-panels
+# pnpm install 완료됨
+```
+
+#### 머지 순서 (Round 2 완료 후)
+
+```bash
+git checkout feat/phase1-property-editor
+git merge feat/phase1-node-form       # page.tsx 수정 포함
+git merge feat/phase1-info-panels     # page.tsx 수정 포함 — 머지 충돌 가능 (아래 참고)
+```
 
 | 세션 | 작업 | 상태 |
 |------|------|------|
@@ -57,22 +93,24 @@ Phase 0에서 kg-core에 TypeRegistry(NodeType, LinkType, PropertyDef) 스키마
 |------------|------------|------|
 | `forms/node-form.tsx` | `panels/node-info-panel.tsx` | 없음 |
 | `hooks/use-dialogs.ts` | `panels/sidebar.tsx` | 없음 |
-| `app/page.tsx` (NodeForm props 전달) | `panels/edge-info-panel.tsx` | 없음 |
+| `app/page.tsx` (NodeForm props 전달) | `app/page.tsx` (Sidebar/DetailPanel schema 전달) | **있음** |
 
-**충돌 위험 0%** — 세션 A는 폼/훅, 세션 B는 패널/사이드바.
-
-단, `app/page.tsx`는 세션 A가 NodeForm 인터페이스 변경 시 수정하므로, 세션 B는 page.tsx를 건드리지 않아야 한다.
+**page.tsx 충돌 가능** — 세션 A는 NodeForm에 schema prop을 추가하고, 세션 B는 Sidebar/DetailPanel에 schema prop을 추가. 둘 다 page.tsx의 다른 영역을 수정하므로 auto-merge 가능성 높지만, 머지 시 수동 확인 필요.
 
 ### 시각화
 
 ```
 시간 →
 
-R1:  [A: PropertyEditor + 테스트 ▓▓▓▓▓▓▓▓] 
-                                           │
-R2:  ──────────────────────────────────────├─[A: NodeForm + useDialogs + 테스트 ▓▓▓▓▓▓▓▓]
-                                           └─[B: InfoPanels + Sidebar ▓▓▓▓▓▓]
-                                                                              ↘ 완료
+R1:  [A: PropertyEditor + 테스트 ▓▓▓▓▓▓▓▓] ✅ DONE
+     branch: feat/phase1-property-editor     │
+                                              │ (서브 브랜치 분기)
+R2:  ────────────────────────────────────────├─[A: NodeForm + useDialogs ▓▓▓▓▓▓▓▓]
+     branch: feat/phase1-node-form           │   ↘ merge
+                                              └─[B: InfoPanels + Sidebar ▓▓▓▓▓▓]
+     branch: feat/phase1-info-panels                ↘ merge
+                                                          │
+최종PR: ──────────────────────────────────────────────────── └─ PR → main
 ```
 
 ---
