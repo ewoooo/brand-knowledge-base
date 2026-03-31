@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatPanel } from "@/components/panels/chat-panel";
 import { NodeInfoPanel } from "@/components/panels/node-info-panel";
 import { EdgeInfoPanel } from "@/components/panels/edge-info-panel";
-import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
 
 interface DetailPanelProps {
     graph: KnowledgeGraph;
+    schema?: TypeRegistry;
     selectedNodeId: string | null;
     selectedEdgeId: string | null;
     validationResults: ValidationResult[];
@@ -22,6 +23,7 @@ interface DetailPanelProps {
 
 export function DetailPanel({
     graph,
+    schema,
     selectedNodeId,
     selectedEdgeId,
     validationResults,
@@ -124,6 +126,7 @@ export function DetailPanel({
                             <NodeInfoPanel
                                 graph={graph}
                                 node={selectedNode}
+                                schema={schema}
                                 validationResults={validationResults}
                                 onEditNode={onEditNode}
                                 onDeleteNode={onDeleteNode}
@@ -138,6 +141,7 @@ export function DetailPanel({
                             <EdgeInfoPanel
                                 graph={graph}
                                 triple={selectedTriple}
+                                schema={schema}
                                 onEditTriple={onEditTriple}
                                 onDeleteTriple={onDeleteTriple}
                             />

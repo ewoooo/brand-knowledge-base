@@ -141,6 +141,7 @@ export default function Home() {
                 validationResults={results}
                 onAddRule={dialogs.openRuleCreate}
                 graph={graph}
+                schema={graph.schema}
                 hiddenTypes={hiddenTypes}
                 onToggleType={toggleTypeFilter}
             />
@@ -209,6 +210,7 @@ export default function Home() {
 
             <DetailPanel
                 graph={graph}
+                schema={graph.schema}
                 selectedNodeId={selectedNodeId}
                 selectedEdgeId={selectedEdgeId}
                 validationResults={results}
