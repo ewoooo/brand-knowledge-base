@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
 import type { PropertyDef, TypeRegistry } from "@knowledgeview/kg-core";
-import { formatPropertyValue, isHexColor } from "./property-format";
+import { formatPropertyValue, isHexColor, parsePropertyInput } from "./property-format";
 
 /* ------------------------------------------------------------------ */
 /*  순수 헬퍼 (테스트 대상, named export)                                */
@@ -224,15 +224,7 @@ function renderInput(
                     id={id}
                     type="number"
                     value={value !== undefined && value !== null ? String(value) : ""}
-                    onChange={(e) => {
-                        const v = e.target.value;
-                        if (v === "") {
-                            onChange(undefined);
-                        } else {
-                            const n = Number(v);
-                            if (!Number.isNaN(n)) onChange(n);
-                        }
-                    }}
+                    onChange={(e) => onChange(parsePropertyInput("number", e.target.value))}
                     placeholder={prop.displayName}
                 />
             );
@@ -245,9 +237,9 @@ function renderInput(
                         checked={!!value}
                         onCheckedChange={(checked) => onChange(checked)}
                     />
-                    <Label htmlFor={id} className="text-muted-foreground text-xs font-normal">
+                    <span className="text-muted-foreground text-xs">
                         {value ? "예" : "아니오"}
-                    </Label>
+                    </span>
                 </div>
             );
 
