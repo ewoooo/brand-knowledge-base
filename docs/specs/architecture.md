@@ -22,31 +22,41 @@
 ### 컴포넌트 트리
 
 ```
-page.tsx — 훅 조합 + 3단 레이아웃
-├── Sidebar              좌측 — 그래프 목록, 통계, 타입 필터, 규칙 결과
-├── Canvas               중앙 — D3 force simulation (SVG)
+page.tsx — 훅 조합 + 3단 레이아웃 (오케스트레이터)
+├── Sidebar              좌측 — 그래프 목록, 통계(stats), 타입 필터(nodeTypes), 규칙 결과(ruleResults)
+├── Canvas               중앙 — D3 force simulation (SVG) ← graph 직접 접근 허용 (예외)
 │   ├── SearchOverlay      ⌘K 검색 오버레이
 │   └── NodeContextMenu    노드 우클릭 메뉴
-├── DetailPanel          우측 — 속성 탭 + AI 채팅 탭
-│   ├── NodeInfoPanel      노드 상세 (위반, 트리플, 편집/삭제)
-│   ├── EdgeInfoPanel      엣지 상세 (편집/삭제)
-│   └── ChatPanel          AI 채팅 (useChat + 스트리밍)
-└── Dialogs (모달)
+├── DetailPanel          우측 — 속성 탭 + AI 채팅 탭 (graph 대신 가공된 prop 수신)
+│   ├── NodeInfoPanel      노드 상세 (outgoingTriples, getNodeLabel 등 prop)
+│   ├── EdgeInfoPanel      엣지 상세 (getNodeLabel prop)
+│   └── ChatPanel          AI 채팅 (nodes, systemPrompt, chatGraph prop)
+└── Dialogs (모달, useDialog × 3)
     ├── NodeForm           노드 생성/편집
     ├── TripleForm         관계 생성/편집
-    └── RuleForm           규칙 생성
+    └── RuleForm           규칙 생성/편집 (nodeTypes, predicates prop)
 ```
 
 ### 훅 구조
 
 | 훅 | 역할 |
 |----|------|
-| `useGraph(null)` | 핵심 — CRUD + 저장/로드 + isDirty. kg-core 불변 operations 호출 |
+| `useGraph(null)` | 핵심 — 그래프 상태 + 저장/로드 + isDirty + 파생 데이터(stats, systemPrompt, linkTypes) |
+| `useNode({...})` | 노드 도메인 — CRUD + getNode/getNodeLabel/nodeTypes/existingTypes/getRelations |
+| `useTriple({...})` | 트리플 도메인 — CRUD + getTriple/predicates |
+| `useRule({...})` | 룰 도메인 — CRUD + getRule/results(사용자 규칙만 필터링) |
+| `useDialog()` | UI 상태 — 모달 open/close/editingId (도메인 무관, 재사용 가능) |
+| `useValidation(graph)` | 그래프 변경마다 자동 검증 → violatedNodeIds/TripleIds |
 | `useSelection()` | 단일 선택 (node \| edge \| null) |
-| `useRules(graph)` | 그래프 변경마다 자동 검증 → violatedNodeIds/TripleIds |
-| `useDialogs({...})` | 폼 open/close/editing/submit 상태 관리 |
 | `useContextMenu()` | 우클릭 메뉴 상태 |
 | `useSearch(nodes, { onOpen })` | ⌘K 검색 상태 + 키보드 단축키 |
+
+### 은닉화 원칙
+
+- **컴포넌트는 `graph` 객체를 모른다** — Canvas를 제외한 모든 컴포넌트에서 `KnowledgeGraph` 타입을 import하지 않는다
+- **데이터 접근(읽기 포함)은 훅을 통해** — `find`, `filter`, `map` 등 데이터 로직은 도메인 훅에서 처리하고, 컴포넌트는 가공된 결과만 prop으로 받는다
+- **CRUD와 UI 상태 분리** — 데이터 조작은 도메인 훅(`useNode`, `useTriple`, `useRule`), 모달 열기/닫기는 `useDialog`
+- **React Compiler 활성화** — `useCallback`/`useMemo` 수동 메모이제이션 불필요 (컴파일러가 자동 최적화)
 
 ### Canvas (D3) 모듈 구조
 
@@ -66,7 +76,7 @@ components/graph/
 ```
 
 **핵심 패턴:**
-- 두 개의 useEffect: 구조 변경(시뮬레이션 재구성) + 스타일 변경(선택/위반만 갱신)
+- 두 개의 useEffect: 구조 변경(`[graph.nodes, graph.triples, graph.schema]` — 시뮬레이션 재구성) + 스타일 변경(선택/위반만 갱신, 룰 변경 시 리빌드 없음)
 - 이벤트 핸들러는 ref에 저장 → stale closure 방지
 - 노드 색상/크기는 type 기반 (canvas-types.ts의 NODE_COLORS/NODE_SIZES)
 - 더블클릭 = focus mode (비이웃 노드 dimmed)
