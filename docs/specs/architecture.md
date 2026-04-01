@@ -19,22 +19,36 @@
 
 ## Editor 앱 상세
 
+### 컴포넌트 위계
+
+```
+ui/            ← ① shadcn 원자 (button, input, badge...)
+patterns/      ← ② 조합 (dialog, tabs, search-overlay...)
+blocks/        ← ③ 도메인 데이터 단위 (property/, node/, triple/...)
+layout/        ← ④ 앱 골격 (left-sidebar, right-sidebar)
+graph/         ← D3 캔버스 (위계 밖)
+```
+
+의존 방향: `ui → patterns → blocks → layout → graph` (역방향 금지)
+
 ### 컴포넌트 트리
 
 ```
 page.tsx — 훅 조합 + 3단 레이아웃 (오케스트레이터)
-├── Sidebar              좌측 — 그래프 목록, 통계(stats), 타입 필터(nodeTypes), 규칙 결과(ruleResults)
-├── Canvas               중앙 — D3 force simulation (SVG) ← graph 직접 접근 허용 (예외)
-│   ├── SearchOverlay      ⌘K 검색 오버레이
-│   └── NodeContextMenu    노드 우클릭 메뉴
-├── DetailPanel          우측 — 속성 탭 + AI 채팅 탭 (graph 대신 가공된 prop 수신)
-│   ├── NodeInfoPanel      노드 상세 (outgoingTriples, getNodeLabel 등 prop)
-│   ├── EdgeInfoPanel      엣지 상세 (getNodeLabel prop)
-│   └── ChatPanel          AI 채팅 (nodes, systemPrompt, chatGraph prop)
+├── LeftSidebar  [layout]   좌측 래퍼 (w-[220px] + border-r)
+│   └── Sidebar  [blocks]   그래프 목록, 통계, 타입 필터, 규칙 결과
+├── Canvas       [graph]    중앙 — D3 force simulation (SVG) ← graph 직접 접근 허용 (예외)
+│   ├── SearchOverlay  [patterns]  ⌘K 검색 오버레이
+│   └── NodeContextMenu            노드 우클릭 메뉴
+├── RightSidebar [layout]   우측 래퍼 (w-[350px] + border-l)
+│   └── DetailPanel [blocks]  속성 탭 + AI 채팅 탭
+│       ├── NodeInfoPanel [blocks/node]   노드 상세
+│       ├── EdgeInfoPanel [blocks/edge]   엣지 상세
+│       └── ChatPanel     [blocks]        AI 채팅
 └── Dialogs (모달, useDialog × 3)
-    ├── NodeForm           노드 생성/편집
-    ├── TripleForm         관계 생성/편집
-    └── RuleForm           규칙 생성/편집 (nodeTypes, predicates prop)
+    ├── NodeForm   [blocks/node]     노드 생성/편집
+    ├── TripleForm [blocks/triple]   관계 생성/편집
+    └── RuleForm   [blocks/rule]     규칙 생성/편집
 ```
 
 ### 훅 구조

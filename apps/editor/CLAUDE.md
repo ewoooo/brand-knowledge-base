@@ -21,3 +21,6 @@ pnpm test --filter editor
 - UI 텍스트는 한국어
 - Canvas 수정 시 D3 모듈 구조(`rendering/`, `core/`, `styles/`) 유지
 - CSS는 `app/styles/` 하위 파일에 관심사별 분리 — globals.css에 직접 추가하지 말 것
+- 컴포넌트 위계: `ui/ → patterns/ → blocks/ → layout/` (역방향 의존 금지)
+- `ui/`는 shadcn 전용, `blocks/`는 도메인별 서브폴더, `layout/`은 앱 골격 래퍼
+- 유틸 함수는 `lib/`에 동사+목적어 네이밍 (예: `format-property-value.ts`)
