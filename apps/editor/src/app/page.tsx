@@ -216,10 +216,13 @@ export default function Home() {
                 <div className="relative flex-1">
                     <SearchOverlay
                         open={search.searchOpen}
-                        query={search.searchQuery}
-                        matchedCount={search.matchedCount}
-                        onQueryChange={search.setSearchQuery}
                         onClose={handleSearchClose}
+                        nodes={nodeCrud.nodes}
+                        onSelectNode={(nodeId) => {
+                            selectNode(nodeId);
+                            handleFocusNode(nodeId);
+                        }}
+                        onQueryChange={search.setSearchQuery}
                     />
 
                     {failCount > 0 && (

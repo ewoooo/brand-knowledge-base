@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { Node } from "@knowledgeview/kg-core";
 import { findMatchingNodeIds } from "@/lib/search-match";
 
@@ -10,21 +10,15 @@ export function useSearch(nodes: Node[] | null, options?: UseSearchOptions) {
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const matchedNodeIds = useMemo(
-        () => (nodes ? findMatchingNodeIds(nodes, searchQuery) : null),
-        [nodes, searchQuery],
-    );
-
+    const matchedNodeIds = nodes ? findMatchingNodeIds(nodes, searchQuery) : null;
     const highlightedNodeIds = searchOpen ? matchedNodeIds : null;
 
-    const openSearch = useCallback(() => {
-        setSearchOpen(true);
-    }, []);
+    const openSearch = () => setSearchOpen(true);
 
-    const closeSearch = useCallback(() => {
+    const closeSearch = () => {
         setSearchOpen(false);
         setSearchQuery("");
-    }, []);
+    };
 
     // Global keyboard shortcut: Cmd+K / Ctrl+K
     useEffect(() => {
