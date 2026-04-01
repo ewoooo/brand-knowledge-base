@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/patterns/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/primitives/toggle-group";
 import { Button } from "@/components/ui/primitives/button";
-import type { KnowledgeGraph, RuleCondition } from "@knowledgeview/kg-core";
+import type { RuleCondition } from "@knowledgeview/kg-core";
 
 interface RuleFormInitial {
     name: string;
@@ -35,7 +35,8 @@ interface RuleFormProps {
         type: "constraint" | "inference" | "validation";
         condition: RuleCondition;
     }) => void;
-    graph: KnowledgeGraph;
+    nodeTypes: string[];
+    predicates: string[];
     initial?: RuleFormInitial;
 }
 
@@ -72,7 +73,7 @@ const DEFAULT_CONDITION: RuleCondition = {
     conflictPredicate: "",
 };
 
-export function RuleForm({ open, onClose, onSubmit, graph, initial }: RuleFormProps) {
+export function RuleForm({ open, onClose, onSubmit, nodeTypes, predicates, initial }: RuleFormProps) {
     const isEditing = !!initial;
     const [name, setName] = useState("");
     const [ruleType, setRuleType] = useState<RuleType>("constraint");
@@ -92,20 +93,6 @@ export function RuleForm({ open, onClose, onSubmit, graph, initial }: RuleFormPr
             }
         }
     }, [open, initial]);
-
-    // Unique node types from the graph
-    const nodeTypes = useMemo(() => {
-        const types = graph.nodes
-            .map((n) => n.type)
-            .filter((t): t is string => !!t);
-        return Array.from(new Set(types));
-    }, [graph.nodes]);
-
-    // Unique predicates from the graph triples
-    const predicates = useMemo(() => {
-        const preds = graph.triples.map((t) => t.predicate).filter(Boolean);
-        return Array.from(new Set(preds));
-    }, [graph.triples]);
 
     const expression = buildExpression(condition);
 

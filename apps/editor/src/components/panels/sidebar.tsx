@@ -6,13 +6,9 @@ import { Button } from "@/components/ui/primitives/button";
 import { ScrollArea } from "@/components/ui/patterns/scroll-area";
 import { SectionHeader } from "@/components/ui/patterns/section-header";
 import { Separator } from "@/components/ui/primitives/separator";
-import type {
-    KnowledgeGraph,
-    TypeRegistry,
-    ValidationResult,
-} from "@knowledgeview/kg-core";
-import { getNodeTypeDisplayName } from "@/lib/schema-display";
+import type { ValidationResult } from "@knowledgeview/kg-core";
 import { RuleCard } from "@/components/ui/patterns/cards/rule-card";
+import type { NodeTypeInfo } from "@/hooks/use-node";
 
 interface GraphListItem {
     filename: string;
@@ -26,12 +22,12 @@ interface SidebarProps {
     currentFile: string | null;
     onSelectFile: (filename: string) => void;
     onCreateGraph: () => void;
+    stats: { nodeCount: number; tripleCount: number; ruleCount: number } | null;
+    nodeTypes: NodeTypeInfo[];
     ruleResults: ValidationResult[];
     onAddRule: () => void;
     onEditRule: (ruleId: string) => void;
     onDeleteRule: (ruleId: string) => void;
-    graph: KnowledgeGraph | null;
-    schema?: TypeRegistry;
     hiddenTypes: Set<string>;
     onToggleType: (type: string) => void;
 }
@@ -40,12 +36,12 @@ export function Sidebar({
     currentFile,
     onSelectFile,
     onCreateGraph,
+    stats,
+    nodeTypes,
     ruleResults,
     onAddRule,
     onEditRule,
     onDeleteRule,
-    graph,
-    schema,
     hiddenTypes,
     onToggleType,
 }: SidebarProps) {
@@ -92,13 +88,13 @@ export function Sidebar({
 
             <Separator />
 
-            {graph && (
+            {stats && (
                 <div className="px-4 py-3">
                     <SectionHeader title="통계" />
                     <div className="mt-2 grid grid-cols-3 gap-2 text-center">
                         <div className="bg-muted/30 rounded-md px-2 py-1.5">
                             <div className="truncate text-lg font-semibold">
-                                {graph.nodes.length}
+                                {stats.nodeCount}
                             </div>
                             <div className="text-muted-foreground text-[10px]">
                                 노드
@@ -106,7 +102,7 @@ export function Sidebar({
                         </div>
                         <div className="bg-muted/30 overflow-hidden rounded-md px-2 py-1.5">
                             <div className="truncate text-lg font-semibold">
-                                {graph.triples.length}
+                                {stats.tripleCount}
                             </div>
                             <div className="text-muted-foreground text-[10px]">
                                 관계
@@ -114,7 +110,7 @@ export function Sidebar({
                         </div>
                         <div className="bg-muted/30 overflow-hidden rounded-md px-2 py-1.5">
                             <div className="truncate text-lg font-semibold">
-                                {graph.rules.length}
+                                {stats.ruleCount}
                             </div>
                             <div className="text-muted-foreground text-[10px]">
                                 규칙
@@ -124,43 +120,30 @@ export function Sidebar({
                 </div>
             )}
 
-            {graph && graph.nodes.length > 0 && (
+            {nodeTypes.length > 0 && (
                 <div className="px-4 py-3">
                     <SectionHeader title="노드 타입" />
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                        {Array.from(
-                            new Set(
-                                graph.nodes.map((n) => n.type).filter(Boolean),
-                            ),
-                        ).map((type) => {
-                            const count = graph.nodes.filter(
-                                (n) => n.type === type,
-                            ).length;
-                            const displayName = getNodeTypeDisplayName(
-                                schema,
-                                type as string,
-                            );
-                            return (
-                                <Badge
-                                    key={type}
-                                    variant={
-                                        hiddenTypes.has(type as string)
-                                            ? "outline"
-                                            : "secondary"
-                                    }
-                                    className={`max-w-full cursor-pointer text-xs ${hiddenTypes.has(type as string) ? "line-through opacity-40" : ""}`}
-                                    onClick={() => onToggleType(type as string)}
-                                    title={`${displayName} (${type}) — ${count}개`}
-                                >
-                                    <span className="truncate">
-                                        {displayName}
-                                    </span>
-                                    <span className="ml-1 shrink-0 opacity-60">
-                                        {count}
-                                    </span>
-                                </Badge>
-                            );
-                        })}
+                        {nodeTypes.map(({ type, displayName, count }) => (
+                            <Badge
+                                key={type}
+                                variant={
+                                    hiddenTypes.has(type)
+                                        ? "outline"
+                                        : "secondary"
+                                }
+                                className={`max-w-full cursor-pointer text-xs ${hiddenTypes.has(type) ? "line-through opacity-40" : ""}`}
+                                onClick={() => onToggleType(type)}
+                                title={`${displayName} (${type}) — ${count}개`}
+                            >
+                                <span className="truncate">
+                                    {displayName}
+                                </span>
+                                <span className="ml-1 shrink-0 opacity-60">
+                                    {count}
+                                </span>
+                            </Badge>
+                        ))}
                     </div>
                 </div>
             )}

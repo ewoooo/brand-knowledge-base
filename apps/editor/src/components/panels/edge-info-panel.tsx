@@ -2,29 +2,24 @@ import { Badge } from "@/components/ui/primitives/badge";
 import { Button } from "@/components/ui/primitives/button";
 import { SectionHeader } from "@/components/ui/patterns/section-header";
 import { Separator } from "@/components/ui/primitives/separator";
-import type { KnowledgeGraph, Triple, TypeRegistry } from "@knowledgeview/kg-core";
+import type { Triple, TypeRegistry } from "@knowledgeview/kg-core";
 import { getLinkTypeDisplayName, getLinkTypeInfo } from "@/lib/schema-display";
 
 interface EdgeInfoPanelProps {
-    graph: KnowledgeGraph;
     triple: Triple;
     schema?: TypeRegistry;
+    getNodeLabel: (id: string) => string;
     onEditTriple: (tripleId: string) => void;
     onDeleteTriple: (tripleId: string) => void;
 }
 
 export function EdgeInfoPanel({
-    graph,
     triple,
     schema,
+    getNodeLabel,
     onEditTriple,
     onDeleteTriple,
 }: EdgeInfoPanelProps) {
-    const nodeLabelById = (id: string) => {
-        const n = graph.nodes.find((nd) => nd.id === id);
-        return n ? n.label : id;
-    };
-
     const linkInfo = getLinkTypeInfo(schema, triple.predicate);
     const predicateDisplay = getLinkTypeDisplayName(schema, triple.predicate);
 
@@ -36,9 +31,9 @@ export function EdgeInfoPanel({
                     <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
                         <span
                             className="max-w-full truncate font-medium"
-                            title={nodeLabelById(triple.subject)}
+                            title={getNodeLabel(triple.subject)}
                         >
-                            {nodeLabelById(triple.subject)}
+                            {getNodeLabel(triple.subject)}
                         </span>
                         <span className="text-muted-foreground shrink-0">
                             →
@@ -54,9 +49,9 @@ export function EdgeInfoPanel({
                         </span>
                         <span
                             className="max-w-full truncate font-medium"
-                            title={nodeLabelById(triple.object)}
+                            title={getNodeLabel(triple.object)}
                         >
-                            {nodeLabelById(triple.object)}
+                            {getNodeLabel(triple.object)}
                         </span>
                     </div>
                 </div>

@@ -26,6 +26,9 @@ export default function Home() {
         graph,
         filename,
         isDirty,
+        stats,
+        systemPrompt,
+        linkTypes,
         load,
         save,
         addNode,
@@ -92,6 +95,18 @@ export default function Home() {
     const selectedNodeId = selection?.type === "node" ? selection.id : null;
     const selectedEdgeId = selection?.type === "edge" ? selection.id : null;
 
+    // --- Derived editing entities ---
+    const editingNode = nodeCrud.getNode(nodeDialog.editingId);
+    const editingTriple = tripleCrud.getTriple(tripleDialog.editingId);
+    const editingRule = ruleCrud.getRule(ruleDialog.editingId);
+
+    // --- Selected entities ---
+    const selectedNode = nodeCrud.getNode(selectedNodeId);
+    const selectedTriple = tripleCrud.getTriple(selectedEdgeId);
+    const selectedNodeRelations = selectedNode
+        ? nodeCrud.getRelations(selectedNode.id, tripleCrud.triples)
+        : { outgoing: [], incoming: [] };
+
     // --- Handlers ---
 
     const handleCreateGraph = useCallback(async () => {
@@ -119,7 +134,7 @@ export default function Home() {
         search.closeSearch();
     }, [search.closeSearch]);
 
-    // --- Submit handlers (다이얼로그 editingId → 도메인 훅) ---
+    // --- Submit handlers ---
 
     const handleNodeSubmit = useCallback(
         (data: Parameters<typeof nodeCrud.handleSubmit>[1]) => {
@@ -142,11 +157,6 @@ export default function Home() {
         [ruleCrud, ruleDialog.editingId],
     );
 
-    // --- Derived editing entities ---
-    const editingNode = nodeCrud.getNode(nodeDialog.editingId);
-    const editingTriple = tripleCrud.getTriple(tripleDialog.editingId);
-    const editingRule = ruleCrud.getRule(ruleDialog.editingId);
-
     // --- No graph loaded state ---
     if (!graph) {
         return (
@@ -155,11 +165,12 @@ export default function Home() {
                     currentFile={filename}
                     onSelectFile={load}
                     onCreateGraph={handleCreateGraph}
+                    stats={null}
+                    nodeTypes={[]}
                     ruleResults={ruleCrud.results}
                     onAddRule={ruleDialog.openCreate}
                     onEditRule={ruleDialog.openEdit}
                     onDeleteRule={ruleCrud.remove}
-                    graph={null}
                     hiddenTypes={hiddenTypes}
                     onToggleType={toggleTypeFilter}
                 />
@@ -179,12 +190,12 @@ export default function Home() {
                 currentFile={filename}
                 onSelectFile={load}
                 onCreateGraph={handleCreateGraph}
+                stats={stats}
+                nodeTypes={nodeCrud.nodeTypes}
                 ruleResults={ruleCrud.results}
                 onAddRule={ruleDialog.openCreate}
                 onEditRule={ruleDialog.openEdit}
                 onDeleteRule={ruleCrud.remove}
-                graph={graph}
-                schema={graph.schema}
                 hiddenTypes={hiddenTypes}
                 onToggleType={toggleTypeFilter}
             />
@@ -252,10 +263,9 @@ export default function Home() {
             </div>
 
             <DetailPanel
-                graph={graph}
-                schema={graph.schema}
-                selectedNodeId={selectedNodeId}
-                selectedEdgeId={selectedEdgeId}
+                selectedNode={selectedNode}
+                selectedTriple={selectedTriple}
+                schema={nodeCrud.schema}
                 validationResults={results}
                 onEditNode={nodeDialog.openEdit}
                 onDeleteNode={nodeCrud.remove}
@@ -268,16 +278,19 @@ export default function Home() {
                 onUpdateSystemPrompt={updateSystemPrompt}
                 onAddPropertyDef={addPropertyDef}
                 onRemovePropertyDef={removePropertyDef}
+                nodes={nodeCrud.nodes}
+                systemPrompt={systemPrompt}
+                chatGraph={graph}
+                outgoingTriples={selectedNodeRelations.outgoing}
+                incomingTriples={selectedNodeRelations.incoming}
+                getNodeLabel={nodeCrud.getNodeLabel}
             />
 
             {/* Context menu */}
             {contextMenu && (
                 <NodeContextMenu
                     nodeId={contextMenu.nodeId}
-                    nodeLabel={
-                        graph.nodes.find((n) => n.id === contextMenu.nodeId)
-                            ?.label ?? ""
-                    }
+                    nodeLabel={nodeCrud.getNodeLabel(contextMenu.nodeId)}
                     position={contextMenu.position}
                     onClose={closeContextMenu}
                     onAddRelation={tripleDialog.openCreate}
@@ -304,16 +317,16 @@ export default function Home() {
                           }
                         : undefined
                 }
-                existingTypes={[...new Set(graph.nodes.map((n) => n.type))]}
-                schema={graph.schema}
+                existingTypes={nodeCrud.existingTypes}
+                schema={nodeCrud.schema}
             />
 
             <TripleForm
                 open={tripleDialog.open}
                 onClose={tripleDialog.close}
                 onSubmit={handleTripleSubmit}
-                nodes={graph.nodes}
-                linkTypes={graph.schema?.linkTypes}
+                nodes={nodeCrud.nodes}
+                linkTypes={linkTypes}
                 initial={
                     editingTriple
                         ? {
@@ -329,7 +342,8 @@ export default function Home() {
                 open={ruleDialog.open}
                 onClose={ruleDialog.close}
                 onSubmit={handleRuleSubmit}
-                graph={graph}
+                nodeTypes={nodeCrud.existingTypes}
+                predicates={tripleCrud.predicates}
                 initial={
                     editingRule
                         ? {

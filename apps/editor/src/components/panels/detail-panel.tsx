@@ -5,13 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/patter
 import { ChatPanel } from "@/components/panels/chat-panel";
 import { NodeInfoPanel } from "@/components/panels/node-info-panel";
 import { EdgeInfoPanel } from "@/components/panels/edge-info-panel";
-import type { KnowledgeGraph, PropertyDef, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
+import type { Node, Triple, PropertyDef, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
 
 interface DetailPanelProps {
-    graph: KnowledgeGraph;
+    selectedNode: Node | null;
+    selectedTriple: Triple | null;
     schema?: TypeRegistry;
-    selectedNodeId: string | null;
-    selectedEdgeId: string | null;
     validationResults: ValidationResult[];
     onEditNode: (nodeId: string) => void;
     onDeleteNode: (nodeId: string) => void;
@@ -21,13 +20,20 @@ interface DetailPanelProps {
     onUpdateSystemPrompt?: (prompt: string) => void;
     onAddPropertyDef?: (nodeType: string, prop: PropertyDef) => void;
     onRemovePropertyDef?: (nodeType: string, propertyKey: string) => void;
+    // ChatPanel에 필요한 데이터
+    nodes: Node[];
+    systemPrompt: string;
+    chatGraph: unknown; // useChat transport용 (graph 원본)
+    // NodeInfoPanel에 필요한 데이터
+    outgoingTriples: Triple[];
+    incomingTriples: Triple[];
+    getNodeLabel: (id: string) => string;
 }
 
 export function DetailPanel({
-    graph,
+    selectedNode,
+    selectedTriple,
     schema,
-    selectedNodeId,
-    selectedEdgeId,
     validationResults,
     onEditNode,
     onDeleteNode,
@@ -37,15 +43,13 @@ export function DetailPanel({
     onUpdateSystemPrompt,
     onAddPropertyDef,
     onRemovePropertyDef,
+    nodes,
+    systemPrompt,
+    chatGraph,
+    outgoingTriples,
+    incomingTriples,
+    getNodeLabel,
 }: DetailPanelProps) {
-    const selectedNode = selectedNodeId
-        ? (graph.nodes.find((n) => n.id === selectedNodeId) ?? null)
-        : null;
-
-    const selectedTriple = selectedEdgeId
-        ? (graph.triples.find((t) => t.id === selectedEdgeId) ?? null)
-        : null;
-
     return (
         <div className="flex h-full w-[350px] min-w-[350px] flex-col overflow-hidden border-l">
             <Tabs defaultValue="properties" className="flex h-full flex-col">
@@ -128,10 +132,12 @@ export function DetailPanel({
                         {/* Node selected */}
                         {selectedNode && (
                             <NodeInfoPanel
-                                graph={graph}
                                 node={selectedNode}
                                 schema={schema}
                                 validationResults={validationResults}
+                                outgoingTriples={outgoingTriples}
+                                incomingTriples={incomingTriples}
+                                getNodeLabel={getNodeLabel}
                                 onEditNode={onEditNode}
                                 onDeleteNode={onDeleteNode}
                                 onEditTriple={onEditTriple}
@@ -145,9 +151,9 @@ export function DetailPanel({
                         {/* Edge selected */}
                         {selectedTriple && !selectedNode && (
                             <EdgeInfoPanel
-                                graph={graph}
                                 triple={selectedTriple}
                                 schema={schema}
+                                getNodeLabel={getNodeLabel}
                                 onEditTriple={onEditTriple}
                                 onDeleteTriple={onDeleteTriple}
                             />
@@ -161,7 +167,9 @@ export function DetailPanel({
                     className="mt-0 flex-1 overflow-hidden data-[state=inactive]:hidden"
                 >
                     <ChatPanel
-                        graph={graph}
+                        nodes={nodes}
+                        systemPrompt={systemPrompt}
+                        chatGraph={chatGraph}
                         chatId="detail-panel-chat"
                         onFocusNode={onFocusNode}
                         onUpdateSystemPrompt={onUpdateSystemPrompt}

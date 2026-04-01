@@ -1,5 +1,6 @@
-import { useCallback } from "react";
-import type { Node, KnowledgeGraph } from "@knowledgeview/kg-core";
+import { useCallback, useMemo } from "react";
+import type { Node, Triple, KnowledgeGraph, TypeRegistry } from "@knowledgeview/kg-core";
+import { getNodeTypeDisplayName } from "@/lib/schema-display";
 
 interface UseNodeOptions {
     graph: KnowledgeGraph | null;
@@ -8,16 +9,55 @@ interface UseNodeOptions {
     removeNode: (id: string) => void;
 }
 
+export interface NodeTypeInfo {
+    type: string;
+    displayName: string;
+    count: number;
+}
+
 export function useNode({
     graph,
     addNode,
     updateNode,
     removeNode,
 }: UseNodeOptions) {
+    const nodes = graph?.nodes ?? [];
+    const schema = graph?.schema;
+
     const getNode = useCallback(
         (id: string | null) =>
-            id ? (graph?.nodes.find((n) => n.id === id) ?? null) : null,
-        [graph],
+            id ? (nodes.find((n) => n.id === id) ?? null) : null,
+        [nodes],
+    );
+
+    const getNodeLabel = useCallback(
+        (id: string) => nodes.find((n) => n.id === id)?.label ?? id,
+        [nodes],
+    );
+
+    /** 노드 타입 목록 (displayName + 카운트) */
+    const nodeTypes = useMemo<NodeTypeInfo[]>(() => {
+        const typeSet = new Set(nodes.map((n) => n.type).filter(Boolean));
+        return Array.from(typeSet).map((type) => ({
+            type,
+            displayName: getNodeTypeDisplayName(schema, type),
+            count: nodes.filter((n) => n.type === type).length,
+        }));
+    }, [nodes, schema]);
+
+    /** 기존 타입 문자열 목록 (NodeForm용) */
+    const existingTypes = useMemo(
+        () => [...new Set(nodes.map((n) => n.type))],
+        [nodes],
+    );
+
+    /** 특정 노드의 나가는/들어오는 관계 */
+    const getRelations = useCallback(
+        (nodeId: string, triples: Triple[]) => ({
+            outgoing: triples.filter((t) => t.subject === nodeId),
+            incoming: triples.filter((t) => t.object === nodeId),
+        }),
+        [],
     );
 
     const handleSubmit = useCallback(
@@ -31,5 +71,15 @@ export function useNode({
         [updateNode, addNode],
     );
 
-    return { getNode, handleSubmit, remove: removeNode };
+    return {
+        nodes,
+        schema,
+        getNode,
+        getNodeLabel,
+        nodeTypes,
+        existingTypes,
+        getRelations,
+        handleSubmit,
+        remove: removeNode,
+    };
 }

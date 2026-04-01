@@ -2,26 +2,25 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useRef, useEffect, useMemo, useCallback, type ReactNode } from "react";
+import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { Button } from "@/components/ui/primitives/button";
 import { ScrollArea } from "@/components/ui/patterns/scroll-area";
 import { Textarea } from "@/components/ui/primitives/textarea";
-import type { KnowledgeGraph, Node } from "@knowledgeview/kg-core";
+import type { Node } from "@knowledgeview/kg-core";
 import { Send, Loader2, Settings2, ChevronDown } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { extractMentionedNodeIds } from "@/lib/extract-mentioned-nodes";
 
 interface ChatPanelProps {
-    graph: KnowledgeGraph;
+    nodes: Node[];
+    systemPrompt: string;
+    chatGraph: unknown;
     chatId: string;
     onFocusNode: (nodeId: string) => void;
     onUpdateSystemPrompt?: (prompt: string) => void;
 }
 
-/**
- * 텍스트에서 노드 라벨을 감지하여 클릭 가능한 요소로 변환
- */
 function highlightNodeLabels(
     text: string,
     nodes: Node[],
@@ -29,12 +28,10 @@ function highlightNodeLabels(
 ): ReactNode {
     if (nodes.length === 0) return text;
 
-    // 라벨 → 노드 매핑 (긴 라벨부터 매칭하여 부분 매칭 방지)
     const sorted = [...nodes]
         .filter((n) => n.label.length >= 2)
         .sort((a, b) => b.label.length - a.label.length);
 
-    // 정규식 특수문자 이스케이프
     const escaped = sorted.map((n) => ({
         node: n,
         pattern: n.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
@@ -64,9 +61,6 @@ function highlightNodeLabels(
     });
 }
 
-/**
- * React children를 재귀적으로 순회하며 문자열에서 노드 라벨을 하이라이트
- */
 function processChildren(
     children: ReactNode,
     nodes: Node[],
@@ -89,10 +83,10 @@ function processChildren(
     return children;
 }
 
-export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: ChatPanelProps) {
+export function ChatPanel({ nodes, systemPrompt, chatGraph, chatId, onFocusNode, onUpdateSystemPrompt }: ChatPanelProps) {
     const [input, setInput] = useState("");
     const [showPromptEditor, setShowPromptEditor] = useState(false);
-    const [promptDraft, setPromptDraft] = useState(graph.metadata.systemPrompt ?? "");
+    const [promptDraft, setPromptDraft] = useState(systemPrompt);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const { messages, sendMessage, status } = useChat({
@@ -100,14 +94,13 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
         transport: new DefaultChatTransport({
             api: "/api/chat",
             prepareSendMessagesRequest: ({ id, messages }) => ({
-                body: { id, messages, graph },
+                body: { id, messages, graph: chatGraph },
             }),
         }),
     });
 
     const isLoading = status === "streaming" || status === "submitted";
 
-    // Auto-scroll to bottom on new messages
     useEffect(() => {
         const viewport = scrollAreaRef.current?.querySelector(
             "[data-radix-scroll-area-viewport]",
@@ -117,11 +110,9 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
         }
     }, [messages]);
 
-    // Auto-focus: 스트리밍 중 첫 번째 노드가 감지되면 즉시 포커스 (1회만)
     const focusedForMessageRef = useRef<string | null>(null);
     useEffect(() => {
         if (status !== "streaming") {
-            // 스트리밍이 끝나면 플래그 초기화 (다음 대화를 위해)
             if (status === "ready") focusedForMessageRef.current = null;
             return;
         }
@@ -134,32 +125,31 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
             .map((p) => p.text)
             .join(" ");
 
-        const mentionedIds = extractMentionedNodeIds(text, graph.nodes);
+        const mentionedIds = extractMentionedNodeIds(text, nodes);
         if (mentionedIds.length > 0) {
             focusedForMessageRef.current = lastAssistant.id;
             onFocusNode(mentionedIds[0]);
         }
-    }, [status, messages, graph.nodes, onFocusNode]);
+    }, [status, messages, nodes, onFocusNode]);
 
-    // react-markdown 커스텀 컴포넌트: 텍스트 내 노드 라벨을 클릭 가능하게 변환
     const mdComponents = useMemo<Components>(
         () => ({
             p: ({ children }) => (
-                <p>{processChildren(children, graph.nodes, onFocusNode)}</p>
+                <p>{processChildren(children, nodes, onFocusNode)}</p>
             ),
             li: ({ children }) => (
-                <li>{processChildren(children, graph.nodes, onFocusNode)}</li>
+                <li>{processChildren(children, nodes, onFocusNode)}</li>
             ),
             td: ({ children }) => (
-                <td>{processChildren(children, graph.nodes, onFocusNode)}</td>
+                <td>{processChildren(children, nodes, onFocusNode)}</td>
             ),
             strong: ({ children }) => (
                 <strong>
-                    {processChildren(children, graph.nodes, onFocusNode)}
+                    {processChildren(children, nodes, onFocusNode)}
                 </strong>
             ),
         }),
-        [graph.nodes, onFocusNode],
+        [nodes, onFocusNode],
     );
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -188,7 +178,7 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
                     >
                         <Settings2 className="h-3 w-3" />
                         <span>시스템 프롬프트</span>
-                        {graph.metadata.systemPrompt && (
+                        {systemPrompt && (
                             <span className="bg-primary/10 text-primary rounded px-1 text-[10px]">
                                 커스텀
                             </span>
@@ -224,7 +214,7 @@ export function ChatPanel({ graph, chatId, onFocusNode, onUpdateSystemPrompt }: 
                                     size="sm"
                                     className="h-6 text-[10px]"
                                     onClick={() => onUpdateSystemPrompt(promptDraft)}
-                                    disabled={promptDraft === (graph.metadata.systemPrompt ?? "")}
+                                    disabled={promptDraft === systemPrompt}
                                 >
                                     적용
                                 </Button>

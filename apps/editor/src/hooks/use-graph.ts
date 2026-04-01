@@ -50,10 +50,22 @@ export function useGraph(initial: KnowledgeGraph | null) {
         });
     }, []);
 
+    // 파생 데이터 (컴포넌트에서 graph 직접 접근 대신 사용)
+    const stats = {
+        nodeCount: graph?.nodes.length ?? 0,
+        tripleCount: graph?.triples.length ?? 0,
+        ruleCount: graph?.rules.length ?? 0,
+    };
+    const systemPrompt = graph?.metadata.systemPrompt ?? "";
+    const linkTypes = graph?.schema?.linkTypes;
+
     return {
         graph,
         filename,
         isDirty,
+        stats,
+        systemPrompt,
+        linkTypes,
         load,
         save,
         setGraph,

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { Triple, KnowledgeGraph } from "@knowledgeview/kg-core";
 
 interface UseTripleOptions {
@@ -14,10 +14,18 @@ export function useTriple({
     updateTriple,
     removeTriple,
 }: UseTripleOptions) {
+    const triples = graph?.triples ?? [];
+
     const getTriple = useCallback(
         (id: string | null) =>
-            id ? (graph?.triples.find((t) => t.id === id) ?? null) : null,
-        [graph],
+            id ? (triples.find((t) => t.id === id) ?? null) : null,
+        [triples],
+    );
+
+    /** 고유 predicate 목록 (RuleForm용) */
+    const predicates = useMemo(
+        () => Array.from(new Set(triples.map((t) => t.predicate).filter(Boolean))),
+        [triples],
     );
 
     const handleSubmit = useCallback(
@@ -31,5 +39,5 @@ export function useTriple({
         [updateTriple, addTriple],
     );
 
-    return { getTriple, handleSubmit, remove: removeTriple };
+    return { triples, getTriple, predicates, handleSubmit, remove: removeTriple };
 }

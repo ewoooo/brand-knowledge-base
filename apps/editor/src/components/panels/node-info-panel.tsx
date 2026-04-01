@@ -18,8 +18,8 @@ import {
 import { getNodeTypeDisplayName } from "@/lib/schema-display";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import type {
-    KnowledgeGraph,
     Node,
+    Triple,
     PropertyDef,
     TypeRegistry,
     ValidationResult,
@@ -30,10 +30,12 @@ import type {
 /* ------------------------------------------------------------------ */
 
 interface NodeInfoPanelProps {
-    graph: KnowledgeGraph;
     node: Node;
     schema?: TypeRegistry;
     validationResults: ValidationResult[];
+    outgoingTriples: Triple[];
+    incomingTriples: Triple[];
+    getNodeLabel: (id: string) => string;
     onEditNode: (nodeId: string) => void;
     onDeleteNode: (nodeId: string) => void;
     onEditTriple: (tripleId: string) => void;
@@ -44,10 +46,12 @@ interface NodeInfoPanelProps {
 }
 
 export function NodeInfoPanel({
-    graph,
     node,
     schema,
     validationResults,
+    outgoingTriples,
+    incomingTriples,
+    getNodeLabel,
     onEditNode,
     onDeleteNode,
     onEditTriple,
@@ -71,10 +75,7 @@ export function NodeInfoPanel({
         nodeViolations.map((v) => v.relatedTripleId).filter(Boolean),
     );
 
-    const outgoingTriples = graph.triples.filter((t) => t.subject === node.id);
-    const incomingTriples = graph.triples.filter((t) => t.object === node.id);
-    const nodeLabelById = (id: string) =>
-        graph.nodes.find((n) => n.id === id)?.label ?? id;
+    const nodeLabelById = getNodeLabel;
 
     const schemaProperties = getFieldsForType(schema, node.type);
     const displayProperties = getDisplayFields(schemaProperties, node.props);
