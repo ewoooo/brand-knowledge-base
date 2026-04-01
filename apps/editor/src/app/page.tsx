@@ -51,9 +51,9 @@ export default function Home() {
         useValidation(graph);
 
     // 도메인 훅 (데이터)
-    const nodeCrud = useNode({ graph, addNode, updateNode, removeNode });
-    const tripleCrud = useTriple({ graph, addTriple, updateTriple, removeTriple });
-    const ruleCrud = useRule({
+    const node = useNode({ graph, addNode, updateNode, removeNode });
+    const triple = useTriple({ graph, addTriple, updateTriple, removeTriple });
+    const rule = useRule({
         graph, addRule, updateRule, removeRule,
         validationResults: results,
     });
@@ -96,15 +96,15 @@ export default function Home() {
     const selectedEdgeId = selection?.type === "edge" ? selection.id : null;
 
     // --- Derived editing entities ---
-    const editingNode = nodeCrud.getNode(nodeDialog.editingId);
-    const editingTriple = tripleCrud.getTriple(tripleDialog.editingId);
-    const editingRule = ruleCrud.getRule(ruleDialog.editingId);
+    const editingNode = node.getNode(nodeDialog.editingId);
+    const editingTriple = triple.getTriple(tripleDialog.editingId);
+    const editingRule = rule.getRule(ruleDialog.editingId);
 
     // --- Selected entities ---
-    const selectedNode = nodeCrud.getNode(selectedNodeId);
-    const selectedTriple = tripleCrud.getTriple(selectedEdgeId);
+    const selectedNode = node.getNode(selectedNodeId);
+    const selectedTriple = triple.getTriple(selectedEdgeId);
     const selectedNodeRelations = selectedNode
-        ? nodeCrud.getRelations(selectedNode.id, tripleCrud.triples)
+        ? node.getRelations(selectedNode.id, triple.triples)
         : { outgoing: [], incoming: [] };
 
     // --- Handlers ---
@@ -134,16 +134,16 @@ export default function Home() {
 
     // --- Submit handlers ---
 
-    const handleNodeSubmit = (data: Parameters<typeof nodeCrud.handleSubmit>[1]) => {
-        nodeCrud.handleSubmit(nodeDialog.editingId, data);
+    const handleNodeSubmit = (data: Parameters<typeof node.handleSubmit>[1]) => {
+        node.handleSubmit(nodeDialog.editingId, data);
     };
 
-    const handleTripleSubmit = (data: Parameters<typeof tripleCrud.handleSubmit>[1]) => {
-        tripleCrud.handleSubmit(tripleDialog.editingId, data);
+    const handleTripleSubmit = (data: Parameters<typeof triple.handleSubmit>[1]) => {
+        triple.handleSubmit(tripleDialog.editingId, data);
     };
 
-    const handleRuleSubmit = (data: Parameters<typeof ruleCrud.handleSubmit>[1]) => {
-        ruleCrud.handleSubmit(ruleDialog.editingId, data);
+    const handleRuleSubmit = (data: Parameters<typeof rule.handleSubmit>[1]) => {
+        rule.handleSubmit(ruleDialog.editingId, data);
     };
 
     // --- No graph loaded state ---
@@ -156,10 +156,10 @@ export default function Home() {
                     onCreateGraph={handleCreateGraph}
                     stats={null}
                     nodeTypes={[]}
-                    ruleResults={ruleCrud.results}
+                    ruleResults={rule.results}
                     onAddRule={ruleDialog.openCreate}
                     onEditRule={ruleDialog.openEdit}
-                    onDeleteRule={ruleCrud.remove}
+                    onDeleteRule={rule.remove}
                     hiddenTypes={hiddenTypes}
                     onToggleType={toggleTypeFilter}
                 />
@@ -180,11 +180,11 @@ export default function Home() {
                 onSelectFile={load}
                 onCreateGraph={handleCreateGraph}
                 stats={stats}
-                nodeTypes={nodeCrud.nodeTypes}
-                ruleResults={ruleCrud.results}
+                nodeTypes={node.nodeTypes}
+                ruleResults={rule.results}
                 onAddRule={ruleDialog.openCreate}
                 onEditRule={ruleDialog.openEdit}
-                onDeleteRule={ruleCrud.remove}
+                onDeleteRule={rule.remove}
                 hiddenTypes={hiddenTypes}
                 onToggleType={toggleTypeFilter}
             />
@@ -217,7 +217,7 @@ export default function Home() {
                     <SearchOverlay
                         open={search.searchOpen}
                         onClose={handleSearchClose}
-                        nodes={nodeCrud.nodes}
+                        nodes={node.nodes}
                         onSelectNode={(nodeId) => {
                             selectNode(nodeId);
                             handleFocusNode(nodeId);
@@ -257,12 +257,12 @@ export default function Home() {
             <DetailPanel
                 selectedNode={selectedNode}
                 selectedTriple={selectedTriple}
-                schema={nodeCrud.schema}
+                schema={node.schema}
                 validationResults={results}
                 onEditNode={nodeDialog.openEdit}
-                onDeleteNode={nodeCrud.remove}
+                onDeleteNode={node.remove}
                 onEditTriple={tripleDialog.openEdit}
-                onDeleteTriple={tripleCrud.remove}
+                onDeleteTriple={triple.remove}
                 onFocusNode={(nodeId: string) => {
                     selectNode(nodeId);
                     handleFocusNode(nodeId);
@@ -270,25 +270,25 @@ export default function Home() {
                 onUpdateSystemPrompt={updateSystemPrompt}
                 onAddPropertyDef={addPropertyDef}
                 onRemovePropertyDef={removePropertyDef}
-                nodes={nodeCrud.nodes}
+                nodes={node.nodes}
                 systemPrompt={systemPrompt}
                 chatGraph={graph}
                 outgoingTriples={selectedNodeRelations.outgoing}
                 incomingTriples={selectedNodeRelations.incoming}
-                getNodeLabel={nodeCrud.getNodeLabel}
+                getNodeLabel={node.getNodeLabel}
             />
 
             {/* Context menu */}
             {contextMenu && (
                 <NodeContextMenu
                     nodeId={contextMenu.nodeId}
-                    nodeLabel={nodeCrud.getNodeLabel(contextMenu.nodeId)}
+                    nodeLabel={node.getNodeLabel(contextMenu.nodeId)}
                     position={contextMenu.position}
                     onClose={closeContextMenu}
                     onAddRelation={tripleDialog.openCreate}
                     onEditNode={nodeDialog.openEdit}
                     onDeleteNode={(id) => {
-                        nodeCrud.remove(id);
+                        node.remove(id);
                         clearSelection();
                     }}
                 />
@@ -309,15 +309,15 @@ export default function Home() {
                           }
                         : undefined
                 }
-                existingTypes={nodeCrud.existingTypes}
-                schema={nodeCrud.schema}
+                existingTypes={node.existingTypes}
+                schema={node.schema}
             />
 
             <TripleForm
                 open={tripleDialog.open}
                 onClose={tripleDialog.close}
                 onSubmit={handleTripleSubmit}
-                nodes={nodeCrud.nodes}
+                nodes={node.nodes}
                 linkTypes={linkTypes}
                 initial={
                     editingTriple
@@ -334,8 +334,8 @@ export default function Home() {
                 open={ruleDialog.open}
                 onClose={ruleDialog.close}
                 onSubmit={handleRuleSubmit}
-                nodeTypes={nodeCrud.existingTypes}
-                predicates={tripleCrud.predicates}
+                nodeTypes={node.existingTypes}
+                predicates={triple.predicates}
                 initial={
                     editingRule
                         ? {
