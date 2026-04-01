@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import type { KnowledgeGraph, Node, Triple, Rule, PropertyDef } from "@knowledgeview/kg-core";
 import {
     addNode,
@@ -23,16 +23,16 @@ export function useGraph(initial: KnowledgeGraph | null) {
     const [filename, setFilename] = useState<string | null>(null);
     const [isDirty, setIsDirty] = useState(false);
 
-    const load = useCallback(async (file: string) => {
+    const load = async (file: string) => {
         const res = await fetch(`/api/graphs/${file}`);
         if (!res.ok) throw new Error("Failed to load graph");
         const data: KnowledgeGraph = await res.json();
         setGraph(data);
         setFilename(file);
         setIsDirty(false);
-    }, []);
+    };
 
-    const save = useCallback(async () => {
+    const save = async () => {
         if (!graph || !filename) return;
         await fetch(`/api/graphs/${filename}`, {
             method: "PUT",
@@ -40,17 +40,17 @@ export function useGraph(initial: KnowledgeGraph | null) {
             body: JSON.stringify(graph),
         });
         setIsDirty(false);
-    }, [graph, filename]);
+    };
 
-    const modify = useCallback((fn: (g: KnowledgeGraph) => KnowledgeGraph) => {
+    const modify = (fn: (g: KnowledgeGraph) => KnowledgeGraph) => {
         setGraph((prev) => {
             if (!prev) return prev;
             setIsDirty(true);
             return fn(prev);
         });
-    }, []);
+    };
 
-    // 파생 데이터 (컴포넌트에서 graph 직접 접근 대신 사용)
+    // 파생 데이터
     const stats = {
         nodeCount: graph?.nodes.length ?? 0,
         tripleCount: graph?.triples.length ?? 0,

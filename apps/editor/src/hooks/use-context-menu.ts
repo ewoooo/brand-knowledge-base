@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 interface ContextMenuState {
     nodeId: string;
@@ -8,16 +8,11 @@ interface ContextMenuState {
 export function useContextMenu() {
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
-    const openContextMenu = useCallback(
-        (nodeId: string, position: { x: number; y: number }) => {
-            setContextMenu({ nodeId, position });
-        },
-        [],
-    );
+    const openContextMenu = (nodeId: string, position: { x: number; y: number }) => {
+        setContextMenu({ nodeId, position });
+    };
 
-    const closeContextMenu = useCallback(() => {
-        setContextMenu(null);
-    }, []);
+    const closeContextMenu = () => setContextMenu(null);
 
     return { contextMenu, openContextMenu, closeContextMenu };
 }

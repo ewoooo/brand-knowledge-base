@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from "react";
 import type { Rule, KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
 
 interface UseRuleOptions {
@@ -16,27 +15,18 @@ export function useRule({
     removeRule,
     validationResults,
 }: UseRuleOptions) {
-    const getRule = useCallback(
-        (id: string | null) =>
-            id ? (graph?.rules.find((r) => r.id === id) ?? null) : null,
-        [graph],
-    );
+    const getRule = (id: string | null) =>
+        id ? (graph?.rules.find((r) => r.id === id) ?? null) : null;
 
-    const results = useMemo(
-        () => validationResults.filter((r) => !r.ruleId.startsWith("schema:")),
-        [validationResults],
-    );
+    const results = validationResults.filter((r) => !r.ruleId.startsWith("schema:"));
 
-    const handleSubmit = useCallback(
-        (editingId: string | null, data: Omit<Rule, "id">) => {
-            if (editingId) {
-                updateRule(editingId, data);
-            } else {
-                addRule(data);
-            }
-        },
-        [updateRule, addRule],
-    );
+    const handleSubmit = (editingId: string | null, data: Omit<Rule, "id">) => {
+        if (editingId) {
+            updateRule(editingId, data);
+        } else {
+            addRule(data);
+        }
+    };
 
     return { getRule, results, handleSubmit, remove: removeRule };
 }

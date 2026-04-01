@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Canvas from "@/components/graph/canvas";
 import { NodeContextMenu } from "@/components/graph/node-context-menu";
 import { SearchOverlay } from "@/components/graph/search-overlay";
@@ -66,13 +66,13 @@ export default function Home() {
     const { contextMenu, openContextMenu, closeContextMenu } =
         useContextMenu();
 
-    const clearFocus = useCallback(() => setFocusedNodeId(null), []);
+    const clearFocus = () => setFocusedNodeId(null);
     const search = useSearch(graph?.nodes ?? null, { onOpen: clearFocus });
 
     // Filter state
     const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
 
-    const toggleTypeFilter = useCallback((type: string) => {
+    const toggleTypeFilter = (type: string) => {
         setHiddenTypes((prev) => {
             const next = new Set(prev);
             if (next.has(type)) {
@@ -82,14 +82,14 @@ export default function Home() {
             }
             return next;
         });
-    }, []);
+    };
 
     // Focus state
     const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
 
-    const handleFocusNode = useCallback((nodeId: string | null) => {
+    const handleFocusNode = (nodeId: string | null) => {
         setFocusedNodeId((prev) => (prev === nodeId ? null : nodeId));
-    }, []);
+    };
 
     // Derive selected IDs from selection
     const selectedNodeId = selection?.type === "node" ? selection.id : null;
@@ -109,7 +109,7 @@ export default function Home() {
 
     // --- Handlers ---
 
-    const handleCreateGraph = useCallback(async () => {
+    const handleCreateGraph = async () => {
         const name = prompt("그래프 이름을 입력하세요:");
         if (!name?.trim()) return;
 
@@ -122,40 +122,29 @@ export default function Home() {
         if (!res.ok) return;
         const data = await res.json();
         await load(data.filename);
-    }, [load]);
+    };
 
-    const handleClearSelection = useCallback(() => {
+    const handleClearSelection = () => {
         clearSelection();
         setFocusedNodeId(null);
         closeContextMenu();
-    }, [clearSelection, closeContextMenu]);
+    };
 
-    const handleSearchClose = useCallback(() => {
-        search.closeSearch();
-    }, [search.closeSearch]);
+    const handleSearchClose = () => search.closeSearch();
 
     // --- Submit handlers ---
 
-    const handleNodeSubmit = useCallback(
-        (data: Parameters<typeof nodeCrud.handleSubmit>[1]) => {
-            nodeCrud.handleSubmit(nodeDialog.editingId, data);
-        },
-        [nodeCrud, nodeDialog.editingId],
-    );
+    const handleNodeSubmit = (data: Parameters<typeof nodeCrud.handleSubmit>[1]) => {
+        nodeCrud.handleSubmit(nodeDialog.editingId, data);
+    };
 
-    const handleTripleSubmit = useCallback(
-        (data: Parameters<typeof tripleCrud.handleSubmit>[1]) => {
-            tripleCrud.handleSubmit(tripleDialog.editingId, data);
-        },
-        [tripleCrud, tripleDialog.editingId],
-    );
+    const handleTripleSubmit = (data: Parameters<typeof tripleCrud.handleSubmit>[1]) => {
+        tripleCrud.handleSubmit(tripleDialog.editingId, data);
+    };
 
-    const handleRuleSubmit = useCallback(
-        (data: Parameters<typeof ruleCrud.handleSubmit>[1]) => {
-            ruleCrud.handleSubmit(ruleDialog.editingId, data);
-        },
-        [ruleCrud, ruleDialog.editingId],
-    );
+    const handleRuleSubmit = (data: Parameters<typeof ruleCrud.handleSubmit>[1]) => {
+        ruleCrud.handleSubmit(ruleDialog.editingId, data);
+    };
 
     // --- No graph loaded state ---
     if (!graph) {

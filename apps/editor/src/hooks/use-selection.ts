@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 interface Selection {
     type: "node" | "edge";
@@ -10,22 +10,9 @@ interface Selection {
 export function useSelection() {
     const [selection, setSelection] = useState<Selection | null>(null);
 
-    const selectNode = useCallback((id: string) => {
-        setSelection({ type: "node", id });
-    }, []);
+    const selectNode = (id: string) => setSelection({ type: "node", id });
+    const selectEdge = (id: string) => setSelection({ type: "edge", id });
+    const clearSelection = () => setSelection(null);
 
-    const selectEdge = useCallback((id: string) => {
-        setSelection({ type: "edge", id });
-    }, []);
-
-    const clearSelection = useCallback(() => {
-        setSelection(null);
-    }, []);
-
-    return {
-        selection,
-        selectNode,
-        selectEdge,
-        clearSelection,
-    };
+    return { selection, selectNode, selectEdge, clearSelection };
 }
