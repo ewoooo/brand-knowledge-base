@@ -3,7 +3,6 @@
 import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
 import { Label } from "@/components/ui/primitives/label";
-import { SectionHeader } from "@/components/ui/patterns/section-header";
 import {
     Select,
     SelectContent,
@@ -56,7 +55,7 @@ interface PropertyEditorProps {
     readOnly?: boolean;
 }
 
-export function PropertyEditor({
+export function PropertyField({
     properties,
     values,
     onChange,

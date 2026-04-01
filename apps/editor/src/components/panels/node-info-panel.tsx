@@ -11,10 +11,10 @@ import { PanelSection } from "@/components/panels/panel-section";
 import { TripleSection } from "@/components/panels/triple-section";
 import { AddPropertyDefForm } from "@/components/forms/add-property-def-form";
 import {
-    PropertyEditor,
+    PropertyField,
     getDisplayFields,
     getFieldsForType,
-} from "@/components/forms/property-editor";
+} from "@/components/forms/property-field";
 import { getNodeTypeDisplayName } from "@/lib/schema-display";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import type {
@@ -263,7 +263,7 @@ function PropertyList({
             {properties.map((prop) => (
                 <div key={prop.key} className="group flex items-start gap-1">
                     <div className="min-w-0 flex-1">
-                        <PropertyEditor
+                        <PropertyField
                             properties={[prop]}
                             values={values}
                             readOnly

@@ -20,7 +20,8 @@ import { Button } from "@/components/ui/primitives/button";
 import { Label } from "@/components/ui/primitives/label";
 import { ScrollArea } from "@/components/ui/patterns/scroll-area";
 import { Textarea } from "@/components/ui/primitives/textarea";
-import { PropertyEditor, getFieldsForType } from "./property-editor";
+import { SectionHeader } from "@/components/ui/patterns/section-header";
+import { PropertyField, getFieldsForType } from "./property-field";
 import type { TypeRegistry } from "@knowledgeview/kg-core";
 
 interface NodeFormProps {
@@ -214,11 +215,14 @@ export function NodeForm({
                         </div>
 
                         {propertyDefs.length > 0 && (
-                            <PropertyEditor
-                                properties={propertyDefs}
-                                values={props}
-                                onChange={handlePropChange}
-                            />
+                            <div className="space-y-3">
+                                <SectionHeader title="속성" />
+                                <PropertyField
+                                    properties={propertyDefs}
+                                    values={props}
+                                    onChange={handlePropChange}
+                                />
+                            </div>
                         )}
                     </div>
                 </ScrollArea>
