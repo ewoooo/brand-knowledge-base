@@ -7,13 +7,13 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/patterns/dialog";
-import { Input } from "@/components/ui/primitives/input";
+} from "@/components/patterns/dialog";
+import { Input } from "@/components/ui/input";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "@/components/ui/patterns/popover";
+} from "@/components/patterns/popover";
 import {
     Command,
     CommandEmpty,
@@ -21,11 +21,11 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/components/ui/patterns/command";
-import { Button } from "@/components/ui/primitives/button";
+} from "@/components/patterns/command";
+import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { commandFilter } from "@/lib/search-match";
+import { commandFilter } from "@/lib/match-search-query";
 import type { Node, LinkType } from "@knowledgeview/kg-core";
 
 interface TripleFormProps {

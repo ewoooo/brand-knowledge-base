@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { SectionHeader } from "@/components/ui/patterns/section-header";
-import { Separator } from "@/components/ui/primitives/separator";
+import { SectionHeader } from "@/components/patterns/section-header";
+import { Separator } from "@/components/ui/separator";
 
 interface PanelSectionProps {
     title: string;

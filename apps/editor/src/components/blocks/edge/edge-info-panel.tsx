@@ -1,9 +1,9 @@
-import { Badge } from "@/components/ui/primitives/badge";
-import { Button } from "@/components/ui/primitives/button";
-import { SectionHeader } from "@/components/ui/patterns/section-header";
-import { Separator } from "@/components/ui/primitives/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/patterns/section-header";
+import { Separator } from "@/components/ui/separator";
 import type { Triple, TypeRegistry } from "@knowledgeview/kg-core";
-import { getLinkTypeDisplayName, getLinkTypeInfo } from "@/lib/schema-display";
+import { getLinkTypeDisplayName, getLinkTypeInfo } from "@/lib/resolve-schema-display";
 
 interface EdgeInfoPanelProps {
     triple: Triple;

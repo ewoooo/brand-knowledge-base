@@ -1,5 +1,5 @@
 import type { ValidationResult } from "@knowledgeview/kg-core";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/button";
 import { Pencil, X } from "lucide-react";
 
 interface RuleCardProps {

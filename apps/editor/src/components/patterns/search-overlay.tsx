@@ -8,8 +8,8 @@ import {
     CommandEmpty,
     CommandGroup,
     CommandItem,
-} from "@/components/ui/patterns/command";
-import { commandFilter } from "@/lib/search-match";
+} from "@/components/patterns/command";
+import { commandFilter } from "@/lib/match-search-query";
 import type { Node } from "@knowledgeview/kg-core";
 
 interface SearchOverlayProps {

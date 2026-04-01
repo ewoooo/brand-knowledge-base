@@ -1,10 +1,10 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/patterns/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/patterns/tabs";
-import { ChatPanel } from "@/components/panels/chat-panel";
-import { NodeInfoPanel } from "@/components/panels/node-info-panel";
-import { EdgeInfoPanel } from "@/components/panels/edge-info-panel";
+import { ScrollArea } from "@/components/patterns/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/patterns/tabs";
+import { ChatPanel } from "@/components/blocks/chat-panel";
+import { NodeInfoPanel } from "@/components/blocks/node/node-info-panel";
+import { EdgeInfoPanel } from "@/components/blocks/edge/edge-info-panel";
 import type { Node, Triple, PropertyDef, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
 
 interface DetailPanelProps {
@@ -51,7 +51,7 @@ export function DetailPanel({
     getNodeLabel,
 }: DetailPanelProps) {
     return (
-        <div className="flex h-full w-[350px] min-w-[350px] flex-col overflow-hidden border-l">
+        <div className="flex h-full flex-col overflow-hidden">
             <Tabs defaultValue="properties" className="flex h-full flex-col">
                 <div className="border-b px-2 pt-2">
                     <TabsList className="w-full">

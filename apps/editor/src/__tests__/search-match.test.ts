@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fuzzyMatch, commandFilter, findMatchingNodeIds } from "@/lib/search-match";
+import { fuzzyMatch, commandFilter, findMatchingNodeIds } from "@/lib/match-search-query";
 import type { Node } from "@knowledgeview/kg-core";
 
 const nodes: Node[] = [

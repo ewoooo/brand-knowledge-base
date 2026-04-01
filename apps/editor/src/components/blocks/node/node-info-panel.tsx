@@ -3,19 +3,19 @@ import {
     Alert,
     AlertDescription,
     AlertTitle,
-} from "@/components/ui/patterns/alert";
-import { Badge } from "@/components/ui/primitives/badge";
-import { Button } from "@/components/ui/primitives/button";
-import { Separator } from "@/components/ui/primitives/separator";
-import { PanelSection } from "@/components/panels/panel-section";
-import { TripleSection } from "@/components/panels/triple-section";
-import { AddPropertyDefForm } from "@/components/forms/add-property-def-form";
+} from "@/components/patterns/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { PanelSection } from "@/components/blocks/panel-section";
+import { TripleSection } from "@/components/blocks/triple/triple-section";
+import { AddPropertyDefForm } from "@/components/blocks/property/property-def-form";
 import {
     PropertyField,
     getDisplayFields,
     getFieldsForType,
-} from "@/components/forms/property-field";
-import { getNodeTypeDisplayName } from "@/lib/schema-display";
+} from "@/components/blocks/property/property-field";
+import { getNodeTypeDisplayName } from "@/lib/resolve-schema-display";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import type {
     Node,

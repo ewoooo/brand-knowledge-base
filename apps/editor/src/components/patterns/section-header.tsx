@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CountBadge } from "@/components/ui/primitives/count-badge";
+import { CountBadge } from "@/components/blocks/count-badge";
 import { cn } from "@/lib/utils";
 
 interface SectionHeaderProps {

@@ -7,17 +7,17 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/patterns/dialog";
-import { Input } from "@/components/ui/primitives/input";
+} from "@/components/patterns/dialog";
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/patterns/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/primitives/toggle-group";
-import { Button } from "@/components/ui/primitives/button";
+} from "@/components/patterns/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
 import type { RuleCondition } from "@knowledgeview/kg-core";
 
 interface RuleFormInitial {

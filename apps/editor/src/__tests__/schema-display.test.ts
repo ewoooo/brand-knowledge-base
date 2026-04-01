@@ -3,7 +3,7 @@ import {
     getNodeTypeDisplayName,
     getLinkTypeDisplayName,
     getLinkTypeInfo,
-} from "@/lib/schema-display";
+} from "@/lib/resolve-schema-display";
 import type { TypeRegistry } from "@knowledgeview/kg-core";
 
 const registry: TypeRegistry = {

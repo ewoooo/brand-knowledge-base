@@ -1,5 +1,5 @@
 import type { Node, Triple, KnowledgeGraph } from "@knowledgeview/kg-core";
-import { getNodeTypeDisplayName } from "@/lib/schema-display";
+import { getNodeTypeDisplayName } from "@/lib/resolve-schema-display";
 
 interface UseNodeOptions {
     graph: KnowledgeGraph | null;

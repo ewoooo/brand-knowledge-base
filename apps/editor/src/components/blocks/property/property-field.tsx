@@ -1,24 +1,21 @@
 "use client";
 
-import { Input } from "@/components/ui/primitives/input";
-import { Textarea } from "@/components/ui/primitives/textarea";
-import { Label } from "@/components/ui/primitives/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/patterns/select";
-import { Switch } from "@/components/ui/primitives/switch";
-import { Badge } from "@/components/ui/primitives/badge";
+} from "@/components/patterns/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
 import type { PropertyDef, TypeRegistry } from "@knowledgeview/kg-core";
-import {
-    formatPropertyValue,
-    isHexColor,
-    parsePropertyInput,
-} from "./property-format";
+import { formatPropertyValue, parsePropertyInput } from "@/lib/format-property-value";
+import { isHexColor } from "@/lib/detect-property-value-type";
 
 /* ------------------------------------------------------------------ */
 /*  순수 헬퍼 (테스트 대상, named export)                                */

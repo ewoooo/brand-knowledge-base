@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/primitives/badge";
-import { Button } from "@/components/ui/primitives/button";
-import { ScrollArea } from "@/components/ui/patterns/scroll-area";
-import { SectionHeader } from "@/components/ui/patterns/section-header";
-import { Separator } from "@/components/ui/primitives/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/patterns/scroll-area";
+import { SectionHeader } from "@/components/patterns/section-header";
+import { Separator } from "@/components/ui/separator";
 import type { ValidationResult } from "@knowledgeview/kg-core";
-import { RuleCard } from "@/components/ui/patterns/cards/rule-card";
+import { RuleCard } from "@/components/blocks/rule/rule-card";
 import type { NodeTypeInfo } from "@/hooks/use-node";
 
 interface GraphListItem {
@@ -54,7 +54,7 @@ export function Sidebar({
     }, [currentFile]);
 
     return (
-        <div className="flex h-full w-[220px] min-w-[220px] flex-col overflow-hidden border-r">
+        <div className="flex h-full flex-col overflow-hidden">
             <div className="p-4">
                 <SectionHeader
                     title="그래프"

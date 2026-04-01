@@ -10,8 +10,8 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/patterns/dialog";
-import { InputGroup, InputGroupAddon } from "@/components/ui/layout/input-group";
+} from "@/components/patterns/dialog";
+import { InputGroup, InputGroupAddon } from "@/components/blocks/input-group";
 import { SearchIcon, CheckIcon } from "lucide-react";
 
 function Command({

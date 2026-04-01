@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Node } from "@knowledgeview/kg-core";
-import { findMatchingNodeIds } from "@/lib/search-match";
+import { findMatchingNodeIds } from "@/lib/match-search-query";
 
 interface UseSearchOptions {
     onOpen?: () => void;

@@ -2,10 +2,6 @@ import type { PropertyDef } from "@knowledgeview/kg-core";
 
 type ValueType = PropertyDef["valueType"];
 
-export function isHexColor(value: string): boolean {
-    return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value);
-}
-
 export function formatPropertyValue(
     valueType: ValueType,
     value: unknown,

@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/primitives/button";
-import { Input } from "@/components/ui/primitives/input";
-import { Label } from "@/components/ui/primitives/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/patterns/select";
+} from "@/components/patterns/select";
 import type { PropertyDef } from "@knowledgeview/kg-core";
 
 const VALUE_TYPE_OPTIONS: { value: PropertyDef["valueType"]; label: string }[] = [

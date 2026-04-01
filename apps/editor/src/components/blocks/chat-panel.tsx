@@ -3,9 +3,9 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
-import { Button } from "@/components/ui/primitives/button";
-import { ScrollArea } from "@/components/ui/patterns/scroll-area";
-import { Textarea } from "@/components/ui/primitives/textarea";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/patterns/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import type { Node } from "@knowledgeview/kg-core";
 import { Send, Loader2, Settings2, ChevronDown } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";

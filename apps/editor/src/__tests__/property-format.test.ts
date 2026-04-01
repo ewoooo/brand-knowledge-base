@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
     formatPropertyValue,
     parsePropertyInput,
-    isHexColor,
-} from "@/components/forms/property-format";
+} from "@/lib/format-property-value";
+import { isHexColor } from "@/lib/detect-property-value-type";
 
 describe("isHexColor", () => {
     it("유효한 6자리 hex 인식", () => {

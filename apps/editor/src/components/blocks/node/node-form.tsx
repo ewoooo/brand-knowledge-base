@@ -7,21 +7,21 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/patterns/dialog";
-import { Input } from "@/components/ui/primitives/input";
+} from "@/components/patterns/dialog";
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/patterns/select";
-import { Button } from "@/components/ui/primitives/button";
-import { Label } from "@/components/ui/primitives/label";
-import { ScrollArea } from "@/components/ui/patterns/scroll-area";
-import { Textarea } from "@/components/ui/primitives/textarea";
-import { SectionHeader } from "@/components/ui/patterns/section-header";
-import { PropertyField, getFieldsForType } from "./property-field";
+} from "@/components/patterns/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/patterns/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { SectionHeader } from "@/components/patterns/section-header";
+import { PropertyField, getFieldsForType } from "@/components/blocks/property/property-field";
 import type { TypeRegistry } from "@knowledgeview/kg-core";
 
 interface NodeFormProps {

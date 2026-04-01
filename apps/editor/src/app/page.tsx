@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Canvas from "@/components/graph/canvas";
 import { NodeContextMenu } from "@/components/graph/node-context-menu";
-import { SearchOverlay } from "@/components/graph/search-overlay";
-import { Sidebar } from "@/components/panels/sidebar";
-import { DetailPanel } from "@/components/panels/detail-panel";
-import { NodeForm } from "@/components/forms/node-form";
-import { TripleForm } from "@/components/forms/triple-form";
-import { RuleForm } from "@/components/forms/rule-form";
+import { SearchOverlay } from "@/components/patterns/search-overlay";
+import { LeftSidebar } from "@/components/layout/left-sidebar";
+import { RightSidebar } from "@/components/layout/right-sidebar";
+import { NodeForm } from "@/components/blocks/node/node-form";
+import { TripleForm } from "@/components/blocks/triple/triple-form";
+import { RuleForm } from "@/components/blocks/rule/rule-form";
 import { useGraph } from "@/hooks/use-graph";
 import { useSelection } from "@/hooks/use-selection";
 import { useValidation } from "@/hooks/use-validation";
@@ -18,8 +18,8 @@ import { useRule } from "@/hooks/use-rule";
 import { useDialog } from "@/hooks/use-dialog";
 import { useContextMenu } from "@/hooks/use-context-menu";
 import { useSearch } from "@/hooks/use-search";
-import { Button } from "@/components/ui/primitives/button";
-import { Alert, AlertDescription } from "@/components/ui/patterns/alert";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/patterns/alert";
 
 export default function Home() {
     const {
@@ -150,7 +150,7 @@ export default function Home() {
     if (!graph) {
         return (
             <div className="flex h-screen">
-                <Sidebar
+                <LeftSidebar
                     currentFile={filename}
                     onSelectFile={load}
                     onCreateGraph={handleCreateGraph}
@@ -175,7 +175,7 @@ export default function Home() {
     // --- Main layout ---
     return (
         <div className="flex h-screen">
-            <Sidebar
+            <LeftSidebar
                 currentFile={filename}
                 onSelectFile={load}
                 onCreateGraph={handleCreateGraph}
@@ -254,7 +254,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <DetailPanel
+            <RightSidebar
                 selectedNode={selectedNode}
                 selectedTriple={selectedTriple}
                 schema={node.schema}

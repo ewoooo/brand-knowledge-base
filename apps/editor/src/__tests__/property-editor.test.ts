@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
     getFieldsForType,
     getDisplayFields,
-} from "@/components/forms/property-editor";
+} from "@/components/blocks/property/property-field";
 import type { TypeRegistry, PropertyDef } from "@knowledgeview/kg-core";
 
 const colorProps: PropertyDef[] = [
