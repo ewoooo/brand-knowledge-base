@@ -35,12 +35,15 @@ graph/         ← D3 캔버스 (위계 밖)
 
 ```
 page.tsx — 훅 조합 + 3단 레이아웃 (오케스트레이터)
-├── LeftSidebar  [layout]   좌측 래퍼 (w-[220px] + border-r)
-│   └── Sidebar  [blocks]   그래프 목록, 통계, 타입 필터, 규칙 결과
-├── Canvas       [graph]    중앙 — D3 force simulation (SVG) ← graph 직접 접근 허용 (예외)
+├── AppSidebarLeft  [layout]   좌측 래퍼 (w-[220px] + border-r)
+│   └── Sidebar  [blocks]   그래프 목록, 타입 필터, 규칙 결과
+├── AppGraph  [layout]   중앙 래퍼 (flex-1 flex-col)
+│   ├── GraphHeader  [layout]   툴바 (노드/관계 추가 + 통계 + 저장)
+│   │   └── GraphInfo  [blocks]   노드·관계·규칙 카운트 표시
 │   ├── SearchOverlay  [patterns]  ⌘K 검색 오버레이
+│   ├── Canvas  [graph]   D3 force simulation (SVG) ← graph 직접 접근 허용 (예외)
 │   └── NodeContextMenu            노드 우클릭 메뉴
-├── RightSidebar [layout]   우측 래퍼 (w-[350px] + border-l)
+├── AppSidebarRight  [layout]   우측 래퍼 (w-[350px] + border-l)
 │   └── DetailPanel [blocks]  속성 탭 + AI 채팅 탭
 │       ├── NodeInfoPanel [blocks/node]   노드 상세
 │       ├── EdgeInfoPanel [blocks/edge]   엣지 상세
