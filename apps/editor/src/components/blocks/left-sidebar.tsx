@@ -22,7 +22,7 @@ interface SidebarProps {
     currentFile: string | null;
     onSelectFile: (filename: string) => void;
     onCreateGraph: () => void;
-    stats: { nodeCount: number; tripleCount: number; ruleCount: number } | null;
+
     nodeTypes: NodeTypeInfo[];
     ruleResults: ValidationResult[];
     onAddRule: () => void;
@@ -36,7 +36,7 @@ export function Sidebar({
     currentFile,
     onSelectFile,
     onCreateGraph,
-    stats,
+
     nodeTypes,
     ruleResults,
     onAddRule,
@@ -87,38 +87,6 @@ export function Sidebar({
             </div>
 
             <Separator />
-
-            {stats && (
-                <div className="px-4 py-3">
-                    <SectionHeader title="통계" />
-                    <div className="mt-2 grid grid-cols-3 gap-2 text-center">
-                        <div className="bg-muted/30 rounded-md px-2 py-1.5">
-                            <div className="truncate text-lg font-semibold">
-                                {stats.nodeCount}
-                            </div>
-                            <div className="text-muted-foreground text-[10px]">
-                                노드
-                            </div>
-                        </div>
-                        <div className="bg-muted/30 overflow-hidden rounded-md px-2 py-1.5">
-                            <div className="truncate text-lg font-semibold">
-                                {stats.tripleCount}
-                            </div>
-                            <div className="text-muted-foreground text-[10px]">
-                                관계
-                            </div>
-                        </div>
-                        <div className="bg-muted/30 overflow-hidden rounded-md px-2 py-1.5">
-                            <div className="truncate text-lg font-semibold">
-                                {stats.ruleCount}
-                            </div>
-                            <div className="text-muted-foreground text-[10px]">
-                                규칙
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {nodeTypes.length > 0 && (
                 <div className="px-4 py-3">

@@ -4,8 +4,10 @@ import { useState } from "react";
 import Canvas from "@/components/graph/canvas";
 import { NodeContextMenu } from "@/components/graph/node-context-menu";
 import { SearchOverlay } from "@/components/patterns/search-overlay";
-import { LeftSidebar } from "@/components/layout/left-sidebar";
-import { RightSidebar } from "@/components/layout/right-sidebar";
+import { AppSidebarLeft } from "@/components/layout/app-sidebar-left";
+import { AppSidebarRight } from "@/components/layout/app-sidebar-right";
+import { AppGraph } from "@/components/layout/app-graph";
+import { GraphHeader } from "@/components/layout/graph-header";
 import { NodeForm } from "@/components/blocks/node/node-form";
 import { TripleForm } from "@/components/blocks/triple/triple-form";
 import { RuleForm } from "@/components/blocks/rule/rule-form";
@@ -18,7 +20,6 @@ import { useRule } from "@/hooks/use-rule";
 import { useDialog } from "@/hooks/use-dialog";
 import { useContextMenu } from "@/hooks/use-context-menu";
 import { useSearch } from "@/hooks/use-search";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/patterns/alert";
 
 export default function Home() {
@@ -150,11 +151,11 @@ export default function Home() {
     if (!graph) {
         return (
             <div className="flex h-screen">
-                <LeftSidebar
+                <AppSidebarLeft
                     currentFile={filename}
                     onSelectFile={load}
                     onCreateGraph={handleCreateGraph}
-                    stats={null}
+
                     nodeTypes={[]}
                     ruleResults={rule.results}
                     onAddRule={ruleDialog.openCreate}
@@ -175,11 +176,10 @@ export default function Home() {
     // --- Main layout ---
     return (
         <div className="flex h-screen">
-            <LeftSidebar
+            <AppSidebarLeft
                 currentFile={filename}
                 onSelectFile={load}
                 onCreateGraph={handleCreateGraph}
-                stats={stats}
                 nodeTypes={node.nodeTypes}
                 ruleResults={rule.results}
                 onAddRule={ruleDialog.openCreate}
@@ -189,28 +189,14 @@ export default function Home() {
                 onToggleType={toggleTypeFilter}
             />
 
-            <div className="flex flex-1 flex-col">
-                {/* Toolbar */}
-                <div className="flex items-center gap-2 border-b px-4 py-2">
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={nodeDialog.openCreate}
-                    >
-                        + 노드
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={tripleDialog.openCreate}
-                    >
-                        + 관계
-                    </Button>
-                    <div className="flex-1" />
-                    <Button size="sm" onClick={save} disabled={!isDirty}>
-                        저장
-                    </Button>
-                </div>
+            <AppGraph>
+                <GraphHeader
+                    stats={stats}
+                    isDirty={isDirty}
+                    onAddNode={nodeDialog.openCreate}
+                    onAddTriple={tripleDialog.openCreate}
+                    onSave={save}
+                />
 
                 {/* Canvas + violation banner */}
                 <div className="relative flex-1">
@@ -252,9 +238,9 @@ export default function Home() {
                         onContextMenu={openContextMenu}
                     />
                 </div>
-            </div>
+            </AppGraph>
 
-            <RightSidebar
+            <AppSidebarRight
                 selectedNode={selectedNode}
                 selectedTriple={selectedTriple}
                 schema={node.schema}
