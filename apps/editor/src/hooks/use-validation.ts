@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
 import { validate } from "@knowledgeview/kg-core";
 
-export function useRules(graph: KnowledgeGraph | null) {
+export function useValidation(graph: KnowledgeGraph | null) {
     const results = useMemo<ValidationResult[]>(() => {
         if (!graph) return [];
         return validate(graph);

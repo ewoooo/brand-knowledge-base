@@ -108,8 +108,10 @@ export default function Canvas({
         simulation.on("end", () => fitToView(svg, zoom, nodes, width, height, schema));
 
         return () => { simulation.stop(); };
+        // 시뮬레이션은 노드/트리플/스키마가 바뀔 때만 리빌드.
+        // 룰/메타데이터 변경은 스타일 effect로 처리됨.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [graph, hiddenTypes]);
+    }, [graph.nodes, graph.triples, graph.schema, hiddenTypes]);
 
     /* ---- update styles (selection/violation) without rebuilding ------ */
     useEffect(() => {

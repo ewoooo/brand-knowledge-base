@@ -21,6 +21,7 @@ export {
   removeTriple,
   updateTriple,
   addRule,
+  updateRule,
   removeRule,
   addPropertyDef,
   removePropertyDef,

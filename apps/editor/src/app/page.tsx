@@ -11,8 +11,11 @@ import { TripleForm } from "@/components/forms/triple-form";
 import { RuleForm } from "@/components/forms/rule-form";
 import { useGraph } from "@/hooks/use-graph";
 import { useSelection } from "@/hooks/use-selection";
-import { useRules } from "@/hooks/use-rules";
-import { useDialogs } from "@/hooks/use-dialogs";
+import { useValidation } from "@/hooks/use-validation";
+import { useNode } from "@/hooks/use-node";
+import { useTriple } from "@/hooks/use-triple";
+import { useRule } from "@/hooks/use-rule";
+import { useDialog } from "@/hooks/use-dialog";
 import { useContextMenu } from "@/hooks/use-context-menu";
 import { useSearch } from "@/hooks/use-search";
 import { Button } from "@/components/ui/primitives/button";
@@ -32,6 +35,8 @@ export default function Home() {
         removeTriple,
         updateTriple,
         addRule,
+        updateRule,
+        removeRule,
         updateSystemPrompt,
         addPropertyDef,
         removePropertyDef,
@@ -40,16 +45,20 @@ export default function Home() {
     const { selection, selectNode, selectEdge, clearSelection } =
         useSelection();
     const { results, violatedNodeIds, violatedTripleIds, failCount } =
-        useRules(graph);
+        useValidation(graph);
 
-    const dialogs = useDialogs({
-        graph,
-        addNode,
-        updateNode,
-        addTriple,
-        updateTriple,
-        addRule,
+    // 도메인 훅 (데이터)
+    const nodeCrud = useNode({ graph, addNode, updateNode, removeNode });
+    const tripleCrud = useTriple({ graph, addTriple, updateTriple, removeTriple });
+    const ruleCrud = useRule({
+        graph, addRule, updateRule, removeRule,
+        validationResults: results,
     });
+
+    // 다이얼로그 (UI 상태)
+    const nodeDialog = useDialog();
+    const tripleDialog = useDialog();
+    const ruleDialog = useDialog();
 
     const { contextMenu, openContextMenu, closeContextMenu } =
         useContextMenu();
@@ -110,6 +119,34 @@ export default function Home() {
         search.closeSearch();
     }, [search.closeSearch]);
 
+    // --- Submit handlers (다이얼로그 editingId → 도메인 훅) ---
+
+    const handleNodeSubmit = useCallback(
+        (data: Parameters<typeof nodeCrud.handleSubmit>[1]) => {
+            nodeCrud.handleSubmit(nodeDialog.editingId, data);
+        },
+        [nodeCrud, nodeDialog.editingId],
+    );
+
+    const handleTripleSubmit = useCallback(
+        (data: Parameters<typeof tripleCrud.handleSubmit>[1]) => {
+            tripleCrud.handleSubmit(tripleDialog.editingId, data);
+        },
+        [tripleCrud, tripleDialog.editingId],
+    );
+
+    const handleRuleSubmit = useCallback(
+        (data: Parameters<typeof ruleCrud.handleSubmit>[1]) => {
+            ruleCrud.handleSubmit(ruleDialog.editingId, data);
+        },
+        [ruleCrud, ruleDialog.editingId],
+    );
+
+    // --- Derived editing entities ---
+    const editingNode = nodeCrud.getNode(nodeDialog.editingId);
+    const editingTriple = tripleCrud.getTriple(tripleDialog.editingId);
+    const editingRule = ruleCrud.getRule(ruleDialog.editingId);
+
     // --- No graph loaded state ---
     if (!graph) {
         return (
@@ -118,8 +155,10 @@ export default function Home() {
                     currentFile={filename}
                     onSelectFile={load}
                     onCreateGraph={handleCreateGraph}
-                    validationResults={results}
-                    onAddRule={dialogs.openRuleCreate}
+                    ruleResults={ruleCrud.results}
+                    onAddRule={ruleDialog.openCreate}
+                    onEditRule={ruleDialog.openEdit}
+                    onDeleteRule={ruleCrud.remove}
                     graph={null}
                     hiddenTypes={hiddenTypes}
                     onToggleType={toggleTypeFilter}
@@ -140,8 +179,10 @@ export default function Home() {
                 currentFile={filename}
                 onSelectFile={load}
                 onCreateGraph={handleCreateGraph}
-                validationResults={results}
-                onAddRule={dialogs.openRuleCreate}
+                ruleResults={ruleCrud.results}
+                onAddRule={ruleDialog.openCreate}
+                onEditRule={ruleDialog.openEdit}
+                onDeleteRule={ruleCrud.remove}
                 graph={graph}
                 schema={graph.schema}
                 hiddenTypes={hiddenTypes}
@@ -154,14 +195,14 @@ export default function Home() {
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={dialogs.openNodeCreate}
+                        onClick={nodeDialog.openCreate}
                     >
                         + 노드
                     </Button>
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={dialogs.openTripleCreate}
+                        onClick={tripleDialog.openCreate}
                     >
                         + 관계
                     </Button>
@@ -203,7 +244,7 @@ export default function Home() {
                         onSelectNode={selectNode}
                         onSelectEdge={selectEdge}
                         onClearSelection={handleClearSelection}
-                        onDoubleClickCanvas={dialogs.openNodeCreate}
+                        onDoubleClickCanvas={nodeDialog.openCreate}
                         onFocusNode={handleFocusNode}
                         onContextMenu={openContextMenu}
                     />
@@ -216,10 +257,10 @@ export default function Home() {
                 selectedNodeId={selectedNodeId}
                 selectedEdgeId={selectedEdgeId}
                 validationResults={results}
-                onEditNode={dialogs.openNodeEdit}
-                onDeleteNode={removeNode}
-                onEditTriple={dialogs.openTripleEdit}
-                onDeleteTriple={removeTriple}
+                onEditNode={nodeDialog.openEdit}
+                onDeleteNode={nodeCrud.remove}
+                onEditTriple={tripleDialog.openEdit}
+                onDeleteTriple={tripleCrud.remove}
                 onFocusNode={(nodeId: string) => {
                     selectNode(nodeId);
                     handleFocusNode(nodeId);
@@ -239,12 +280,10 @@ export default function Home() {
                     }
                     position={contextMenu.position}
                     onClose={closeContextMenu}
-                    onAddRelation={() => {
-                        dialogs.openTripleCreate();
-                    }}
-                    onEditNode={dialogs.openNodeEdit}
+                    onAddRelation={tripleDialog.openCreate}
+                    onEditNode={nodeDialog.openEdit}
                     onDeleteNode={(id) => {
-                        removeNode(id);
+                        nodeCrud.remove(id);
                         clearSelection();
                     }}
                 />
@@ -252,16 +291,16 @@ export default function Home() {
 
             {/* Dialogs */}
             <NodeForm
-                open={dialogs.nodeFormOpen}
-                onClose={dialogs.closeNodeForm}
-                onSubmit={dialogs.handleNodeSubmit}
+                open={nodeDialog.open}
+                onClose={nodeDialog.close}
+                onSubmit={handleNodeSubmit}
                 initial={
-                    dialogs.editingNode
+                    editingNode
                         ? {
-                              label: dialogs.editingNode.label,
-                              type: dialogs.editingNode.type,
-                              description: dialogs.editingNode.description,
-                              props: dialogs.editingNode.props,
+                              label: editingNode.label,
+                              type: editingNode.type,
+                              description: editingNode.description,
+                              props: editingNode.props,
                           }
                         : undefined
                 }
@@ -270,27 +309,36 @@ export default function Home() {
             />
 
             <TripleForm
-                open={dialogs.tripleFormOpen}
-                onClose={dialogs.closeTripleForm}
-                onSubmit={dialogs.handleTripleSubmit}
+                open={tripleDialog.open}
+                onClose={tripleDialog.close}
+                onSubmit={handleTripleSubmit}
                 nodes={graph.nodes}
                 linkTypes={graph.schema?.linkTypes}
                 initial={
-                    dialogs.editingTriple
+                    editingTriple
                         ? {
-                              subject: dialogs.editingTriple.subject,
-                              predicate: dialogs.editingTriple.predicate,
-                              object: dialogs.editingTriple.object,
+                              subject: editingTriple.subject,
+                              predicate: editingTriple.predicate,
+                              object: editingTriple.object,
                           }
                         : undefined
                 }
             />
 
             <RuleForm
-                open={dialogs.ruleFormOpen}
-                onClose={dialogs.closeRuleForm}
-                onSubmit={dialogs.handleRuleSubmit}
+                open={ruleDialog.open}
+                onClose={ruleDialog.close}
+                onSubmit={handleRuleSubmit}
                 graph={graph}
+                initial={
+                    editingRule
+                        ? {
+                              name: editingRule.name,
+                              type: editingRule.type,
+                              condition: { ...editingRule.condition },
+                          }
+                        : undefined
+                }
             />
         </div>
     );

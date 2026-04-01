@@ -20,6 +20,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/primitives/toggle-
 import { Button } from "@/components/ui/primitives/button";
 import type { KnowledgeGraph, RuleCondition } from "@knowledgeview/kg-core";
 
+interface RuleFormInitial {
+    name: string;
+    type: "constraint" | "inference" | "validation";
+    condition: RuleCondition;
+}
+
 interface RuleFormProps {
     open: boolean;
     onClose: () => void;
@@ -30,6 +36,7 @@ interface RuleFormProps {
         condition: RuleCondition;
     }) => void;
     graph: KnowledgeGraph;
+    initial?: RuleFormInitial;
 }
 
 type RuleType = "constraint" | "inference" | "validation";
@@ -65,7 +72,8 @@ const DEFAULT_CONDITION: RuleCondition = {
     conflictPredicate: "",
 };
 
-export function RuleForm({ open, onClose, onSubmit, graph }: RuleFormProps) {
+export function RuleForm({ open, onClose, onSubmit, graph, initial }: RuleFormProps) {
+    const isEditing = !!initial;
     const [name, setName] = useState("");
     const [ruleType, setRuleType] = useState<RuleType>("constraint");
     const [condition, setCondition] =
@@ -73,11 +81,17 @@ export function RuleForm({ open, onClose, onSubmit, graph }: RuleFormProps) {
 
     useEffect(() => {
         if (open) {
-            setName("");
-            setRuleType("constraint");
-            setCondition(DEFAULT_CONDITION);
+            if (initial) {
+                setName(initial.name);
+                setRuleType(initial.type);
+                setCondition(initial.condition);
+            } else {
+                setName("");
+                setRuleType("constraint");
+                setCondition(DEFAULT_CONDITION);
+            }
         }
-    }, [open]);
+    }, [open, initial]);
 
     // Unique node types from the graph
     const nodeTypes = useMemo(() => {
@@ -121,7 +135,7 @@ export function RuleForm({ open, onClose, onSubmit, graph }: RuleFormProps) {
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>새 규칙 추가</DialogTitle>
+                    <DialogTitle>{isEditing ? "규칙 편집" : "새 규칙 추가"}</DialogTitle>
                 </DialogHeader>
 
                 <div className="flex flex-col gap-5 py-2">
@@ -314,7 +328,7 @@ export function RuleForm({ open, onClose, onSubmit, graph }: RuleFormProps) {
                         취소
                     </Button>
                     <Button onClick={handleSubmit} disabled={!canSubmit}>
-                        추가
+                        {isEditing ? "저장" : "추가"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -26,8 +26,10 @@ interface SidebarProps {
     currentFile: string | null;
     onSelectFile: (filename: string) => void;
     onCreateGraph: () => void;
-    validationResults: ValidationResult[];
+    ruleResults: ValidationResult[];
     onAddRule: () => void;
+    onEditRule: (ruleId: string) => void;
+    onDeleteRule: (ruleId: string) => void;
     graph: KnowledgeGraph | null;
     schema?: TypeRegistry;
     hiddenTypes: Set<string>;
@@ -38,8 +40,10 @@ export function Sidebar({
     currentFile,
     onSelectFile,
     onCreateGraph,
-    validationResults,
+    ruleResults,
     onAddRule,
+    onEditRule,
+    onDeleteRule,
     graph,
     schema,
     hiddenTypes,
@@ -173,14 +177,20 @@ export function Sidebar({
                     }
                 />
                 <ScrollArea className="h-full">
-                    {validationResults.length === 0 && (
+                    {ruleResults.length === 0 ? (
                         <p className="text-muted-foreground text-xs">
                             규칙 없음
                         </p>
+                    ) : (
+                        ruleResults.map((r) => (
+                            <RuleCard
+                                key={r.ruleId}
+                                result={r}
+                                onEdit={onEditRule}
+                                onDelete={onDeleteRule}
+                            />
+                        ))
                     )}
-                    {validationResults.map((r) => (
-                        <RuleCard key={r.ruleId} result={r} />
-                    ))}
                 </ScrollArea>
             </div>
         </div>

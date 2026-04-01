@@ -10,6 +10,7 @@ import {
     removeTriple,
     updateTriple,
     addRule,
+    updateRule,
     removeRule,
     addPropertyDef,
     removePropertyDef,
@@ -69,6 +70,8 @@ export function useGraph(initial: KnowledgeGraph | null) {
             modify((g) => updateTriple(g, id, updates)),
         addRule: (rule: Omit<Rule, "id">) =>
             modify((g) => addRule(g, { ...rule, id: generateId() })),
+        updateRule: (id: string, updates: Partial<Omit<Rule, "id">>) =>
+            modify((g) => updateRule(g, id, updates)),
         removeRule: (id: string) => modify((g) => removeRule(g, id)),
         updateSystemPrompt: (prompt: string) =>
             modify((g) => ({

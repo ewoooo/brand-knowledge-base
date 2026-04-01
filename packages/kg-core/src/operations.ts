@@ -194,6 +194,32 @@ export function addRule(graph: KnowledgeGraph, rule: Rule): KnowledgeGraph {
     };
 }
 
+export function updateRule(
+    graph: KnowledgeGraph,
+    ruleId: string,
+    updates: Partial<Omit<Rule, "id">>,
+): KnowledgeGraph {
+    const normalizedUpdates = updates.condition
+        ? {
+              ...updates,
+              condition: {
+                  ...updates.condition,
+                  nodeType: normalizeType(updates.condition.nodeType) ?? updates.condition.nodeType,
+              },
+          }
+        : updates;
+    return {
+        ...graph,
+        rules: graph.rules.map((r) =>
+            r.id === ruleId ? { ...r, ...normalizedUpdates } : r,
+        ),
+        metadata: {
+            ...graph.metadata,
+            updated: new Date().toISOString().split("T")[0],
+        },
+    };
+}
+
 export function removeRule(
     graph: KnowledgeGraph,
     ruleId: string,

@@ -7,6 +7,7 @@ import {
   addTriple,
   removeTriple,
   addRule,
+  updateRule,
 } from "../operations";
 import type { Node, Triple, Rule, TypeRegistry } from "../types";
 
@@ -332,6 +333,57 @@ describe("updateNode (props 머지)", () => {
     });
     // props 전체 교체: 기존 category는 유실됨
     expect(result.nodes[0].props).toEqual({ hexCode: "#FF0000", usage: "danger" });
+  });
+});
+
+describe("updateRule", () => {
+  const makeRule = (id: string, name: string, nodeType: string): Rule => ({
+    id,
+    name,
+    expression: `∀x (${nodeType}(x) → ∃y has(x, y))`,
+    type: "constraint",
+    condition: { nodeType, predicate: "has", operator: "must_have" },
+  });
+
+  it("이름과 타입을 업데이트한다", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = addRule(graph, makeRule("r1", "규칙1", "brand"));
+    const result = updateRule(graph, "r1", { name: "수정된 규칙", type: "validation" });
+    expect(result.rules[0].name).toBe("수정된 규칙");
+    expect(result.rules[0].type).toBe("validation");
+  });
+
+  it("condition 업데이트 시 nodeType을 정규화한다", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = addRule(graph, makeRule("r1", "규칙1", "brand"));
+    const result = updateRule(graph, "r1", {
+      condition: { nodeType: "CoreValue", predicate: "설명", operator: "must_have" },
+    });
+    expect(result.rules[0].condition.nodeType).toBe("core-value");
+  });
+
+  it("원본 그래프를 변경하지 않는다 (불변)", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = addRule(graph, makeRule("r1", "규칙1", "brand"));
+    const result = updateRule(graph, "r1", { name: "수정됨" });
+    expect(graph.rules[0].name).toBe("규칙1");
+    expect(result.rules[0].name).toBe("수정됨");
+  });
+
+  it("metadata.updated를 갱신한다", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = addRule(graph, makeRule("r1", "규칙1", "brand"));
+    const result = updateRule(graph, "r1", { name: "수정됨" });
+    expect(result.metadata.updated).toBeDefined();
+    expect(result.metadata).not.toBe(graph.metadata);
+  });
+
+  it("다른 룰은 영향받지 않는다", () => {
+    let graph = createEmptyGraph("테스트");
+    graph = addRule(graph, makeRule("r1", "규칙1", "brand"));
+    graph = addRule(graph, makeRule("r2", "규칙2", "color"));
+    const result = updateRule(graph, "r1", { name: "수정됨" });
+    expect(result.rules[1].name).toBe("규칙2");
   });
 });
 
