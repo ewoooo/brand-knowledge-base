@@ -10,8 +10,8 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
+} from "@/components/ui/patterns/dialog";
+import { InputGroup, InputGroupAddon } from "@/components/ui/layout/input-group";
 import { SearchIcon, CheckIcon } from "lucide-react";
 
 function Command({
@@ -93,7 +93,7 @@ function CommandList({
         <CommandPrimitive.List
             data-slot="command-list"
             className={cn(
-                "no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+                "max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
                 className,
             )}
             {...props}

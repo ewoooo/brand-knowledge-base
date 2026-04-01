@@ -71,9 +71,17 @@ export function serializeGraphForPrompt(graph: KnowledgeGraph): string {
 
     const nodeMap = new Map(graph.nodes.map((n) => [n.id, n]));
 
-    const nodeLines = graph.nodes.map(
-        (n) => `- ${n.label} (${n.type})`,
-    );
+    const nodeLines = graph.nodes.map((n) => {
+        const parts = [`- ${n.label} (${n.type})`];
+        if (n.description) parts.push(`: ${n.description}`);
+        if (n.props && Object.keys(n.props).length > 0) {
+            const propsStr = Object.entries(n.props)
+                .map(([k, v]) => `${k}=${v}`)
+                .join(", ");
+            parts.push(` [${propsStr}]`);
+        }
+        return parts.join("");
+    });
 
     const tripleLines = graph.triples.map((t) => {
         const subj = nodeMap.get(t.subject)?.label ?? t.subject;

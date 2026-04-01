@@ -29,7 +29,7 @@ describe("extractMentionedNodeIds", () => {
     });
 
     it("2글자 미만 라벨은 무시한다", () => {
-        const shortNodes: Node[] = [{ id: "s1", label: "A" }];
+        const shortNodes: Node[] = [{ id: "s1", label: "A", type: "concept" }];
         const result = extractMentionedNodeIds("A는 좋은 브랜드", shortNodes);
         expect(result).toEqual([]);
     });

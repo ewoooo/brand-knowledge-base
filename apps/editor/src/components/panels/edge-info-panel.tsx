@@ -1,10 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import type { KnowledgeGraph, Triple } from "@knowledgeview/kg-core";
+import { Badge } from "@/components/ui/primitives/badge";
+import { Button } from "@/components/ui/primitives/button";
+import { SectionHeader } from "@/components/ui/patterns/section-header";
+import { Separator } from "@/components/ui/primitives/separator";
+import type { KnowledgeGraph, Triple, TypeRegistry } from "@knowledgeview/kg-core";
+import { getLinkTypeDisplayName, getLinkTypeInfo } from "@/lib/schema-display";
 
 interface EdgeInfoPanelProps {
     graph: KnowledgeGraph;
     triple: Triple;
+    schema?: TypeRegistry;
     onEditTriple: (tripleId: string) => void;
     onDeleteTriple: (tripleId: string) => void;
 }
@@ -12,6 +16,7 @@ interface EdgeInfoPanelProps {
 export function EdgeInfoPanel({
     graph,
     triple,
+    schema,
     onEditTriple,
     onDeleteTriple,
 }: EdgeInfoPanelProps) {
@@ -20,12 +25,13 @@ export function EdgeInfoPanel({
         return n ? n.label : id;
     };
 
+    const linkInfo = getLinkTypeInfo(schema, triple.predicate);
+    const predicateDisplay = getLinkTypeDisplayName(schema, triple.predicate);
+
     return (
         <div className="space-y-4 p-4">
             <div className="space-y-1">
-                <p className="text-muted-foreground text-xs font-medium uppercase">
-                    관계
-                </p>
+                <SectionHeader title="관계" />
                 <div className="border-border bg-muted/30 rounded-md border px-3 py-2 text-sm">
                     <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
                         <span
@@ -41,7 +47,7 @@ export function EdgeInfoPanel({
                             className="text-primary max-w-full truncate font-medium"
                             title={triple.predicate}
                         >
-                            {triple.predicate}
+                            {predicateDisplay}
                         </span>
                         <span className="text-muted-foreground shrink-0">
                             →
@@ -55,6 +61,22 @@ export function EdgeInfoPanel({
                     </div>
                 </div>
             </div>
+
+            {/* LinkType 상세 정보 */}
+            {linkInfo && (
+                <>
+                    <div className="flex flex-wrap gap-1.5">
+                        <Badge variant="outline" className="text-xs font-normal">
+                            {linkInfo.cardinality}
+                        </Badge>
+                    </div>
+                    {linkInfo.description && (
+                        <p className="text-muted-foreground text-xs">
+                            {linkInfo.description}
+                        </p>
+                    )}
+                </>
+            )}
 
             <Separator />
 

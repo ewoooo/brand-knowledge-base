@@ -1,14 +1,15 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/patterns/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/patterns/tabs";
 import { ChatPanel } from "@/components/panels/chat-panel";
 import { NodeInfoPanel } from "@/components/panels/node-info-panel";
 import { EdgeInfoPanel } from "@/components/panels/edge-info-panel";
-import type { KnowledgeGraph, ValidationResult } from "@knowledgeview/kg-core";
+import type { KnowledgeGraph, PropertyDef, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
 
 interface DetailPanelProps {
     graph: KnowledgeGraph;
+    schema?: TypeRegistry;
     selectedNodeId: string | null;
     selectedEdgeId: string | null;
     validationResults: ValidationResult[];
@@ -18,10 +19,13 @@ interface DetailPanelProps {
     onDeleteTriple: (tripleId: string) => void;
     onFocusNode: (nodeId: string) => void;
     onUpdateSystemPrompt?: (prompt: string) => void;
+    onAddPropertyDef?: (nodeType: string, prop: PropertyDef) => void;
+    onRemovePropertyDef?: (nodeType: string, propertyKey: string) => void;
 }
 
 export function DetailPanel({
     graph,
+    schema,
     selectedNodeId,
     selectedEdgeId,
     validationResults,
@@ -31,6 +35,8 @@ export function DetailPanel({
     onDeleteTriple,
     onFocusNode,
     onUpdateSystemPrompt,
+    onAddPropertyDef,
+    onRemovePropertyDef,
 }: DetailPanelProps) {
     const selectedNode = selectedNodeId
         ? (graph.nodes.find((n) => n.id === selectedNodeId) ?? null)
@@ -124,12 +130,15 @@ export function DetailPanel({
                             <NodeInfoPanel
                                 graph={graph}
                                 node={selectedNode}
+                                schema={schema}
                                 validationResults={validationResults}
                                 onEditNode={onEditNode}
                                 onDeleteNode={onDeleteNode}
                                 onEditTriple={onEditTriple}
                                 onDeleteTriple={onDeleteTriple}
                                 onFocusNode={onFocusNode}
+                                onAddPropertyDef={onAddPropertyDef}
+                                onRemovePropertyDef={onRemovePropertyDef}
                             />
                         )}
 
@@ -138,6 +147,7 @@ export function DetailPanel({
                             <EdgeInfoPanel
                                 graph={graph}
                                 triple={selectedTriple}
+                                schema={schema}
                                 onEditTriple={onEditTriple}
                                 onDeleteTriple={onDeleteTriple}
                             />

@@ -90,7 +90,7 @@
 
 ## Layout
 - **Approach:** Grid-disciplined — 3패널 고정 그리드, 예측 가능한 도구 UI
-- **Grid:** 사이드바(180px) + 캔버스(flex-1) + 디테일패널(260-350px)
+- **Grid:** 사이드바(220px) + 캔버스(flex-1) + 디테일패널(260-350px)
 - **Max content width:** 제한 없음 (3패널이 뷰포트를 채움)
 - **Min viewport:** 1024px (데스크톱 전용)
 - **Border radius:**
