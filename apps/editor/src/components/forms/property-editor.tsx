@@ -15,7 +15,11 @@ import { Switch } from "@/components/ui/primitives/switch";
 import { Badge } from "@/components/ui/primitives/badge";
 import { ExternalLink } from "lucide-react";
 import type { PropertyDef, TypeRegistry } from "@knowledgeview/kg-core";
-import { formatPropertyValue, isHexColor, parsePropertyInput } from "./property-format";
+import {
+    formatPropertyValue,
+    isHexColor,
+    parsePropertyInput,
+} from "./property-format";
 
 /* ------------------------------------------------------------------ */
 /*  순수 헬퍼 (테스트 대상, named export)                                */
@@ -66,8 +70,7 @@ export function PropertyEditor({
 
         return (
             <div className="space-y-3">
-                <SectionHeader title="속성" />
-                <div className="space-y-2">
+                <div className="space-y-2 pb-1">
                     {displayFields.map((prop) => (
                         <ReadOnlyField
                             key={prop.key}
@@ -82,8 +85,7 @@ export function PropertyEditor({
 
     return (
         <div className="space-y-3">
-            <SectionHeader title="속성" />
-            <div className="space-y-3">
+            <div className="space-y-2 pb-1">
                 {properties.map((prop) => (
                     <EditField
                         key={prop.key}
@@ -101,13 +103,7 @@ export function PropertyEditor({
 /*  읽기 모드 필드                                                      */
 /* ------------------------------------------------------------------ */
 
-function ReadOnlyField({
-    prop,
-    value,
-}: {
-    prop: PropertyDef;
-    value: unknown;
-}) {
+function ReadOnlyField({ prop, value }: { prop: PropertyDef; value: unknown }) {
     const formatted = formatPropertyValue(prop.valueType, value);
 
     return (
@@ -116,13 +112,19 @@ function ReadOnlyField({
                 {prop.displayName}
             </p>
             {prop.valueType === "text" ? (
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {formatted || <span className="text-muted-foreground">—</span>}
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {formatted || (
+                        <span className="text-muted-foreground">—</span>
+                    )}
                 </p>
             ) : prop.valueType === "array" && Array.isArray(value) ? (
                 <div className="flex flex-wrap gap-1">
                     {value.map((item, i) => (
-                        <Badge key={i} variant="outline" className="text-xs font-normal">
+                        <Badge
+                            key={i}
+                            variant="outline"
+                            className="text-xs font-normal"
+                        >
                             {String(item)}
                         </Badge>
                     ))}
@@ -198,7 +200,7 @@ function EditField({
             <Label htmlFor={id} className="text-xs">
                 {prop.displayName}
                 {prop.required && (
-                    <span className="ml-0.5 text-destructive">*</span>
+                    <span className="text-destructive ml-0.5">*</span>
                 )}
             </Label>
             {renderInput(prop, value, onChange, id)}
@@ -262,8 +264,14 @@ function renderInput(
                 <Input
                     id={id}
                     type="number"
-                    value={value !== undefined && value !== null ? String(value) : ""}
-                    onChange={(e) => onChange(parsePropertyInput("number", e.target.value))}
+                    value={
+                        value !== undefined && value !== null
+                            ? String(value)
+                            : ""
+                    }
+                    onChange={(e) =>
+                        onChange(parsePropertyInput("number", e.target.value))
+                    }
                     placeholder={prop.displayName}
                 />
             );

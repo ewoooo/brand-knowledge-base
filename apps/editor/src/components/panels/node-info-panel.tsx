@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/patterns/alert";
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/patterns/alert";
 import { Badge } from "@/components/ui/primitives/badge";
 import { Button } from "@/components/ui/primitives/button";
 import { Separator } from "@/components/ui/primitives/separator";
@@ -57,18 +61,26 @@ export function NodeInfoPanel({
     const nodeViolations = validationResults.flatMap((r) =>
         r.violations
             .filter((v) => v.nodeId === node.id)
-            .map((v) => ({ ruleName: r.ruleName, message: v.message, relatedTripleId: v.relatedTripleId })),
+            .map((v) => ({
+                ruleName: r.ruleName,
+                message: v.message,
+                relatedTripleId: v.relatedTripleId,
+            })),
     );
-    const violatingTripleIds = new Set(nodeViolations.map((v) => v.relatedTripleId).filter(Boolean));
+    const violatingTripleIds = new Set(
+        nodeViolations.map((v) => v.relatedTripleId).filter(Boolean),
+    );
 
     const outgoingTriples = graph.triples.filter((t) => t.subject === node.id);
     const incomingTriples = graph.triples.filter((t) => t.object === node.id);
-    const nodeLabelById = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
+    const nodeLabelById = (id: string) =>
+        graph.nodes.find((n) => n.id === id)?.label ?? id;
 
     const schemaProperties = getFieldsForType(schema, node.type);
     const displayProperties = getDisplayFields(schemaProperties, node.props);
     const hasSchemaProps = displayProperties.length > 0;
-    const hasFallbackProps = !hasSchemaProps && !!node.props && Object.keys(node.props).length > 0;
+    const hasFallbackProps =
+        !hasSchemaProps && !!node.props && Object.keys(node.props).length > 0;
     const canAddProp = !!onAddPropertyDef && !!schema;
 
     return (
@@ -120,17 +132,20 @@ export function NodeInfoPanel({
                     <FallbackPropertyList props={node.props!} />
                 )}
 
-                {!hasSchemaProps && !hasFallbackProps && canAddProp && !showAddProp && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-full justify-start gap-1.5 text-xs text-muted-foreground"
-                        onClick={() => setShowAddProp(true)}
-                    >
-                        <Plus className="size-3" />
-                        속성 추가
-                    </Button>
-                )}
+                {!hasSchemaProps &&
+                    !hasFallbackProps &&
+                    canAddProp &&
+                    !showAddProp && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground h-7 w-full justify-start gap-1.5 text-xs"
+                            onClick={() => setShowAddProp(true)}
+                        >
+                            <Plus className="size-3" />
+                            속성 추가
+                        </Button>
+                    )}
 
                 {showAddProp && onAddPropertyDef && (
                     <AddPropertyDefForm
@@ -200,10 +215,18 @@ function NodeHeader({
     return (
         <div className="space-y-1">
             <div className="flex items-start gap-1">
-                <p className="min-w-0 flex-1 truncate text-base font-semibold" title={node.label}>
+                <p
+                    className="min-w-0 flex-1 truncate text-base font-semibold"
+                    title={node.label}
+                >
                     {node.label}
                 </p>
-                <Button variant="ghost" size="icon" className="size-7 shrink-0" onClick={onEdit}>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 shrink-0"
+                    onClick={onEdit}
+                >
                     <Pencil className="size-3.5" />
                 </Button>
                 <Button
@@ -240,7 +263,11 @@ function PropertyList({
             {properties.map((prop) => (
                 <div key={prop.key} className="group flex items-start gap-1">
                     <div className="min-w-0 flex-1">
-                        <PropertyEditor properties={[prop]} values={values} readOnly />
+                        <PropertyEditor
+                            properties={[prop]}
+                            values={values}
+                            readOnly
+                        />
                     </div>
                     {onRemove && (
                         <Button
@@ -273,4 +300,3 @@ function FallbackPropertyList({ props }: { props: Record<string, unknown> }) {
         </div>
     );
 }
-
