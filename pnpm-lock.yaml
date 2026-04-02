@@ -19,10 +19,10 @@ importers:
     dependencies:
       '@ai-sdk/anthropic':
         specifier: ^3.0.64
-        version: 3.0.64(zod@4.3.6)
+        version: 3.0.64(zod@3.25.76)
       '@ai-sdk/react':
         specifier: ^3.0.143
-        version: 3.0.143(react@19.2.4)(zod@4.3.6)
+        version: 3.0.143(react@19.2.4)(zod@3.25.76)
       '@knowledgeview/chat-core':
         specifier: workspace:*
         version: link:../../packages/chat-core
@@ -34,7 +34,7 @@ importers:
         version: link:../../packages/kg-core
       ai:
         specifier: ^6.0.141
-        version: 6.0.141(zod@4.3.6)
+        version: 6.0.141(zod@3.25.76)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -83,6 +83,9 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+      zustand:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -5068,10 +5071,34 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
+  zustand@5.0.12:
+    resolution: {integrity: sha512-i77ae3aZq4dhMlRhJVCYgMLKuSiZAaUPAct2AksxQ+gOtimhGMdXljRT21P5BNpeT4kXlLIckvkPM029OljD7g==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@ai-sdk/anthropic@3.0.64(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
+      zod: 3.25.76
 
   '@ai-sdk/anthropic@3.0.64(zod@4.3.6)':
     dependencies:
@@ -5079,12 +5106,26 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
+  '@ai-sdk/gateway@3.0.83(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
+      '@vercel/oidc': 3.1.0
+      zod: 3.25.76
+
   '@ai-sdk/gateway@3.0.83(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       '@vercel/oidc': 3.1.0
       zod: 4.3.6
+
+  '@ai-sdk/provider-utils@4.0.21(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@standard-schema/spec': 1.1.0
+      eventsource-parser: 3.0.6
+      zod: 3.25.76
 
   '@ai-sdk/provider-utils@4.0.21(zod@4.3.6)':
     dependencies:
@@ -5097,10 +5138,10 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.143(react@19.2.4)(zod@4.3.6)':
+  '@ai-sdk/react@3.0.143(react@19.2.4)(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
-      ai: 6.0.141(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
+      ai: 6.0.141(zod@3.25.76)
       react: 19.2.4
       swr: 2.4.1(react@19.2.4)
       throttleit: 2.1.0
@@ -7058,6 +7099,14 @@ snapshots:
   acorn@8.16.0: {}
 
   agent-base@7.1.4: {}
+
+  ai@6.0.141(zod@3.25.76):
+    dependencies:
+      '@ai-sdk/gateway': 3.0.83(zod@3.25.76)
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.76)
+      '@opentelemetry/api': 1.9.0
+      zod: 3.25.76
 
   ai@6.0.141(zod@4.3.6):
     dependencies:
@@ -10490,5 +10539,11 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.3.6: {}
+
+  zustand@5.0.12(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.4
+      use-sync-external-store: 1.6.0(react@19.2.4)
 
   zwitch@2.0.4: {}

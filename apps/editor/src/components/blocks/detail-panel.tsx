@@ -5,51 +5,57 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/patterns/
 import { ChatPanel } from "@/components/blocks/chat-panel";
 import { NodeInfoPanel } from "@/components/blocks/node/node-info-panel";
 import { EdgeInfoPanel } from "@/components/blocks/edge/edge-info-panel";
-import type { Node, Triple, PropertyDef, TypeRegistry, ValidationResult } from "@knowledgeview/kg-core";
+import { useGraphStore } from "@/store/graph-store";
+import { useUIStore } from "@/store/ui-store";
+import { useValidationStore } from "@/store/validation-store";
+import { selectNodes, selectSchema } from "@/store/selectors/node-selectors";
 
-interface DetailPanelProps {
-    selectedNode: Node | null;
-    selectedTriple: Triple | null;
-    schema?: TypeRegistry;
-    validationResults: ValidationResult[];
-    onEditNode: (nodeId: string) => void;
-    onDeleteNode: (nodeId: string) => void;
-    onEditTriple: (tripleId: string) => void;
-    onDeleteTriple: (tripleId: string) => void;
-    onFocusNode: (nodeId: string) => void;
-    onUpdateSystemPrompt?: (prompt: string) => void;
-    onAddPropertyDef?: (nodeType: string, prop: PropertyDef) => void;
-    onRemovePropertyDef?: (nodeType: string, propertyKey: string) => void;
-    // ChatPanel에 필요한 데이터
-    nodes: Node[];
-    systemPrompt: string;
-    chatGraph: unknown; // useChat transport용 (graph 원본)
-    // NodeInfoPanel에 필요한 데이터
-    outgoingTriples: Triple[];
-    incomingTriples: Triple[];
-    getNodeLabel: (id: string) => string;
-}
+export function DetailPanel() {
+    const selection = useUIStore((s) => s.selection);
+    const graph = useGraphStore((s) => s.graph);
+    const schema = useGraphStore(selectSchema);
+    const validationResults = useValidationStore((s) => s.results);
+    const nodes = useGraphStore(selectNodes);
+    const systemPrompt = useGraphStore(
+        (s) => s.graph?.metadata.systemPrompt ?? "",
+    );
 
-export function DetailPanel({
-    selectedNode,
-    selectedTriple,
-    schema,
-    validationResults,
-    onEditNode,
-    onDeleteNode,
-    onEditTriple,
-    onDeleteTriple,
-    onFocusNode,
-    onUpdateSystemPrompt,
-    onAddPropertyDef,
-    onRemovePropertyDef,
-    nodes,
-    systemPrompt,
-    chatGraph,
-    outgoingTriples,
-    incomingTriples,
-    getNodeLabel,
-}: DetailPanelProps) {
+    // graph를 구독하여 파생 — getState() snapshot이 아니라 리렌더에 반응
+    const selectedNode =
+        selection?.type === "node"
+            ? (graph?.nodes.find((n) => n.id === selection.id) ?? null)
+            : null;
+    const selectedTriple =
+        selection?.type === "edge"
+            ? (graph?.triples.find((t) => t.id === selection.id) ?? null)
+            : null;
+    const triples = graph?.triples ?? [];
+    const selectedNodeRelations = selectedNode
+        ? {
+              outgoing: triples.filter((t) => t.subject === selectedNode.id),
+              incoming: triples.filter((t) => t.object === selectedNode.id),
+          }
+        : { outgoing: [], incoming: [] };
+    const getNodeLabel = (id: string) =>
+        graph?.nodes.find((n) => n.id === id)?.label ?? id;
+
+    const editNode = (nodeId: string) =>
+        useUIStore.getState().openDialog("node", nodeId);
+    const deleteNode = (nodeId: string) => {
+        useGraphStore.getState().removeNode(nodeId);
+        useUIStore.getState().clearSelection();
+    };
+    const editTriple = (tripleId: string) =>
+        useUIStore.getState().openDialog("triple", tripleId);
+    const deleteTriple = (tripleId: string) => {
+        useGraphStore.getState().removeTriple(tripleId);
+        useUIStore.getState().clearSelection();
+    };
+    const focusNode = (nodeId: string) => {
+        useUIStore.getState().selectNode(nodeId);
+        useUIStore.getState().setFocusedNodeId(nodeId);
+    };
+
     return (
         <div className="flex h-full flex-col overflow-hidden">
             <Tabs defaultValue="properties" className="flex h-full flex-col">
@@ -72,7 +78,6 @@ export function DetailPanel({
                     className="mt-0 flex-1 overflow-hidden"
                 >
                     <ScrollArea className="h-full w-full">
-                        {/* Empty state */}
                         {!selectedNode && !selectedTriple && (
                             <div className="flex h-full flex-col items-center justify-center gap-6 p-6 text-center">
                                 <div className="space-y-2">
@@ -129,33 +134,31 @@ export function DetailPanel({
                             </div>
                         )}
 
-                        {/* Node selected */}
                         {selectedNode && (
                             <NodeInfoPanel
                                 node={selectedNode}
                                 schema={schema}
                                 validationResults={validationResults}
-                                outgoingTriples={outgoingTriples}
-                                incomingTriples={incomingTriples}
+                                outgoingTriples={selectedNodeRelations.outgoing}
+                                incomingTriples={selectedNodeRelations.incoming}
                                 getNodeLabel={getNodeLabel}
-                                onEditNode={onEditNode}
-                                onDeleteNode={onDeleteNode}
-                                onEditTriple={onEditTriple}
-                                onDeleteTriple={onDeleteTriple}
-                                onFocusNode={onFocusNode}
-                                onAddPropertyDef={onAddPropertyDef}
-                                onRemovePropertyDef={onRemovePropertyDef}
+                                onEditNode={editNode}
+                                onDeleteNode={deleteNode}
+                                onEditTriple={editTriple}
+                                onDeleteTriple={deleteTriple}
+                                onFocusNode={focusNode}
+                                onAddPropertyDef={useGraphStore.getState().addPropertyDef}
+                                onRemovePropertyDef={useGraphStore.getState().removePropertyDef}
                             />
                         )}
 
-                        {/* Edge selected */}
                         {selectedTriple && !selectedNode && (
                             <EdgeInfoPanel
                                 triple={selectedTriple}
                                 schema={schema}
                                 getNodeLabel={getNodeLabel}
-                                onEditTriple={onEditTriple}
-                                onDeleteTriple={onDeleteTriple}
+                                onEditTriple={editTriple}
+                                onDeleteTriple={deleteTriple}
                             />
                         )}
                     </ScrollArea>
@@ -169,10 +172,10 @@ export function DetailPanel({
                     <ChatPanel
                         nodes={nodes}
                         systemPrompt={systemPrompt}
-                        chatGraph={chatGraph}
+                        chatGraph={graph}
                         chatId="detail-panel-chat"
-                        onFocusNode={onFocusNode}
-                        onUpdateSystemPrompt={onUpdateSystemPrompt}
+                        onFocusNode={focusNode}
+                        onUpdateSystemPrompt={useGraphStore.getState().updateSystemPrompt}
                     />
                 </TabsContent>
             </Tabs>

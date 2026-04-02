@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/patterns/scroll-area";
 import { SectionHeader } from "@/components/patterns/section-header";
 import { Separator } from "@/components/ui/separator";
-import type { ValidationResult } from "@knowledgeview/kg-core";
 import { RuleCard } from "@/components/blocks/rule/rule-card";
-import type { NodeTypeInfo } from "@/hooks/use-node";
+import { useGraphStore } from "@/store/graph-store";
+import { useUIStore } from "@/store/ui-store";
+import { useValidationStore } from "@/store/validation-store";
+import { selectNodeTypes } from "@/store/selectors/node-selectors";
+import { selectUserValidationResults } from "@/store/selectors/rule-selectors";
 
 interface GraphListItem {
     filename: string;
@@ -18,40 +21,41 @@ interface GraphListItem {
     ruleCount: number;
 }
 
-interface SidebarProps {
-    currentFile: string | null;
-    onSelectFile: (filename: string) => void;
-    onCreateGraph: () => void;
+export function Sidebar() {
+    const filename = useGraphStore((s) => s.filename);
+    const load = useGraphStore((s) => s.load);
+    const removeRule = useGraphStore((s) => s.removeRule);
+    const nodeTypes = useGraphStore(selectNodeTypes);
+    const hiddenTypes = useUIStore((s) => s.hiddenTypes);
+    const toggleHiddenType = useUIStore((s) => s.toggleHiddenType);
+    const validationResults = useValidationStore((s) => s.results);
+    const ruleResults = selectUserValidationResults(validationResults);
 
-    nodeTypes: NodeTypeInfo[];
-    ruleResults: ValidationResult[];
-    onAddRule: () => void;
-    onEditRule: (ruleId: string) => void;
-    onDeleteRule: (ruleId: string) => void;
-    hiddenTypes: Set<string>;
-    onToggleType: (type: string) => void;
-}
-
-export function Sidebar({
-    currentFile,
-    onSelectFile,
-    onCreateGraph,
-
-    nodeTypes,
-    ruleResults,
-    onAddRule,
-    onEditRule,
-    onDeleteRule,
-    hiddenTypes,
-    onToggleType,
-}: SidebarProps) {
     const [graphs, setGraphs] = useState<GraphListItem[]>([]);
 
     useEffect(() => {
         fetch("/api/graphs")
             .then((res) => res.json())
             .then(setGraphs);
-    }, [currentFile]);
+    }, [filename]);
+
+    const handleCreateGraph = async () => {
+        const name = prompt("그래프 이름을 입력하세요:");
+        if (!name?.trim()) return;
+
+        const res = await fetch("/api/graphs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name.trim() }),
+        });
+
+        if (!res.ok) return;
+        const data = await res.json();
+        await load(data.filename);
+    };
+
+    const openRuleDialog = () => useUIStore.getState().openDialog("rule");
+    const editRule = (ruleId: string) => useUIStore.getState().openDialog("rule", ruleId);
 
     return (
         <div className="flex h-full flex-col overflow-hidden">
@@ -62,7 +66,7 @@ export function Sidebar({
                         <Button
                             variant="ghost"
                             size="xs"
-                            onClick={onCreateGraph}
+                            onClick={handleCreateGraph}
                         >
                             + 새 그래프
                         </Button>
@@ -72,10 +76,10 @@ export function Sidebar({
                     {graphs.map((g) => (
                         <button
                             key={g.filename}
-                            onClick={() => onSelectFile(g.filename)}
+                            onClick={() => load(g.filename)}
                             title={g.name}
                             className={`mb-1 w-full truncate rounded-md px-3 py-1.5 text-left text-sm ${
-                                currentFile === g.filename
+                                filename === g.filename
                                     ? "bg-accent text-accent-foreground"
                                     : "text-muted-foreground hover:bg-accent/50"
                             }`}
@@ -101,7 +105,7 @@ export function Sidebar({
                                         : "secondary"
                                 }
                                 className={`max-w-full cursor-pointer text-xs ${hiddenTypes.has(type) ? "line-through opacity-40" : ""}`}
-                                onClick={() => onToggleType(type)}
+                                onClick={() => toggleHiddenType(type)}
                                 title={`${displayName} (${type}) — ${count}개`}
                             >
                                 <span className="truncate">
@@ -122,7 +126,7 @@ export function Sidebar({
                 <SectionHeader
                     title="규칙"
                     action={
-                        <Button variant="ghost" size="xs" onClick={onAddRule}>
+                        <Button variant="ghost" size="xs" onClick={openRuleDialog}>
                             + 추가
                         </Button>
                     }
@@ -137,8 +141,8 @@ export function Sidebar({
                             <RuleCard
                                 key={r.ruleId}
                                 result={r}
-                                onEdit={onEditRule}
-                                onDelete={onDeleteRule}
+                                onEdit={editRule}
+                                onDelete={removeRule}
                             />
                         ))
                     )}
